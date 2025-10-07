@@ -1,0 +1,28 @@
+<!-- Extiende del layout -->
+<div class="hero-section">
+    <h1>Las mejores tecnologías para tu día a día</h1>
+    <p>Descubre nuestros productos de última generación con los mejores precios y garantía.</p>
+    <div class="hero-buttons">
+        <a href="/products" class="btn-primary">Ver Productos</a>
+        <button class="btn-secondary">Ofertas especiales</button>
+    </div>
+</div>
+
+<div class="products-section">
+    <h2>Nuestros Productos Destacados</h2>
+    <div class="products-grid">
+        <% products.forEach(product => { %>
+            <div class="product-card">
+                <h3><%= product.name %></h3>
+                <div class="product-pricing">
+                    <span class="current-price"><%= product.price %> <%= product.currency %></span>
+                    <span class="original-price"><%= product.originalPrice %> <%= product.currency %></span>
+                </div>
+                <form action="/cart/add" method="POST">
+                    <input type="hidden" name="productId" value="<%= product.id %>">
+                    <button type="submit" class="add-to-cart-btn">Añadir al Carrito</button>
+                </form>
+            </div>
+        <% }); %>
+    </div>
+</div>
