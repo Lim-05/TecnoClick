@@ -12,7 +12,7 @@ const Header = () => {
     <header className="header">
       <div className="container">
         <Link to="/" className="logo">
-          🚀 TecnoClick
+          <img src="/src/assets/tecno_click.png" alt="TecnoClick" />
         </Link>
         
         <nav className="nav">

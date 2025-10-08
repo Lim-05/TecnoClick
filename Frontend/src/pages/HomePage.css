@@ -1,7 +1,9 @@
 /* src/pages/HomePage.css */
+
 .home-page {
   font-family: 'Arial', sans-serif;
   color: #333;
+  padding-top: 10vh;
 }
 
 /* Hero Section */
@@ -10,10 +12,16 @@
   justify-content: space-between;
   align-items: center;
   padding: 4rem 2rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
   min-height: 500px;
+  color: white;
+  background: url('/src/assets/bg.jpg');
+  background-size: cover;      /* hace que se adapte al contenedor */
+  background-position: center; /* centra la imagen */
+  background-repeat: no-repeat;
+  position: relative;
+  z-index: 1;
 }
+
 
 .hero-content {
   flex: 1;

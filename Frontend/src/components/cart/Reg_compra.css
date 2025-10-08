@@ -1,0 +1,60 @@
+.checkout-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-width: 700px; 
+  margin: 0 auto;
+}
+
+.checkout-form fieldset {
+  border: 1px solid #ccc;
+  padding: 0.3rem;
+  border-radius: 8px;
+}
+
+.checkout-form legend {
+  font-weight: bold;
+  margin-bottom: 0.2rem;
+}
+
+/* Distribuir los campos en dos columnas */
+.checkout-form .form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* dos columnas iguales */
+  gap: 0.3rem 2rem; 
+}
+
+.checkout-form label {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.95rem;
+}
+
+.checkout-form input,
+.checkout-form textarea {
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+}
+
+.checkout-form button {
+  background-color: #27ae60;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.checkout-form button:hover {
+  background-color: #229954;
+}
+
+@media (max-width: 768px) {
+  .checkout-form .form-grid {
+    grid-template-columns: 1fr;
+  }
+}

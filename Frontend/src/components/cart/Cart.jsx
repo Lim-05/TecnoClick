@@ -1,12 +1,16 @@
-// src/components/cart/Cart.jsx
-import React from 'react';
+import React, {useState} from 'react';
 import { useApp } from '../../context/AppContext';
 import { Link } from 'react-router-dom';
+import Modal from '../common/Modal';
+import CheckoutForm from './Reg_Compra';
 import './Cart.css';
+
 
 const Cart = () => {
   const { state, dispatch } = useApp();
   const { cart } = state;
+
+  const [isModalOpen, setModalOpen] = useState(false);
 
   const updateQuantity = (productId, quantity) => {
     if (quantity === 0) {
@@ -25,6 +29,12 @@ const Cart = () => {
 
   const clearCart = () => {
     dispatch({ type: 'CLEAR_CART' });
+  };
+
+  const handleCheckout = () => {
+  alert('Compra realizada con éxito!');
+  dispatch({ type: 'CLEAR_CART' });
+  setModalOpen(false);
   };
 
   const total = cart.reduce((sum, item) => {
@@ -100,10 +110,14 @@ const Cart = () => {
             <Link to="/products" className="continue-shopping">
               Seguir Comprando
             </Link>
-            <Link to="/checkout" className="checkout-btn">
-              Proceder al Pago
-            </Link>
+            <button className="checkout-btn" onClick={() => setModalOpen(true)}>
+              Continuar con la compra
+            </button>
           </div>
+          {/* Modal */}
+          <Modal isOpen={isModalOpen} onClose={() => setModalOpen(false)}>
+            <CheckoutForm onSubmit={handleCheckout} />
+          </Modal>
         </div>
       </div>
     </div>
