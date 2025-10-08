@@ -1,77 +1,251 @@
-// src/components/cart/Reg_Compra.jsx
-import React from 'react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './Reg_compra.css';
 
-const CheckoutForm = ({ onSubmit }) => {
+const Reg_Compra = () => {
+  const navigate = useNavigate();
+  
+  const [formData, setFormData] = useState({
+    // Datos de domicilio
+    direccion: '',
+    codigoPostal: '',
+    estado: '',
+    municipio: '',
+    localidad: '',
+    colonia: '',
+    referencias: '',
+    
+    // Datos de contacto
+    nombre: '',
+    apellido: '',
+    telefono: '',
+    email: ''
+  });
+
+  const [errors, setErrors] = useState({});
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+    
+    // Limpiar error del campo cuando el usuario empiece a escribir
+    if (errors[name]) {
+      setErrors(prev => ({
+        ...prev,
+        [name]: ''
+      }));
+    }
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+    
+    // Validar campos requeridos de domicilio
+    if (!formData.direccion.trim()) newErrors.direccion = 'La dirección es requerida';
+    if (!formData.codigoPostal.trim()) newErrors.codigoPostal = 'El código postal es requerido';
+    if (!formData.estado.trim()) newErrors.estado = 'El estado es requerido';
+    if (!formData.municipio.trim()) newErrors.municipio = 'El municipio es requerido';
+    
+    // Validar campos requeridos de contacto
+    if (!formData.nombre.trim()) newErrors.nombre = 'El nombre es requerido';
+    if (!formData.apellido.trim()) newErrors.apellido = 'El apellido es requerido';
+    if (!formData.telefono.trim()) newErrors.telefono = 'El teléfono es requerido';
+    
+    // Validar formato de teléfono (mínimo 10 dígitos)
+    if (formData.telefono && formData.telefono.replace(/\D/g, '').length < 10) {
+      newErrors.telefono = 'El teléfono debe tener al menos 10 dígitos';
+    }
+    
+    // Validar formato de email si se proporciona
+    if (formData.email && !/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = 'El formato del email no es válido';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit();
+    
+    if (validateForm()) {
+      // Pasar los datos al CheckoutForm a través del estado de navegación
+      navigate('/checkout', { 
+        state: { 
+          customerData: formData 
+        } 
+      });
+    }
+  };
+
+  const isFormValid = () => {
+    return (
+      formData.direccion.trim() &&
+      formData.codigoPostal.trim() &&
+      formData.estado.trim() &&
+      formData.municipio.trim() &&
+      formData.nombre.trim() &&
+      formData.apellido.trim() &&
+      formData.telefono.trim() &&
+      formData.telefono.replace(/\D/g, '').length >= 10
+    );
   };
 
   return (
-    <form className="checkout-form" onSubmit={handleSubmit}>
-      <h3>Registro de Compra</h3>
+    <div className="reg-compra-page">
+      <form className="checkout-form" onSubmit={handleSubmit}>
+        <h3>Registro de Compra</h3>
 
-      {/* Sección: Domicilio */}
+        {/* Sección: Domicilio */}
         <fieldset>
-        <legend>Domicilio</legend>
-        <div className="form-grid">
+          <legend>Domicilio</legend>
+          <div className="form-grid">
             <label>
-            Dirección o lugar de entrega
-            <input type="text" required />
+              Dirección o lugar de entrega *
+              <input 
+                type="text" 
+                name="direccion"
+                value={formData.direccion}
+                onChange={handleInputChange}
+                required 
+              />
+              {errors.direccion && <span className="error-message">{errors.direccion}</span>}
             </label>
+            
             <label>
-            Código postal
-            <input type="text" required />
+              Código postal *
+              <input 
+                type="text" 
+                name="codigoPostal"
+                value={formData.codigoPostal}
+                onChange={handleInputChange}
+                required 
+              />
+              {errors.codigoPostal && <span className="error-message">{errors.codigoPostal}</span>}
             </label>
+            
             <label>
-            Estado
-            <input type="text" required />
+              Estado *
+              <input 
+                type="text" 
+                name="estado"
+                value={formData.estado}
+                onChange={handleInputChange}
+                required 
+              />
+              {errors.estado && <span className="error-message">{errors.estado}</span>}
             </label>
+            
             <label>
-            Municipio
-            <input type="text" required />
+              Municipio *
+              <input 
+                type="text" 
+                name="municipio"
+                value={formData.municipio}
+                onChange={handleInputChange}
+                required 
+              />
+              {errors.municipio && <span className="error-message">{errors.municipio}</span>}
             </label>
+            
             <label>
-            Localidad
-            <input type="text" />
+              Localidad
+              <input 
+                type="text" 
+                name="localidad"
+                value={formData.localidad}
+                onChange={handleInputChange}
+              />
             </label>
+            
             <label>
-            Colonia
-            <input type="text" />
+              Colonia
+              <input 
+                type="text" 
+                name="colonia"
+                value={formData.colonia}
+                onChange={handleInputChange}
+              />
             </label>
+            
             <label style={{ gridColumn: '1 / -1' }}>
-            Referencias para entrega (opcional)
-            <textarea maxLength={150}></textarea>
+              Referencias para entrega (opcional)
+              <textarea 
+                maxLength={150}
+                name="referencias"
+                value={formData.referencias}
+                onChange={handleInputChange}
+              ></textarea>
             </label>
-        </div>
+          </div>
         </fieldset>
 
+        {/* Sección: Contacto */}
         <fieldset>
-        <legend>Contacto</legend>
-        <div className="form-grid">
+          <legend>Contacto</legend>
+          <div className="form-grid">
             <label>
-            Nombre
-            <input type="text" required />
+              Nombre *
+              <input 
+                type="text" 
+                name="nombre"
+                value={formData.nombre}
+                onChange={handleInputChange}
+                required 
+              />
+              {errors.nombre && <span className="error-message">{errors.nombre}</span>}
             </label>
+            
             <label>
-            Apellido
-            <input type="text" required />
+              Apellido *
+              <input 
+                type="text" 
+                name="apellido"
+                value={formData.apellido}
+                onChange={handleInputChange}
+                required 
+              />
+              {errors.apellido && <span className="error-message">{errors.apellido}</span>}
             </label>
+            
             <label>
-            Teléfono
-            <input type="tel" required />
+              Teléfono *
+              <input 
+                type="tel" 
+                name="telefono"
+                value={formData.telefono}
+                onChange={handleInputChange}
+                required 
+              />
+              {errors.telefono && <span className="error-message">{errors.telefono}</span>}
             </label>
+            
             <label>
-            Correo electrónico (opcional)
-            <input type="email" />
+              Correo electrónico (opcional)
+              <input 
+                type="email" 
+                name="email"
+                value={formData.email}
+                onChange={handleInputChange}
+              />
+              {errors.email && <span className="error-message">{errors.email}</span>}
             </label>
-        </div>
+          </div>
         </fieldset>
 
-      <button type="submit">Continuar</button>
-    </form>
+        <button 
+          type="submit" 
+          className={`continue-btn ${isFormValid() ? 'active' : ''}`}
+          disabled={!isFormValid()}
+        >
+          Continuar al Pago
+        </button>
+      </form>
+    </div>
   );
 };
 
-export default CheckoutForm;
+export default Reg_Compra;
