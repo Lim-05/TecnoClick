@@ -1,0 +1,9 @@
+# Ignorar archivos de entorno
+.env
+
+# Carpetas de dependencias
+node_modules/
+
+# Logs y otros archivos temporales
+*.log
+.DS_Store
