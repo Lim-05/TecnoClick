@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
+import { Link } from 'react-router-dom'; // ← Agregar esta importación
 import './ProductsPage.css';
 
 const ProductsPage = () => {
@@ -12,7 +13,7 @@ const ProductsPage = () => {
   const [sortBy, setSortBy] = useState('nombre');
   const [loading, setLoading] = useState(true);
 
-  // Datos de productos más completos
+  // Datos de productos más completos (agregar rating y reviews)
   const allProducts = [
     {
       id: 1,
@@ -25,7 +26,9 @@ const ProductsPage = () => {
       description: "Laptop para gaming de alto rendimiento con RTX 4060, 16GB RAM, 1TB SSD, pantalla 15.6\" 144Hz",
       image: "https://images.unsplash.com/photo-1603302576837-37561b2e2302?w=400&h=300&fit=crop",
       specs: ["RTX 4060", "16GB RAM", "1TB SSD", "15.6\" 144Hz"],
-      inStock: true
+      inStock: true,
+      rating: 4.5, // ← Agregado
+      reviewCount: 24 // ← Agregado
     },
     {
       id: 2,
@@ -38,7 +41,9 @@ const ProductsPage = () => {
       description: "Smartphone flagship con cámara triple 48MP, chip A17 Pro, 256GB, Dynamic Island",
       image: "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=400&h=300&fit=crop",
       specs: ["Cámara 48MP", "A17 Pro", "256GB", "iOS 17"],
-      inStock: true
+      inStock: true,
+      rating: 4.8, // ← Agregado
+      reviewCount: 32 // ← Agregado
     },
     {
       id: 3,
@@ -51,7 +56,9 @@ const ProductsPage = () => {
       description: "Laptop profesional con chip M3 Max, 36GB RAM, 1TB SSD, pantalla Liquid Retina XDR",
       image: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=400&h=300&fit=crop",
       specs: ["M3 Max", "36GB RAM", "1TB SSD", "14.2\""],
-      inStock: true
+      inStock: true,
+      rating: 4.7, // ← Agregado
+      reviewCount: 18 // ← Agregado
     },
     {
       id: 4,
@@ -64,7 +71,9 @@ const ProductsPage = () => {
       description: "Smartwatch con monitorización avanzada de salud, GPS, resistente al agua",
       image: "https://images.unsplash.com/photo-1575311373937-040b8e1fd5b6?w=400&h=300&fit=crop",
       specs: ["GPS", "Resistente agua", "Monitoreo salud", "iOS"],
-      inStock: true
+      inStock: true,
+      rating: 4.3, // ← Agregado
+      reviewCount: 15 // ← Agregado
     },
     {
       id: 5,
@@ -77,7 +86,9 @@ const ProductsPage = () => {
       description: "Smartphone con S-Pen integrado, cámara 200MP, 12GB RAM, 512GB, pantalla Dynamic AMOLED",
       image: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400&h=300&fit=crop",
       specs: ["S-Pen", "200MP", "12GB RAM", "512GB"],
-      inStock: true
+      inStock: true,
+      rating: 4.6, // ← Agregado
+      reviewCount: 21 // ← Agregado
     },
     {
       id: 6,
@@ -90,7 +101,9 @@ const ProductsPage = () => {
       description: "Tablet profesional con chip M2, pantalla Liquid Retina XDR, compatible con Apple Pencil",
       image: "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=400&h=300&fit=crop",
       specs: ["Chip M2", "12.9\"", "Apple Pencil", "Liquid Retina"],
-      inStock: false
+      inStock: false,
+      rating: 4.4, // ← Agregado
+      reviewCount: 12 // ← Agregado
     },
     {
       id: 7,
@@ -103,7 +116,9 @@ const ProductsPage = () => {
       description: "Audífonos noise cancelling premium con 30h de batería, sonido HD, control táctil",
       image: "https://images.unsplash.com/photo-1583394838336-acd977736f90?w=400&h=300&fit=crop",
       specs: ["Noise Cancelling", "30h batería", "HD Sound", "Táctil"],
-      inStock: true
+      inStock: true,
+      rating: 4.9, // ← Agregado
+      reviewCount: 28 // ← Agregado
     },
     {
       id: 8,
@@ -116,7 +131,9 @@ const ProductsPage = () => {
       description: "Teclado mecánico inalámbrico con iluminación RGB, switches táctiles, multi-dispositivo",
       image: "https://images.unsplash.com/photo-1541140532154-b024d705b90a?w=400&h=300&fit=crop",
       specs: ["Mecánico", "RGB", "Inalámbrico", "Multi-device"],
-      inStock: true
+      inStock: true,
+      rating: 4.2, // ← Agregado
+      reviewCount: 9 // ← Agregado
     },
     {
       id: 9,
@@ -129,7 +146,9 @@ const ProductsPage = () => {
       description: "Monitor gaming curvo 32\" 240Hz, 1ms, QHD, FreeSync Premium Pro",
       image: "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=400&h=300&fit=crop",
       specs: ["32\" Curvo", "240Hz", "QHD", "FreeSync"],
-      inStock: true
+      inStock: true,
+      rating: 4.7, // ← Agregado
+      reviewCount: 14 // ← Agregado
     },
     {
       id: 10,
@@ -142,7 +161,9 @@ const ProductsPage = () => {
       description: "Consola de última generación con SSD ultrarrápido, ray tracing, 4K 120Hz",
       image: "https://images.unsplash.com/photo-1606813907291-d86efa9b94db?w=400&h=300&fit=crop",
       specs: ["4K 120Hz", "SSD", "Ray Tracing", "8K"],
-      inStock: true
+      inStock: true,
+      rating: 4.8, // ← Agregado
+      reviewCount: 35 // ← Agregado
     }
   ];
 
@@ -161,7 +182,7 @@ const ProductsPage = () => {
   useEffect(() => {
     const loadProducts = async () => {
       setLoading(true);
-      await new Promise(resolve => setTimeout(resolve, 800)); // Simular delay
+      await new Promise(resolve => setTimeout(resolve, 800));
       setProducts(allProducts);
       setFilteredProducts(allProducts);
       setLoading(false);
@@ -174,12 +195,10 @@ const ProductsPage = () => {
   useEffect(() => {
     let result = products;
 
-    // Filtrar por categoría
     if (selectedCategory !== 'todos') {
       result = result.filter(product => product.category === selectedCategory);
     }
 
-    // Filtrar por búsqueda
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
       result = result.filter(product => 
@@ -189,7 +208,6 @@ const ProductsPage = () => {
       );
     }
 
-    // Ordenar
     result = [...result].sort((a, b) => {
       switch (sortBy) {
         case 'precio-asc':
@@ -205,7 +223,9 @@ const ProductsPage = () => {
     setFilteredProducts(result);
   }, [products, selectedCategory, searchTerm, sortBy]);
 
-  const handleAddToCart = (product) => {
+  const handleAddToCart = (product, e) => {
+    e.preventDefault(); // Prevenir navegación del Link
+    e.stopPropagation(); // Detener propagación
     dispatch({
       type: 'ADD_TO_CART',
       payload: product
@@ -223,6 +243,18 @@ const ProductsPage = () => {
 
   const handleSortChange = (e) => {
     setSortBy(e.target.value);
+  };
+
+  // Función para renderizar estrellas
+  const renderStars = (rating) => {
+    return Array.from({ length: 5 }, (_, index) => (
+      <span 
+        key={index} 
+        className={`star ${index < Math.floor(rating) ? 'filled' : ''}`}
+      >
+        {index < Math.floor(rating) ? '★' : '☆'}
+      </span>
+    ));
   };
 
   if (loading) {
@@ -301,42 +333,55 @@ const ProductsPage = () => {
             <div className="products-grid">
               {filteredProducts.map(product => (
                 <div key={product.id} className="product-card">
-                  <div className="product-image">
-                    <img src={product.image} alt={product.name} />
-                    {!product.inStock && <div className="out-of-stock">Agotado</div>}
-                    {product.originalPrice && (
-                      <div className="discount-badge">
-                        -{Math.round((1 - parseFloat(product.price.replace(/,/g, '')) / parseFloat(product.originalPrice.replace(/,/g, ''))) * 100)}%
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="product-content">
-                    <div className="product-brand">{product.brand}</div>
-                    <h3 className="product-name">{product.name}</h3>
-                    <p className="product-description">{product.description}</p>
-
-                    <div className="product-specs">
-                      {product.specs.map((spec, index) => (
-                        <span key={index} className="spec-tag">{spec}</span>
-                      ))}
-                    </div>
-
-                    <div className="product-pricing">
-                      <span className="current-price">{product.price} {product.currency}</span>
+                  {/* Enlace al detalle del producto */}
+                  <Link to={`/product/${product.id}`} className="product-link">
+                    <div className="product-image">
+                      <img src={product.image} alt={product.name} />
+                      {!product.inStock && <div className="out-of-stock">Agotado</div>}
                       {product.originalPrice && (
-                        <span className="original-price">{product.originalPrice} {product.currency}</span>
+                        <div className="discount-badge">
+                          -{Math.round((1 - parseFloat(product.price.replace(/,/g, '')) / parseFloat(product.originalPrice.replace(/,/g, ''))) * 100)}%
+                        </div>
                       )}
                     </div>
 
-                    <button 
-                      className={`add-to-cart-btn ${!product.inStock ? 'disabled' : ''}`}
-                      onClick={() => handleAddToCart(product)}
-                      disabled={!product.inStock}
-                    >
-                      {!product.inStock ? 'Agotado' : '🛒 Añadir al Carrito'}
-                    </button>
-                  </div>
+                    <div className="product-content">
+                      <div className="product-brand">{product.brand}</div>
+                      <h3 className="product-name">{product.name}</h3>
+                      
+                      {/* Rating en la card */}
+                      <div className="product-rating-card">
+                        <div className="stars">
+                          {renderStars(product.rating)}
+                          <span className="rating-value">({product.reviewCount})</span>
+                        </div>
+                      </div>
+
+                      <p className="product-description">{product.description}</p>
+
+                      <div className="product-specs">
+                        {product.specs.map((spec, index) => (
+                          <span key={index} className="spec-tag">{spec}</span>
+                        ))}
+                      </div>
+
+                      <div className="product-pricing">
+                        <span className="current-price">{product.price} {product.currency}</span>
+                        {product.originalPrice && (
+                          <span className="original-price">{product.originalPrice} {product.currency}</span>
+                        )}
+                      </div>
+                    </div>
+                  </Link>
+
+                  {/* Botón fuera del Link para evitar conflictos */}
+                  <button 
+                    className={`add-to-cart-btn ${!product.inStock ? 'disabled' : ''}`}
+                    onClick={(e) => handleAddToCart(product, e)}
+                    disabled={!product.inStock}
+                  >
+                    {!product.inStock ? 'Agotado' : '🛒 Añadir al Carrito'}
+                  </button>
                 </div>
               ))}
             </div>

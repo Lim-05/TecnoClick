@@ -345,3 +345,110 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ESTILOS NUEVOS PARA ENLACES Y RATING */
+
+/* Enlaces de productos */
+.product-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  cursor: pointer;
+}
+
+.product-link:hover {
+  text-decoration: none;
+}
+
+/* Rating en las cards */
+.product-rating-card {
+  margin: 0.5rem 0;
+  display: flex;
+  align-items: center;
+}
+
+.product-rating-card .stars {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.product-rating-card .star {
+  color: #ddd;
+  font-size: 0.9rem;
+}
+
+.product-rating-card .star.filled {
+  color: #f39c12;
+}
+
+.product-rating-card .rating-value {
+  font-size: 0.8rem;
+  color: #7f8c8d;
+  margin-left: 0.5rem;
+}
+
+/* Asegurar que el botón esté sobre el link */
+.add-to-cart-btn {
+  position: relative;
+  z-index: 2;
+  margin-top: 1rem;
+  width: 100%;
+  background: #27ae60;
+  color: white;
+  border: none;
+  padding: 0.75rem;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.add-to-cart-btn:hover:not(.disabled) {
+  background: #229954;
+}
+
+.add-to-cart-btn.disabled {
+  background: #bdc3c7;
+  cursor: not-allowed;
+}
+
+/* Mejorar el hover de las cards */
+.product-card {
+  position: relative;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.product-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Ajustar el contenido para incluir el rating */
+.product-content {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+/* Asegurar que el botón se mantenga abajo */
+.product-card {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Responsive para los nuevos elementos */
+@media (max-width: 768px) {
+  .product-rating-card {
+    justify-content: center;
+  }
+  
+  .product-rating-card .stars {
+    gap: 0.1rem;
+  }
+  
+  .product-rating-card .rating-value {
+    font-size: 0.7rem;
+  }
+}

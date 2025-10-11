@@ -14,3 +14,12 @@ The React Compiler is not enabled on this template because of its impact on dev 
 ## Expanding the ESLint configuration
 
 If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+
+
+## Modificaciones
+
+Se agrego un nuevo page, llamado productDetails.js junto con su propio css, en el app.jsx se agrego un 
+ import ProductDetail from './pages/ProductDetail';
+para importar el componente productdetails, también para visualizar  sus detalles se utilizo
+ <Route path="/product/:id" element={<ProductDetail />} /> 
+que esto hace que por base de id detecte que producto se esta llamando 
