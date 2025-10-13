@@ -11,7 +11,6 @@ const Reg_Compra = () => {
     codigoPostal: '',
     estado: '',
     municipio: '',
-    localidad: '',
     colonia: '',
     referencias: '',
     
@@ -19,7 +18,8 @@ const Reg_Compra = () => {
     nombre: '',
     apellido: '',
     telefono: '',
-    email: ''
+    email: '',
+    password: '' 
   });
 
   const [errors, setErrors] = useState({});
@@ -53,6 +53,7 @@ const Reg_Compra = () => {
     if (!formData.nombre.trim()) newErrors.nombre = 'El nombre es requerido';
     if (!formData.apellido.trim()) newErrors.apellido = 'El apellido es requerido';
     if (!formData.telefono.trim()) newErrors.telefono = 'El teléfono es requerido';
+    if (!formData.password.trim()) newErrors.password = 'La contraseña es requerida';
     
     // Validar formato de teléfono (mínimo 10 dígitos)
     if (formData.telefono && formData.telefono.replace(/\D/g, '').length < 10) {
@@ -97,7 +98,7 @@ const Reg_Compra = () => {
   return (
     <div className="reg-compra-page">
       <form className="checkout-form" onSubmit={handleSubmit}>
-        <h3>Registro de Compra</h3>
+        <h4>Registro de Compra</h4>
 
         {/* Sección: Domicilio */}
         <fieldset>
@@ -149,16 +150,6 @@ const Reg_Compra = () => {
                 required 
               />
               {errors.municipio && <span className="error-message">{errors.municipio}</span>}
-            </label>
-            
-            <label>
-              Localidad
-              <input 
-                type="text" 
-                name="localidad"
-                value={formData.localidad}
-                onChange={handleInputChange}
-              />
             </label>
             
             <label>
@@ -233,9 +224,26 @@ const Reg_Compra = () => {
               />
               {errors.email && <span className="error-message">{errors.email}</span>}
             </label>
+            
+            <label>
+              Contraseña *
+              <input 
+                type="password"
+                name="password"
+                value={formData.password}
+                onChange={handleInputChange}
+                required
+              />
+              {errors.password && <span className="error-message">{errors.password}</span>}
+            </label>
           </div>
         </fieldset>
-
+        
+        <p className="login-text">¿Ya haz registrado tus datos antes?{' '}
+          <span className="login-link" onClick={() => navigate('/login')}>
+            Inicia sesión
+          </span>
+        </p>
         <button 
           type="submit" 
           className={`continue-btn ${isFormValid() ? 'active' : ''}`}

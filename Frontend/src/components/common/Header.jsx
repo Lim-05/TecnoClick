@@ -21,9 +21,14 @@ const Header = () => {
         </nav>
 
         <div className="header-actions">
+          <Link to="/perfil" className="profile-link">
+            👤 Perfil
+          </Link>
+
           <Link to="/cart" className="cart-link">
             🛒 Carrito ({cartItemCount})
           </Link>
+
         </div>
       </div>
     </header>

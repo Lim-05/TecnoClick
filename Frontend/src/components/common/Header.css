@@ -34,6 +34,12 @@
   width: 100%;
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 20px; /* espacio entre carrito y perfil */
+}
+
 
 .nav {
   display: flex;
@@ -55,7 +61,7 @@
 .cart-link {
   color: white;
   text-decoration: none;
-  padding: 0.5rem 1rem;
+  padding: 0.4rem 0.8rem;
   background: #043c69;
   border-radius: 20px;
   transition: background 0.3s;

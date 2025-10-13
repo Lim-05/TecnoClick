@@ -1,0 +1,102 @@
+/* Perfil.css */
+
+/* Contenedor principal */
+.perfil-page {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-top: 12vh; /* igual que el carrito */
+}
+
+.perfil-container {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Títulos */
+.perfil-page h4 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+/* Fieldset y form-grid */
+fieldset {
+  border: 1px solid #ccc;
+  padding: 15px;
+  margin-bottom: 20px;
+  border-radius: 6px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.9rem;
+}
+
+input, textarea {
+  margin-top: 5px;
+  padding: 8px;
+  border: 1px solid #aaa;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+input:disabled, textarea:disabled {
+  background-color: #f5f5f5;
+}
+
+/* Botones */
+button.continue-btn {
+  padding: 10px 20px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  background-color: #007bff;
+  color: #fff;
+}
+
+button.continue-btn:hover {
+  background-color: #0056b3;
+}
+
+/* Barra lateral derecha */
+.sidebar-right {
+  position: fixed;
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  background-color: #fff;
+  border-left: 1px solid #ccc;
+  border-radius: 8px 0 0 8px;
+  box-shadow: -2px 2px 10px rgba(0,0,0,0.1);
+  z-index: 10;
+}
+
+.sidebar-right a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  margin: 10px 0;
+  font-size: 1.5rem;
+  color: #333;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+
+.sidebar-right a:hover {
+  background-color: #f0f0f0;
+  border-radius: 0 8px 8px 0;
+}
