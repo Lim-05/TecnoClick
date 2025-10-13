@@ -1,30 +1,78 @@
 const express = require('express');
 const app = express();
-const db = require('./db');
+const db = require('./db'); // pool de PostgreSQL
 require('dotenv').config();
 
 const PORT = process.env.PORT || 3000;
+
+const cors = require('cors');
+app.use(cors({
+  origin: 'http://172.23.185.97:5173' // URL donde corre Vite
+}));
+
+
 
 app.use(express.json());
 
 // Ruta raíz
 app.get('/', (req, res) => {
-  res.send('Servidor Node.js corriendo ✅');
+  res.send('Servidor Node.js corriendo');
 });
 
-// Ruta de prueba de conexión a la DB
-app.get('/prueba', async (req, res) => {
+// POST - crear un nuevo usuario
+app.post('/api/usuarios', async (req, res) => {
+  const {
+    nombre,
+    apellido,
+    telefono,
+    correo,
+    direccion,
+    contra,
+    CP,
+    estado,
+    municipio,
+    colonia,
+    referencias,
+  } = req.body;
+
+  // Validación básica
+  if (!nombre || !apellido || !contra || !CP || !estado || !municipio || !colonia) {
+    return res.status(400).json({ mensaje: 'Datos requeridos' });
+  }
+
   try {
-    const client = await db.connect();
-    const result = await client.query('SELECT NOW()');
-    client.release();
-    res.send(`Conexión exitosa a PostgreSQL: ${result.rows[0].now}`);
+    const sql = `
+      INSERT INTO usuario 
+      (nombre_usuario, apellido_usuario, telefono_usuario, correo_usuario, direccion_usuario, contrasena, codigo_postal, estado_usuario, municipio_usuario, colonia_usuario, referencias)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+      RETURNING *;
+    `;
+
+    const values = [
+      nombre,
+      apellido,
+      telefono,
+      correo,
+      direccion,
+      contra,
+      CP,
+      estado,
+      municipio,
+      colonia,
+      referencias,
+    ];
+
+    const result = await db.query(sql, values);
+
+    res.status(201).json({
+      mensaje: 'Usuario creado exitosamente',
+      usuario: result.rows[0],
+    });
   } catch (err) {
-    console.error('Error en /prueba-db:', err.message);
-    res.status(500).send('Error en la conexión a la DB');
+    console.error('Error al crear usuario:', err.message);
+    res.status(500).json({ mensaje: 'Error al crear usuario', error: err.message });
   }
 });
-
 
 // Inicia el servidor
 app.listen(PORT, '0.0.0.0', () => {

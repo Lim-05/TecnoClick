@@ -69,7 +69,86 @@ const Reg_Compra = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  if (validateForm()) {
+    try {
+      const response = await fetch('/api/usuarios', { // ruta relativa, proxy de Vite la redirige
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nombre: formData.nombre,
+          apellido: formData.apellido,
+          telefono: formData.telefono,
+          correo: formData.email,
+          direccion: formData.direccion,
+          contra: formData.password,
+          CP: formData.codigoPostal,
+          estado: formData.estado,
+          municipio: formData.municipio,
+          colonia: formData.colonia,
+          referencias: formData.referencias,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert('Usuario guardado correctamente');
+        navigate('/checkout', { state: { customerData: formData } });
+      } else {
+        alert(`Error al guardar: ${data.mensaje || 'Error desconocido'}`);
+      }
+    } catch (error) {
+      console.error('Error al enviar datos:', error);
+      alert('Error de conexión con el servidor');
+    }
+  }
+};
+
+
+
+  /*const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  if (validateForm()) {
+    try {
+      const response = await fetch('http://172.23.185.97:3000/api/usuarios', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nombre: formData.nombre,
+          apellido: formData.apellido,
+          telefono: formData.telefono,
+          correo: formData.email,
+          direccion: formData.direccion,
+          contra: formData.password,
+          CP: formData.codigoPostal,
+          estado: formData.estado,
+          municipio: formData.municipio,
+          colonia: formData.colonia,
+          referencias: formData.referencias,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert('Usuario guardado correctamente');
+        navigate('/checkout', { state: { customerData: formData } });
+      } else {
+        alert(`Error al guardar: ${data.mensaje || 'Error desconocido'}`);
+      }
+    } catch (error) {
+      console.error('Error al enviar datos:', error);
+      alert('Error de conexión con el servidor');
+    }
+  }
+};*/
+
+
+  /*const handleSubmit = (e) => {
     e.preventDefault();
     
     if (validateForm()) {
@@ -80,7 +159,49 @@ const Reg_Compra = () => {
         } 
       });
     }
-  };
+  };*/
+
+  /*const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  if (validateForm()) {
+    try {
+      // Enviar los datos al backend
+      //no usamos localhost porque desde Windows donde corre vite no apunta a wsl
+      const response = await fetch('http://172.23.185.97:3000/api/usuarios', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nombre: formData.nombre,
+          apellido: formData.apellido,
+          telefono: formData.telefono,
+          correo: formData.email,
+          direccion: formData.direccion,
+          contra: formData.password,
+          CP: formData.codigoPostal,
+          estado: formData.estado,
+          municipio: formData.municipio,
+          colonia: formData.colonia,
+          referencias: formData.referencias,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert('Usuario guardado correctamente');
+        // Opcional: pasar los datos al checkout
+        navigate('/checkout', { state: { customerData: formData } });
+      } else {
+        alert(`Error al guardar: ${data.mensaje || 'Error desconocido'}`);
+      }
+    } catch (error) {
+      console.error('Error al enviar datos:', error);
+      alert('Error de conexión con el servidor');
+    }
+  }
+};*/
+
 
   const isFormValid = () => {
     return (
