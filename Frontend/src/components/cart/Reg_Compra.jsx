@@ -108,13 +108,12 @@ const handleSubmit = async (e) => {
 };
 
 
-
   /*const handleSubmit = async (e) => {
   e.preventDefault();
 
   if (validateForm()) {
     try {
-      const response = await fetch('http://172.23.185.97:3000/api/usuarios', {
+      const response = await fetch('http://localhost:3000/api/usuarios', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -168,7 +167,7 @@ const handleSubmit = async (e) => {
     try {
       // Enviar los datos al backend
       //no usamos localhost porque desde Windows donde corre vite no apunta a wsl
-      const response = await fetch('http://172.23.185.97:3000/api/usuarios', {
+      const response = await fetch('http://localhost:3000/api/usuarios', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -7,7 +7,7 @@ const PORT = process.env.PORT || 3000;
 
 const cors = require('cors');
 app.use(cors({
-  origin: 'http://172.23.185.97:5173' // URL donde corre Vite
+  origin: 'http://localhost:5173' // URL donde corre Vite
 }));
 
 
