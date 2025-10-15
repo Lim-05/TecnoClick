@@ -95,6 +95,7 @@ const handleSubmit = async (e) => {
       const data = await response.json();
 
       if (response.ok) {
+        localStorage.setItem('usuario', JSON.stringify(data.usuario)); // Guardar datos del usuario en localStorage
         alert('Usuario guardado correctamente');
         navigate('/checkout', { state: { customerData: formData } });
       } else {

@@ -1,20 +1,19 @@
-const express = require('express');
+const express = require('express'); // Framework web
 const app = express();
 const db = require('./db'); // pool de PostgreSQL
 require('dotenv').config();
 
 const PORT = process.env.PORT || 3000;
 
+//conexion backend y frontend
 const cors = require('cors');
 app.use(cors({
   origin: 'http://localhost:5173' // URL donde corre Vite
 }));
 
-
-
 app.use(express.json());
 
-// Ruta raíz
+// Ruta raíz. Verificamos que este corriendo el servidor
 app.get('/', (req, res) => {
   res.send('Servidor Node.js corriendo');
 });
@@ -35,7 +34,7 @@ app.post('/api/usuarios', async (req, res) => {
     referencias,
   } = req.body;
 
-  // Validación básica
+  // Validación 
   if (!nombre || !apellido || !contra || !CP || !estado || !municipio || !colonia) {
     return res.status(400).json({ mensaje: 'Datos requeridos' });
   }
