@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import './ProductDetail.css';
@@ -11,79 +11,75 @@ const ProductDetail = () => {
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState('description');
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Datos de ejemplo del producto (luego vendrán de la BD)
-  const product = {
-    id: 1,
-    name: "Laptop Gaming ASUS ROG Strix",
-    price: "29,680.00",
-    originalPrice: "36,250.00",
-    currency: "MXN",
-    category: "laptops",
-    brand: "ASUS",
-    description: "Laptop para gaming de alto rendimiento diseñada para ofrecer la mejor experiencia de juego. Equipada con los últimos componentes para garantizar un rendimiento excepcional en los juegos más demandantes.",
-    fullDescription: `La Laptop Gaming ASUS ROG Strix es la elección perfecta para gamers exigentes que buscan máximo rendimiento. Con su potente GPU NVIDIA GeForce RTX 4060 y procesador Intel Core i9 de 13ª generación, podrás disfrutar de tus juegos favoritos en calidad 4K con tasas de cuadros ultra altas.
-
-Características principales:
-• Procesador: Intel Core i9-13900H
-• GPU: NVIDIA GeForce RTX 4060 8GB GDDR6
-• RAM: 16GB DDR5 4800MHz
-• Almacenamiento: 1TB SSD NVMe PCIe 4.0
-• Pantalla: 15.6" IPS 144Hz FHD
-• Sistema operativo: Windows 11 Home
-• Batería: 90Wh con carga rápida`,
-    
-    images: [
-      "https://images.unsplash.com/photo-1603302576837-37561b2e2302?w=600&h=400&fit=crop",
-      "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=600&h=400&fit=crop",
-      "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=600&h=400&fit=crop",
-      "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=600&h=400&fit=crop"
-    ],
-    
-    specs: [
-      { name: "Procesador", value: "Intel Core i9-13900H" },
-      { name: "GPU", value: "NVIDIA GeForce RTX 4060 8GB" },
-      { name: "RAM", value: "16GB DDR5 4800MHz" },
-      { name: "Almacenamiento", value: "1TB SSD NVMe PCIe 4.0" },
-      { name: "Pantalla", value: '15.6" IPS 144Hz FHD' },
-      { name: "Sistema Operativo", value: "Windows 11 Home" },
-      { name: "Batería", value: "90Wh" },
-      { name: "Conectividad", value: "WiFi 6E, Bluetooth 5.2" }
-    ],
-    
-    inStock: true,
-    stock: 15,
-    
-    // Reseñas y calificaciones
-    rating: 4.5,
-    reviewCount: 24,
-    reviews: [
-      {
-        id: 1,
-        user: "Carlos Rodríguez",
-        rating: 5,
-        date: "2024-01-15",
-        comment: "Excelente laptop, corre todos los juegos en ultra sin problemas. La pantalla es increíble y el teclado muy cómodo para gaming.",
-        verified: true
-      },
-      {
-        id: 2,
-        user: "Ana Martínez",
-        rating: 4,
-        date: "2024-01-10",
-        comment: "Muy buena relación calidad-precio. El único detalle es que la batería no dura mucho cuando se usa para gaming, pero es normal.",
-        verified: true
-      },
-      {
-        id: 3,
-        user: "Miguel Sánchez",
-        rating: 5,
-        date: "2024-01-08",
-        comment: "Llegó antes de lo esperado y superó mis expectativas. El rendimiento es espectacular.",
-        verified: false
+  // Cargar producto desde la API
+  useEffect(() => {
+    const loadProduct = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        console.log(`🔄 Cargando producto con ID: ${id}`);
+        const response = await fetch(`http://localhost:3000/api/productos/products/${id}`);
+        
+        if (!response.ok) {
+          throw new Error('Producto no encontrado');
+        }
+        
+        const data = await response.json();
+        console.log('✅ Producto cargado:', data);
+        
+        // Agregar imágenes de ejemplo (puedes usar múltiples o una sola)
+        const productWithImages = {
+          ...data,
+          images: [
+            data.image,
+            data.image,
+            data.image,
+            data.image
+          ],
+          fullDescription: data.description,
+          // Convertir specs (array de strings) a formato de objeto
+          specsDetailed: data.specs.map((spec, index) => ({
+            name: `Característica ${index + 1}`,
+            value: spec
+          })),
+          // Reseñas de ejemplo (temporal)
+          reviews: [
+            {
+              id: 1,
+              user: "Cliente Verificado",
+              rating: 5,
+              date: "2024-01-15",
+              comment: "Excelente producto, muy recomendado.",
+              verified: true
+            },
+            {
+              id: 2,
+              user: "Comprador",
+              rating: 4,
+              date: "2024-01-10",
+              comment: "Buena relación calidad-precio.",
+              verified: true
+            }
+          ]
+        };
+        
+        setProduct(productWithImages);
+      } catch (error) {
+        console.error('❌ Error al cargar producto:', error);
+        setError(error.message);
+      } finally {
+        setLoading(false);
       }
-    ]
-  };
+    };
+
+    if (id) {
+      loadProduct();
+    }
+  }, [id]);
 
   const handleAddToCart = () => {
     for (let i = 0; i < quantity; i++) {
@@ -123,10 +119,21 @@ Características principales:
     ));
   };
 
-  if (!product) {
+  // Estado de carga
+  if (loading) {
+    return (
+      <div className="product-detail-loading">
+        <div className="loading-spinner"></div>
+        <p>Cargando producto...</p>
+      </div>
+    );
+  }
+
+  // Estado de error
+  if (error || !product) {
     return (
       <div className="product-not-found">
-        <h2>Producto no encontrado</h2>
+        <h2>{error || 'Producto no encontrado'}</h2>
         <button onClick={() => navigate('/products')} className="back-btn">
           Volver a Productos
         </button>
@@ -235,8 +242,8 @@ Características principales:
             <div className="specs-grid">
               {product.specs.slice(0, 4).map((spec, index) => (
                 <div key={index} className="spec-item">
-                  <span className="spec-name">{spec.name}:</span>
-                  <span className="spec-value">{spec.value}</span>
+                  <span className="spec-name">Característica {index + 1}:</span>
+                  <span className="spec-value">{spec}</span>
                 </div>
               ))}
             </div>
@@ -279,10 +286,16 @@ Características principales:
             <div className="specs-content">
               <h3>Especificaciones técnicas</h3>
               <div className="specs-table">
-                {product.specs.map((spec, index) => (
+                {product.specsDetailed && product.specsDetailed.map((spec, index) => (
                   <div key={index} className="spec-row">
                     <span className="spec-label">{spec.name}</span>
                     <span className="spec-data">{spec.value}</span>
+                  </div>
+                ))}
+                {!product.specsDetailed && product.specs.map((spec, index) => (
+                  <div key={index} className="spec-row">
+                    <span className="spec-label">Característica {index + 1}</span>
+                    <span className="spec-data">{spec}</span>
                   </div>
                 ))}
               </div>
