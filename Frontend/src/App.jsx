@@ -9,6 +9,7 @@ import ProductDetail from './pages/ProductDetail';
 import CheckoutForm from './components/checkout/CheckoutForm';
 import Reg_Compra from './components/cart/Reg_Compra'; // ← Agregar esta importación
 import Perfil from './pages/Perfil'; 
+import Login from './pages/Login';
 import './App.css';
 
 function App() {
@@ -26,6 +27,7 @@ function App() {
               <Route path="/registro-compra" element={<Reg_Compra />} /> {/* ✅ Ruta agregada */}
               <Route path="/checkout" element={<CheckoutForm />} />
               <Route path="/perfil" element={<Perfil />} />
+              <Route path="/login" element={<Login />} />
             </Routes>
           </main>
         </div>
