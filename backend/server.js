@@ -1,6 +1,6 @@
 const express = require('express'); // Framework web
 const app = express();
-const db = require('./db'); // pool de PostgreSQL
+const db = require('./config/db'); // conexion a la base de datos
 require('dotenv').config();
 
 const PORT = process.env.PORT || 3000;
@@ -13,10 +13,16 @@ app.use(cors({
 
 app.use(express.json());
 
+// importamos rutas
+const authRoutes = require('./routes/authRoutes');
+
 // Ruta raíz. Verificamos que este corriendo el servidor
 app.get('/', (req, res) => {
   res.send('Servidor Node.js corriendo');
 });
+
+// rutas principales
+app.use('/api', authRoutes);
 
 // POST - crear un nuevo usuario
 app.post('/api/usuarios', async (req, res) => {
