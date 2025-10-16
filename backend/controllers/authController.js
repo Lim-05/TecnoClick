@@ -28,11 +28,7 @@ const login = async (req, res) => {
     // Si las contraseñas coinciden
     res.status(200).json({
       mensaje: 'Inicio de sesión exitoso',
-      usuario: {
-        id: usuario.id_usuario,
-        nombre: usuario.nombre_usuario,
-        correo: usuario.correo_usuario,
-      },
+      usuario: result.rows[0], //se devuelven todos los campos para perfil
     });
   } catch (err) {
     console.error('Error en login:', err.message);

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import './Login.css';
 
 const Login = () => {
@@ -25,20 +25,15 @@ const Login = () => {
 
       if (response.ok) {
         setMensaje( data.mensaje);
-        console.log('Usuario autenticado:', data.usuario);
-
         // Ejemplo: guardar usuario en localStorage
         localStorage.setItem('usuario', JSON.stringify(data.usuario));
-
-        // Ejemplo: redirigir a otra página después de iniciar sesión
-        // navigate('/dashboard');
+        Navigate('/perfil')
       } else {
         setMensaje( data.mensaje);
       }
     } catch (error) {
       console.error('Error al iniciar sesión:', error);
-      setMensaje('Error al conectar con el servidor');
-    }
+      }
   };
 
   return (
