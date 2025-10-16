@@ -8,7 +8,7 @@ const PORT = process.env.PORT || 3000;
 //conexion backend y frontend
 const cors = require('cors');
 app.use(cors({
-  origin: 'http://localhost:5173' // URL donde corre Vite
+  origin: ['http://localhost:5173', 'http://127.0.0.1:5173'] // URL donde corre Vite
 }));
 
 app.use(express.json()); // permite JSON en body
