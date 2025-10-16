@@ -1,7 +1,7 @@
 const express = require('express'); // Framework web
-const app = express();
-const db = require('./config/db'); // conexion a la base de datos
-require('dotenv').config();
+const app = express(); //instancia a express
+const db = require('./config/db'); // conexion a la base de datos - pool de pg
+require('dotenv').config(); // Cargar variables de .env
 
 const PORT = process.env.PORT || 3000;
 
@@ -11,7 +11,7 @@ app.use(cors({
   origin: 'http://localhost:5173' // URL donde corre Vite
 }));
 
-app.use(express.json());
+app.use(express.json()); // permite JSON en body
 
 // importamos rutas
 const authRoutes = require('./routes/authRoutes');
@@ -22,7 +22,7 @@ app.get('/', (req, res) => {
 });
 
 // rutas principales
-app.use('/api', authRoutes);
+app.use('/api', authRoutes); // /api/login y /api/usuarios
 
 // POST - crear un nuevo usuario
 app.post('/api/usuarios', async (req, res) => {
