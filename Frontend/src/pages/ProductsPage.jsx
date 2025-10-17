@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
-import { Link } from 'react-router-dom'; // ← Agregar esta importación
+import { Link } from 'react-router-dom';
 import './ProductsPage.css';
 
 const ProductsPage = () => {
@@ -21,81 +21,144 @@ const ProductsPage = () => {
     const loadProducts = async () => {
       setLoading(true);
       try {
-        console.log('🔄 Iniciando carga de productos desde la API...');
+        console.log(' Iniciando carga de productos desde la API...');
         const response = await fetch('http://localhost:3000/api/productos/products');
+        
         if (!response.ok) {
-          throw new Error('Error al cargar productos');
+          throw new Error(`Error HTTP: ${response.status}`);
         }
+        
         const data = await response.json();
-        console.log('✅ Productos cargados desde la base de datos:', data);
-        console.log(`📊 Total de productos: ${data.length}`);
-        setProducts(data);
-        setFilteredProducts(data);
+        console.log(' Productos cargados:', data);
+        
+        // Validar y limpiar datos
+        const cleanedProducts = data.map(product => ({
+          ...product,
+          // Asegurar que las URLs de imágenes sean válidas
+          image: product.image || '/images/placeholder.jpg',
+          // Limpiar descripciones duplicadas
+          description: cleanDescription(product.description),
+          // Asegurar que las categorías sean consistentes
+          category: product.category?.toLowerCase().trim() || 'otros'
+        }));
+        
+        setProducts(cleanedProducts);
+        setFilteredProducts(cleanedProducts);
         
         // Actualizar categorías dinámicamente
-        const uniqueCategories = [...new Set(data.map(p => p.category))];
+        const categoryCounts = cleanedProducts.reduce((acc, product) => {
+          acc[product.category] = (acc[product.category] || 0) + 1;
+          return acc;
+        }, {});
+
         const categoriesData = [
-          { id: 'todos', name: 'Todos los Productos', count: data.length },
-          ...uniqueCategories.map(cat => ({
-            id: cat,
-            name: cat.charAt(0).toUpperCase() + cat.slice(1),
-            count: data.filter(p => p.category === cat).length
+          { 
+            id: 'todos', 
+            name: 'Todos los Productos', 
+            count: cleanedProducts.length 
+          },
+          ...Object.entries(categoryCounts).map(([category, count]) => ({
+            id: category,
+            name: formatCategoryName(category),
+            count: count
           }))
         ];
+        
         setCategories(categoriesData);
-        console.log('📁 Categorías disponibles:', categoriesData);
+        console.log(' Categorías disponibles:', categoriesData);
+        
       } catch (error) {
         console.error('❌ Error al cargar productos:', error);
-        alert('Error al cargar productos. Verifica que el servidor esté corriendo.');
+        // Usar datos de ejemplo como fallback
+        setProducts([]);
+        setFilteredProducts([]);
       } finally {
         setLoading(false);
-        console.log('✔️ Carga de productos finalizada');
       }
     };
 
     loadProducts();
   }, []);
 
-  // Filtros y búsqueda
+  // Función para limpiar descripciones duplicadas
+  const cleanDescription = (description) => {
+    if (!description) return '';
+    
+    // Eliminar duplicados dividiendo por puntos y filtrando únicos
+    const sentences = description.split('.').map(s => s.trim()).filter(s => s);
+    const uniqueSentences = [...new Set(sentences)];
+    
+    return uniqueSentences.join('. ') + (uniqueSentences.length > 0 ? '.' : '');
+  };
+
+  // Función para formatear nombres de categoría
+  const formatCategoryName = (category) => {
+    const nameMap = {
+      'mouse': 'Mouse',
+      'monitores': 'Monitores',
+      'almacenamiento-externo': 'Almacenamiento Externo',
+      'audio': 'Audio',
+      'impresoras/escáneres': 'Impresoras/Escáneres'
+    };
+    
+    return nameMap[category] || category.charAt(0).toUpperCase() + category.slice(1);
+  };
+
+  // Filtros y búsqueda optimizados
   useEffect(() => {
-    let result = products;
+    let result = [...products];
 
+    // Filtrar por categoría
     if (selectedCategory !== 'todos') {
-      result = result.filter(product => product.category === selectedCategory);
-    }
-
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
       result = result.filter(product => 
-        product.name.toLowerCase().includes(term) ||
-        product.brand.toLowerCase().includes(term) ||
-        product.description.toLowerCase().includes(term)
+        product.category === selectedCategory
       );
     }
 
-    result = [...result].sort((a, b) => {
+    // Filtrar por búsqueda
+    if (searchTerm.trim()) {
+      const term = searchTerm.toLowerCase().trim();
+      result = result.filter(product => 
+        product.name?.toLowerCase().includes(term) ||
+        product.brand?.toLowerCase().includes(term) ||
+        product.description?.toLowerCase().includes(term) ||
+        product.sku?.toLowerCase().includes(term)
+      );
+    }
+
+    // Ordenar
+    result.sort((a, b) => {
       switch (sortBy) {
         case 'precio-asc':
-          return parseFloat(a.price.replace(/,/g, '')) - parseFloat(b.price.replace(/,/g, ''));
+          return parsePrice(a.price) - parsePrice(b.price);
         case 'precio-desc':
-          return parseFloat(b.price.replace(/,/g, '')) - parseFloat(a.price.replace(/,/g, ''));
+          return parsePrice(b.price) - parsePrice(a.price);
         case 'nombre':
         default:
-          return a.name.localeCompare(b.name);
+          return (a.name || '').localeCompare(b.name || '');
       }
     });
 
     setFilteredProducts(result);
   }, [products, selectedCategory, searchTerm, sortBy]);
 
+  // Función auxiliar para parsear precios
+  const parsePrice = (priceString) => {
+    if (!priceString) return 0;
+    return parseFloat(priceString.toString().replace(/[^\d.-]/g, ''));
+  };
+
   const handleAddToCart = (product, e) => {
-    e.preventDefault(); // Prevenir navegación del Link
-    e.stopPropagation(); // Detener propagación
+    e.preventDefault();
+    e.stopPropagation();
+    
     dispatch({
       type: 'ADD_TO_CART',
       payload: product
     });
-    alert(`¡${product.name} agregado al carrito!`);
+    
+    // Toast más suave
+    console.log(` ${product.name} agregado al carrito`);
   };
 
   const handleSearch = (e) => {
@@ -112,12 +175,14 @@ const ProductsPage = () => {
 
   // Función para renderizar estrellas
   const renderStars = (rating) => {
+    const numericRating = typeof rating === 'number' ? rating : 0;
+    
     return Array.from({ length: 5 }, (_, index) => (
       <span 
         key={index} 
-        className={`star ${index < Math.floor(rating) ? 'filled' : ''}`}
+        className={`star ${index < Math.floor(numericRating) ? 'filled' : ''}`}
       >
-        {index < Math.floor(rating) ? '★' : '☆'}
+        {index < Math.floor(numericRating) ? '★' : '☆'}
       </span>
     ));
   };
@@ -143,7 +208,7 @@ const ProductsPage = () => {
         <div className="search-box">
           <input
             type="text"
-            placeholder="Buscar productos..."
+            placeholder="Buscar productos, marcas, SKU..."
             value={searchTerm}
             onChange={handleSearch}
             className="search-input"
@@ -197,49 +262,77 @@ const ProductsPage = () => {
           ) : (
             <div className="products-grid">
               {filteredProducts.map(product => (
-                <div key={product.id} className="product-card">
-                  {/* Enlace al detalle del producto */}
+                <div key={product.id || product.sku} className="product-card">
                   <Link to={`/product/${product.id}`} className="product-link">
                     <div className="product-image">
-                      <img src={product.image} alt={product.name} />
+                      <img 
+                        src={product.image} 
+                        alt={product.name}
+                        onError={(e) => {
+                          e.target.src = '/images/placeholder.jpg';
+                          e.target.alt = 'Imagen no disponible';
+                        }}
+                      />
                       {!product.inStock && <div className="out-of-stock">Agotado</div>}
-                      {product.originalPrice && (
+                      {product.originalPrice && product.originalPrice !== product.price && (
                         <div className="discount-badge">
-                          -{Math.round((1 - parseFloat(product.price.replace(/,/g, '')) / parseFloat(product.originalPrice.replace(/,/g, ''))) * 100)}%
+                          -{Math.round((1 - parsePrice(product.price) / parsePrice(product.originalPrice)) * 100)}%
                         </div>
                       )}
                     </div>
 
                     <div className="product-content">
-                      <div className="product-brand">{product.brand}</div>
+                      {product.brand && (
+                        <div className="product-brand">{product.brand}</div>
+                      )}
+                      {product.sku && (
+                        <div className="product-sku">SKU: {product.sku}</div>
+                      )}
                       <h3 className="product-name">{product.name}</h3>
                       
-                      {/* Rating en la card */}
+                      {/* Rating */}
                       <div className="product-rating-card">
                         <div className="stars">
-                          {renderStars(product.rating)}
-                          <span className="rating-value">({product.reviewCount})</span>
+                          {renderStars(product.rating || 0)}
+                          <span className="rating-value">
+                            ({product.reviewCount || 0})
+                          </span>
                         </div>
                       </div>
 
-                      <p className="product-description">{product.description}</p>
+                      <p className="product-description">
+                        {product.description?.length > 120 
+                          ? `${product.description.substring(0, 120)}...` 
+                          : product.description
+                        }
+                      </p>
 
-                      <div className="product-specs">
-                        {product.specs.map((spec, index) => (
-                          <span key={index} className="spec-tag">{spec}</span>
-                        ))}
-                      </div>
+                      {product.specs && product.specs.length > 0 && (
+                        <div className="product-specs">
+                          {product.specs.slice(0, 2).map((spec, index) => (
+                            <span key={index} className="spec-tag">
+                              {typeof spec === 'string' ? spec.substring(0, 20) : spec}
+                            </span>
+                          ))}
+                          {product.specs.length > 2 && (
+                            <span className="spec-tag">+{product.specs.length - 2}</span>
+                          )}
+                        </div>
+                      )}
 
                       <div className="product-pricing">
-                        <span className="current-price">{product.price} {product.currency}</span>
-                        {product.originalPrice && (
-                          <span className="original-price">{product.originalPrice} {product.currency}</span>
+                        <span className="current-price">
+                          {product.price} {product.currency || 'MXN'}
+                        </span>
+                        {product.originalPrice && product.originalPrice !== product.price && (
+                          <span className="original-price">
+                            {product.originalPrice} {product.currency || 'MXN'}
+                          </span>
                         )}
                       </div>
                     </div>
                   </Link>
 
-                  {/* Botón fuera del Link para evitar conflictos */}
                   <button 
                     className={`add-to-cart-btn ${!product.inStock ? 'disabled' : ''}`}
                     onClick={(e) => handleAddToCart(product, e)}

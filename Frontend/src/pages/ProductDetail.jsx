@@ -15,62 +15,76 @@ const ProductDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Función para limpiar descripciones duplicadas
+  const cleanDescription = (description) => {
+    if (!description) return 'Descripción no disponible.';
+    
+    // Eliminar duplicados dividiendo por puntos y filtrando únicos
+    const sentences = description.split('.').map(s => s.trim()).filter(s => s);
+    const uniqueSentences = [...new Set(sentences)];
+    
+    return uniqueSentences.join('. ') + (uniqueSentences.length > 0 ? '.' : '');
+  };
+
+  // Función para parsear precios
+  const parsePrice = (priceString) => {
+    if (!priceString) return 0;
+    return parseFloat(priceString.toString().replace(/[^\d.-]/g, ''));
+  };
+
   // Cargar producto desde la API
   useEffect(() => {
     const loadProduct = async () => {
       setLoading(true);
       setError(null);
       try {
-        console.log(`🔄 Cargando producto con ID: ${id}`);
+        console.log(` Cargando producto con ID: ${id}`);
         const response = await fetch(`http://localhost:3000/api/productos/products/${id}`);
         
         if (!response.ok) {
-          throw new Error('Producto no encontrado');
+          throw new Error(`Error HTTP: ${response.status}`);
         }
         
         const data = await response.json();
-        console.log('✅ Producto cargado:', data);
+        console.log(' Producto cargado:', data);
         
-        // Agregar imágenes de ejemplo (puedes usar múltiples o una sola)
-        const productWithImages = {
+        // Limpiar y normalizar datos del producto
+        const cleanedProduct = {
           ...data,
+          // Asegurar que la imagen sea válida
+          image: data.image || '/images/placeholder.jpg',
+          // Limpiar descripción duplicada
+          description: cleanDescription(data.description),
+          // Crear array de imágenes
           images: [
-            data.image,
-            data.image,
-            data.image,
-            data.image
+            data.image || '/images/placeholder.jpg',
+            '/images/placeholder-2.jpg',
+            '/images/placeholder-3.jpg',
+            '/images/placeholder-4.jpg'
           ],
-          fullDescription: data.description,
-          // Convertir specs (array de strings) a formato de objeto
-          specsDetailed: data.specs.map((spec, index) => ({
-            name: `Característica ${index + 1}`,
-            value: spec
-          })),
-          // Reseñas de ejemplo (temporal)
-          reviews: [
-            {
-              id: 1,
-              user: "Cliente Verificado",
-              rating: 5,
-              date: "2024-01-15",
-              comment: "Excelente producto, muy recomendado.",
-              verified: true
-            },
-            {
-              id: 2,
-              user: "Comprador",
-              rating: 4,
-              date: "2024-01-10",
-              comment: "Buena relación calidad-precio.",
-              verified: true
-            }
-          ]
+          // Descripción completa
+          fullDescription: cleanDescription(data.description),
+          // Especificaciones detalladas
+          specsDetailed: Array.isArray(data.specs) ? data.specs.map((spec, index) => ({
+            name: `Especificación ${index + 1}`,
+            value: typeof spec === 'string' ? spec : JSON.stringify(spec)
+          })) : [],
+          // Reseñas (si vienen de la BD, si no, array vacío)
+          reviews: data.reviews || [],
+          // Asegurar que el stock esté definido
+          stock: data.stock || (data.inStock ? 10 : 0),
+          // Asegurar que la moneda esté definida
+          currency: data.currency || 'MXN',
+          // Asegurar que el rating esté definido
+          rating: data.rating || 0,
+          // Asegurar que el reviewCount esté definido
+          reviewCount: data.reviewCount || 0
         };
         
-        setProduct(productWithImages);
+        setProduct(cleanedProduct);
       } catch (error) {
-        console.error('❌ Error al cargar producto:', error);
-        setError(error.message);
+        console.error(' Error al cargar producto:', error);
+        setError('Error al cargar el producto. Verifica que el servidor esté funcionando.');
       } finally {
         setLoading(false);
       }
@@ -82,13 +96,16 @@ const ProductDetail = () => {
   }, [id]);
 
   const handleAddToCart = () => {
+    if (!product) return;
+    
     for (let i = 0; i < quantity; i++) {
       dispatch({
         type: 'ADD_TO_CART',
         payload: product
       });
     }
-    alert(`¡${quantity} ${product.name} agregado(s) al carrito!`);
+    
+    console.log(` ${quantity} ${product.name} agregado(s) al carrito`);
   };
 
   const handleBuyNow = () => {
@@ -97,7 +114,7 @@ const ProductDetail = () => {
   };
 
   const increaseQuantity = () => {
-    if (quantity < product.stock) {
+    if (product && quantity < (product.stock || 10)) {
       setQuantity(quantity + 1);
     }
   };
@@ -109,12 +126,14 @@ const ProductDetail = () => {
   };
 
   const renderStars = (rating) => {
+    const numericRating = typeof rating === 'number' ? rating : 0;
+    
     return Array.from({ length: 5 }, (_, index) => (
       <span 
         key={index} 
-        className={`star ${index < Math.floor(rating) ? 'filled' : ''} ${index === Math.floor(rating) && rating % 1 !== 0 ? 'half-filled' : ''}`}
+        className={`star ${index < Math.floor(numericRating) ? 'filled' : ''}`}
       >
-        {index < Math.floor(rating) ? '★' : '☆'}
+        {index < Math.floor(numericRating) ? '★' : '☆'}
       </span>
     ));
   };
@@ -134,12 +153,17 @@ const ProductDetail = () => {
     return (
       <div className="product-not-found">
         <h2>{error || 'Producto no encontrado'}</h2>
+        <p>El producto que buscas no está disponible.</p>
         <button onClick={() => navigate('/products')} className="back-btn">
           Volver a Productos
         </button>
       </div>
     );
   }
+
+  const discountPercentage = product.originalPrice && product.originalPrice !== product.price 
+    ? Math.round((1 - parsePrice(product.price) / parsePrice(product.originalPrice)) * 100)
+    : 0;
 
   return (
     <div className="product-detail">
@@ -149,23 +173,36 @@ const ProductDetail = () => {
         <span> / </span>
         <button onClick={() => navigate('/products')}>Productos</button>
         <span> / </span>
-        <span>{product.name}</span>
+        <span>{product.category || 'Categoría'}</span>
+        <span> / </span>
+        <span className="current-page">{product.name}</span>
       </nav>
 
       <div className="product-detail-content">
         {/* Galería de imágenes */}
         <div className="product-gallery">
           <div className="main-image">
-            <img src={product.images[selectedImage]} alt={product.name} />
+            <img 
+              src={product.images[selectedImage]} 
+              alt={product.name}
+              onError={(e) => {
+                e.target.src = '/images/placeholder.jpg';
+                e.target.alt = 'Imagen no disponible';
+              }}
+            />
           </div>
           <div className="image-thumbnails">
             {product.images.map((image, index) => (
               <img
                 key={index}
                 src={image}
-                alt={`${product.name} ${index + 1}`}
+                alt={`${product.name} vista ${index + 1}`}
                 className={`thumbnail ${selectedImage === index ? 'active' : ''}`}
                 onClick={() => setSelectedImage(index)}
+                onError={(e) => {
+                  e.target.src = '/images/placeholder.jpg';
+                  e.target.alt = 'Miniatura no disponible';
+                }}
               />
             ))}
           </div>
@@ -174,17 +211,22 @@ const ProductDetail = () => {
         {/* Información del producto */}
         <div className="product-info">
           <div className="product-header">
-            <span className="product-brand">{product.brand}</span>
+            {product.brand && (
+              <span className="product-brand">{product.brand}</span>
+            )}
+            {product.sku && (
+              <span className="product-sku">SKU: {product.sku}</span>
+            )}
             <h1 className="product-title">{product.name}</h1>
             
             {/* Rating */}
             <div className="product-rating">
               <div className="stars">
                 {renderStars(product.rating)}
-                <span className="rating-value">{product.rating}</span>
+                <span className="rating-value">{product.rating}/5</span>
               </div>
               <span className="review-count">({product.reviewCount} reseñas)</span>
-              <span className="stock-status {product.inStock ? 'in-stock' : 'out-of-stock'}">
+              <span className={`stock-status ${product.inStock ? 'in-stock' : 'out-of-stock'}`}>
                 {product.inStock ? `✓ En stock (${product.stock} disponibles)` : '✗ Agotado'}
               </span>
             </div>
@@ -192,18 +234,18 @@ const ProductDetail = () => {
             {/* Precio */}
             <div className="product-pricing">
               <span className="current-price">{product.price} {product.currency}</span>
-              {product.originalPrice && (
-                <span className="original-price">{product.originalPrice} {product.currency}</span>
-              )}
-              {product.originalPrice && (
-                <span className="discount">
-                  {Math.round((1 - parseFloat(product.price.replace(/,/g, '')) / parseFloat(product.originalPrice.replace(/,/g, ''))) * 100)}% OFF
-                </span>
+              {product.originalPrice && product.originalPrice !== product.price && (
+                <>
+                  <span className="original-price">{product.originalPrice} {product.currency}</span>
+                  <span className="discount">{discountPercentage}% OFF</span>
+                </>
               )}
             </div>
 
             {/* Descripción corta */}
-            <p className="product-short-description">{product.description}</p>
+            <p className="product-short-description">
+              {product.description}
+            </p>
           </div>
 
           {/* Selector de cantidad y acciones */}
@@ -213,9 +255,9 @@ const ProductDetail = () => {
               <div className="quantity-controls">
                 <button onClick={decreaseQuantity} disabled={quantity <= 1}>-</button>
                 <span>{quantity}</span>
-                <button onClick={increaseQuantity} disabled={quantity >= product.stock}>+</button>
+                <button onClick={increaseQuantity} disabled={quantity >= (product.stock || 10)}>+</button>
               </div>
-              <span className="stock-info">{product.stock} disponibles</span>
+              <span className="stock-info">{product.stock || 10} disponibles</span>
             </div>
 
             <div className="action-buttons">
@@ -237,17 +279,24 @@ const ProductDetail = () => {
           </div>
 
           {/* Especificaciones rápidas */}
-          <div className="quick-specs">
-            <h3>Especificaciones principales</h3>
-            <div className="specs-grid">
-              {product.specs.slice(0, 4).map((spec, index) => (
-                <div key={index} className="spec-item">
-                  <span className="spec-name">Característica {index + 1}:</span>
-                  <span className="spec-value">{spec}</span>
-                </div>
-              ))}
+          {product.specs && product.specs.length > 0 && (
+            <div className="quick-specs">
+              <h3>Características principales</h3>
+              <div className="specs-grid">
+                {product.specs.slice(0, 4).map((spec, index) => (
+                  <div key={index} className="spec-item">
+                    <span className="spec-name">Característica {index + 1}:</span>
+                    <span className="spec-value">
+                      {typeof spec === 'string' && spec.length > 30 
+                        ? `${spec.substring(0, 30)}...` 
+                        : spec
+                      }
+                    </span>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
 
@@ -286,18 +335,23 @@ const ProductDetail = () => {
             <div className="specs-content">
               <h3>Especificaciones técnicas</h3>
               <div className="specs-table">
-                {product.specsDetailed && product.specsDetailed.map((spec, index) => (
-                  <div key={index} className="spec-row">
-                    <span className="spec-label">{spec.name}</span>
-                    <span className="spec-data">{spec.value}</span>
-                  </div>
-                ))}
-                {!product.specsDetailed && product.specs.map((spec, index) => (
-                  <div key={index} className="spec-row">
-                    <span className="spec-label">Característica {index + 1}</span>
-                    <span className="spec-data">{spec}</span>
-                  </div>
-                ))}
+                {product.specsDetailed && product.specsDetailed.length > 0 ? (
+                  product.specsDetailed.map((spec, index) => (
+                    <div key={index} className="spec-row">
+                      <span className="spec-label">{spec.name}</span>
+                      <span className="spec-data">{spec.value}</span>
+                    </div>
+                  ))
+                ) : product.specs && product.specs.length > 0 ? (
+                  product.specs.map((spec, index) => (
+                    <div key={index} className="spec-row">
+                      <span className="spec-label">Característica {index + 1}</span>
+                      <span className="spec-data">{spec}</span>
+                    </div>
+                  ))
+                ) : (
+                  <p>No hay especificaciones disponibles para este producto.</p>
+                )}
               </div>
             </div>
           )}
@@ -313,21 +367,25 @@ const ProductDetail = () => {
               </div>
 
               <div className="reviews-list">
-                {product.reviews.map(review => (
-                  <div key={review.id} className="review-item">
-                    <div className="review-header">
-                      <div className="reviewer-info">
-                        <span className="reviewer-name">{review.user}</span>
-                        {review.verified && <span className="verified-badge">✓ Verificado</span>}
+                {product.reviews && product.reviews.length > 0 ? (
+                  product.reviews.map(review => (
+                    <div key={review.id} className="review-item">
+                      <div className="review-header">
+                        <div className="reviewer-info">
+                          <span className="reviewer-name">{review.user}</span>
+                          {review.verified && <span className="verified-badge">✓ Verificado</span>}
+                        </div>
+                        <div className="review-meta">
+                          <div className="review-stars">{renderStars(review.rating)}</div>
+                          <span className="review-date">{review.date}</span>
+                        </div>
                       </div>
-                      <div className="review-meta">
-                        <div className="review-stars">{renderStars(review.rating)}</div>
-                        <span className="review-date">{review.date}</span>
-                      </div>
+                      <p className="review-comment">{review.comment}</p>
                     </div>
-                    <p className="review-comment">{review.comment}</p>
-                  </div>
-                ))}
+                  ))
+                ) : (
+                  <p>No hay reseñas para este producto todavía.</p>
+                )}
               </div>
             </div>
           )}
