@@ -21,6 +21,11 @@ const Header = () => {
         </nav>
 
         <div className="header-actions">
+
+          <Link to="/favoritos" className="profile-link">
+            Favoritos
+          </Link>
+          
           <Link to="/perfil" className="profile-link">
             👤 Perfil
           </Link>

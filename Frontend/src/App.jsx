@@ -8,6 +8,7 @@ import Cart from './components/cart/Cart';
 import ProductDetail from './pages/ProductDetail';
 import CheckoutForm from './components/checkout/CheckoutForm';
 import Reg_Compra from './components/cart/Reg_Compra'; // ← Agregar esta importación
+import Favoritos from './components/cart/Favoritos'; 
 import Perfil from './pages/Perfil'; 
 import Login from './pages/Login';
 import './App.css';
@@ -25,6 +26,7 @@ function App() {
               <Route path="/product/:id" element={<ProductDetail />} /> {/* ✅ Ruta agregada */}
               <Route path="/cart" element={<Cart />} />
               <Route path="/registro-compra" element={<Reg_Compra />} /> {/* ✅ Ruta agregada */}
+              <Route path="/favoritos" element={<Favoritos />} />
               <Route path="/checkout" element={<CheckoutForm />} />
               <Route path="/perfil" element={<Perfil />} />
               <Route path="/login" element={<Login />} />

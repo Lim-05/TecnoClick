@@ -1,0 +1,104 @@
+.favoritos-page {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-top: 12vh; /* igual que el carrito */
+}
+
+.favoritos-container {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.favoritos-container h4 {
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 1.4rem;
+}
+
+.favoritos-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.favorito-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 1rem;
+  background-color: #fafafa;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.favorito-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.favorito-imagen {
+  width: 90px;
+  height: 90px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-right: 1rem;
+}
+
+.favorito-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.favorito-info h5 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.favorito-info p {
+  margin: 5px 0 0;
+  color: #555;
+  font-weight: bold;
+}
+
+.favorito-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-eliminar {
+  padding: 8px 12px;
+  border: none;
+  background-color: #dc3545;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.btn-eliminar:hover {
+  background-color: #b52a38;
+}
+
+.btn-agregar {
+  padding: 8px 12px;
+  border: none;
+  background-color: #007bff;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.btn-agregar:hover {
+  background-color: #0056b3;
+}
+
+.no-favoritos {
+  text-align: center;
+  color: #666;
+  font-size: 1rem;
+}
