@@ -4,7 +4,8 @@ import { Link } from 'react-router-dom';
 import './ProductsPage.css';
 
 const ProductsPage = () => {
-  const { dispatch } = useApp();
+  const { dispatch, state } = useApp();
+  const { favoritos } = state;
   
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
@@ -21,7 +22,7 @@ const ProductsPage = () => {
     const loadProducts = async () => {
       setLoading(true);
       try {
-        console.log(' Iniciando carga de productos desde la API...');
+        console.log('🔄 Iniciando carga de productos desde la API...');
         const response = await fetch('http://localhost:3000/api/productos/products');
         
         if (!response.ok) {
@@ -29,7 +30,7 @@ const ProductsPage = () => {
         }
         
         const data = await response.json();
-        console.log(' Productos cargados:', data);
+        console.log('✅ Productos cargados:', data);
         
         // Validar y limpiar datos
         const cleanedProducts = data.map(product => ({
@@ -65,11 +66,10 @@ const ProductsPage = () => {
         ];
         
         setCategories(categoriesData);
-        console.log(' Categorías disponibles:', categoriesData);
+        console.log('📁 Categorías disponibles:', categoriesData);
         
       } catch (error) {
         console.error('❌ Error al cargar productos:', error);
-        // Usar datos de ejemplo como fallback
         setProducts([]);
         setFilteredProducts([]);
       } finally {
@@ -80,11 +80,29 @@ const ProductsPage = () => {
     loadProducts();
   }, []);
 
+  // Función para manejar favoritos
+  const handleAddToFavoritos = (product) => {
+    // Verificar si el producto ya está en favoritos
+    const isAlreadyFavorite = favoritos.some(fav => fav.id === product.id);
+    
+    if (isAlreadyFavorite) {
+      dispatch({ type: 'REMOVE_FROM_FAVORITOS', payload: product.id });
+      console.log(`❤️ ${product.name} removido de favoritos`);
+    } else {
+      dispatch({ type: 'ADD_TO_FAVORITOS', payload: product });
+      console.log(`💖 ${product.name} agregado a favoritos`);
+    }
+  };
+
+  // Verificar si un producto está en favoritos
+  const isProductInFavorites = (productId) => {
+    return favoritos.some(fav => fav.id === productId);
+  };
+
   // Función para limpiar descripciones duplicadas
   const cleanDescription = (description) => {
     if (!description) return '';
     
-    // Eliminar duplicados dividiendo por puntos y filtrando únicos
     const sentences = description.split('.').map(s => s.trim()).filter(s => s);
     const uniqueSentences = [...new Set(sentences)];
     
@@ -108,14 +126,12 @@ const ProductsPage = () => {
   useEffect(() => {
     let result = [...products];
 
-    // Filtrar por categoría
     if (selectedCategory !== 'todos') {
       result = result.filter(product => 
         product.category === selectedCategory
       );
     }
 
-    // Filtrar por búsqueda
     if (searchTerm.trim()) {
       const term = searchTerm.toLowerCase().trim();
       result = result.filter(product => 
@@ -126,7 +142,6 @@ const ProductsPage = () => {
       );
     }
 
-    // Ordenar
     result.sort((a, b) => {
       switch (sortBy) {
         case 'precio-asc':
@@ -157,8 +172,7 @@ const ProductsPage = () => {
       payload: product
     });
     
-    // Toast más suave
-    console.log(` ${product.name} agregado al carrito`);
+    console.log(`✅ ${product.name} agregado al carrito`);
   };
 
   const handleSearch = (e) => {
@@ -333,13 +347,22 @@ const ProductsPage = () => {
                     </div>
                   </Link>
 
-                  <button 
-                    className={`add-to-cart-btn ${!product.inStock ? 'disabled' : ''}`}
-                    onClick={(e) => handleAddToCart(product, e)}
-                    disabled={!product.inStock}
-                  >
-                    {!product.inStock ? 'Agotado' : '🛒 Añadir al Carrito'}
-                  </button>
+                  <div className="product-actions">
+                    <button 
+                      className={`add-to-cart-btn ${!product.inStock ? 'disabled' : ''}`}
+                      onClick={(e) => handleAddToCart(product, e)}
+                      disabled={!product.inStock}
+                    >
+                      {!product.inStock ? 'Agotado' : '🛒 Añadir al Carrito'}
+                    </button>
+
+                     <button
+                      className={`add-to-favorites-btn ${isProductInFavorites(product.id) ? 'active' : ''}`}
+                       onClick={() => handleAddToFavoritos(product)}
+                      >
+                      {isProductInFavorites(product.id) ? '★ En Favoritos' : '☆ Añadir a Favoritos'}
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
