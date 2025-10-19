@@ -46,6 +46,14 @@ const HomePage = () => {
     alert(`¡${product.name} agregado al carrito!`);
   };
 
+  const handleAddToFavoritos = (product) => {
+    dispatch({
+      type: 'ADD_TO_FAVORITOS',
+      payload: product
+    });
+    alert(`¡${product.name} agregado a favoritos! 💙`);
+  };
+
   return (
     <div className="home-page">
       {/* Hero Section */}
@@ -98,6 +106,14 @@ const HomePage = () => {
                 >
                   Añadir al Carrito
                 </button>
+
+                <button
+                  className="add-to-favorites-btn"
+                  onClick={() => handleAddToFavoritos(product)}
+                >
+                  Favoritos
+                </button>
+
               </div>
             </div>
           ))}

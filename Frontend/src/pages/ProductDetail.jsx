@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import './ProductDetail.css';
@@ -11,88 +11,101 @@ const ProductDetail = () => {
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState('description');
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Datos de ejemplo del producto (luego vendrán de la BD)
-  const product = {
-    id: 1,
-    name: "Laptop Gaming ASUS ROG Strix",
-    price: "29,680.00",
-    originalPrice: "36,250.00",
-    currency: "MXN",
-    category: "laptops",
-    brand: "ASUS",
-    description: "Laptop para gaming de alto rendimiento diseñada para ofrecer la mejor experiencia de juego. Equipada con los últimos componentes para garantizar un rendimiento excepcional en los juegos más demandantes.",
-    fullDescription: `La Laptop Gaming ASUS ROG Strix es la elección perfecta para gamers exigentes que buscan máximo rendimiento. Con su potente GPU NVIDIA GeForce RTX 4060 y procesador Intel Core i9 de 13ª generación, podrás disfrutar de tus juegos favoritos en calidad 4K con tasas de cuadros ultra altas.
-
-Características principales:
-• Procesador: Intel Core i9-13900H
-• GPU: NVIDIA GeForce RTX 4060 8GB GDDR6
-• RAM: 16GB DDR5 4800MHz
-• Almacenamiento: 1TB SSD NVMe PCIe 4.0
-• Pantalla: 15.6" IPS 144Hz FHD
-• Sistema operativo: Windows 11 Home
-• Batería: 90Wh con carga rápida`,
+  // Función para limpiar descripciones duplicadas
+  const cleanDescription = (description) => {
+    if (!description) return 'Descripción no disponible.';
     
-    images: [
-      "https://images.unsplash.com/photo-1603302576837-37561b2e2302?w=600&h=400&fit=crop",
-      "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=600&h=400&fit=crop",
-      "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=600&h=400&fit=crop",
-      "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=600&h=400&fit=crop"
-    ],
+    // Eliminar duplicados dividiendo por puntos y filtrando únicos
+    const sentences = description.split('.').map(s => s.trim()).filter(s => s);
+    const uniqueSentences = [...new Set(sentences)];
     
-    specs: [
-      { name: "Procesador", value: "Intel Core i9-13900H" },
-      { name: "GPU", value: "NVIDIA GeForce RTX 4060 8GB" },
-      { name: "RAM", value: "16GB DDR5 4800MHz" },
-      { name: "Almacenamiento", value: "1TB SSD NVMe PCIe 4.0" },
-      { name: "Pantalla", value: '15.6" IPS 144Hz FHD' },
-      { name: "Sistema Operativo", value: "Windows 11 Home" },
-      { name: "Batería", value: "90Wh" },
-      { name: "Conectividad", value: "WiFi 6E, Bluetooth 5.2" }
-    ],
-    
-    inStock: true,
-    stock: 15,
-    
-    // Reseñas y calificaciones
-    rating: 4.5,
-    reviewCount: 24,
-    reviews: [
-      {
-        id: 1,
-        user: "Carlos Rodríguez",
-        rating: 5,
-        date: "2024-01-15",
-        comment: "Excelente laptop, corre todos los juegos en ultra sin problemas. La pantalla es increíble y el teclado muy cómodo para gaming.",
-        verified: true
-      },
-      {
-        id: 2,
-        user: "Ana Martínez",
-        rating: 4,
-        date: "2024-01-10",
-        comment: "Muy buena relación calidad-precio. El único detalle es que la batería no dura mucho cuando se usa para gaming, pero es normal.",
-        verified: true
-      },
-      {
-        id: 3,
-        user: "Miguel Sánchez",
-        rating: 5,
-        date: "2024-01-08",
-        comment: "Llegó antes de lo esperado y superó mis expectativas. El rendimiento es espectacular.",
-        verified: false
-      }
-    ]
+    return uniqueSentences.join('. ') + (uniqueSentences.length > 0 ? '.' : '');
   };
 
+  // Función para parsear precios
+  const parsePrice = (priceString) => {
+    if (!priceString) return 0;
+    return parseFloat(priceString.toString().replace(/[^\d.-]/g, ''));
+  };
+
+  // Cargar producto desde la API
+  useEffect(() => {
+    const loadProduct = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        console.log(` Cargando producto con ID: ${id}`);
+        const response = await fetch(`http://localhost:3000/api/productos/products/${id}`);
+        
+        if (!response.ok) {
+          throw new Error(`Error HTTP: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        console.log(' Producto cargado:', data);
+        
+        // Limpiar y normalizar datos del producto
+        const cleanedProduct = {
+          ...data,
+          // Asegurar que la imagen sea válida
+          image: data.image || '/images/placeholder.jpg',
+          // Limpiar descripción duplicada
+          description: cleanDescription(data.description),
+          // Crear array de imágenes
+          images: [
+            data.image || '/images/placeholder.jpg',
+            '/images/placeholder-2.jpg',
+            '/images/placeholder-3.jpg',
+            '/images/placeholder-4.jpg'
+          ],
+          // Descripción completa
+          fullDescription: cleanDescription(data.description),
+          // Especificaciones detalladas
+          specsDetailed: Array.isArray(data.specs) ? data.specs.map((spec, index) => ({
+            name: `Especificación ${index + 1}`,
+            value: typeof spec === 'string' ? spec : JSON.stringify(spec)
+          })) : [],
+          // Reseñas (si vienen de la BD, si no, array vacío)
+          reviews: data.reviews || [],
+          // Asegurar que el stock esté definido
+          stock: data.stock || (data.inStock ? 10 : 0),
+          // Asegurar que la moneda esté definida
+          currency: data.currency || 'MXN',
+          // Asegurar que el rating esté definido
+          rating: data.rating || 0,
+          // Asegurar que el reviewCount esté definido
+          reviewCount: data.reviewCount || 0
+        };
+        
+        setProduct(cleanedProduct);
+      } catch (error) {
+        console.error(' Error al cargar producto:', error);
+        setError('Error al cargar el producto. Verifica que el servidor esté funcionando.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (id) {
+      loadProduct();
+    }
+  }, [id]);
+
   const handleAddToCart = () => {
+    if (!product) return;
+    
     for (let i = 0; i < quantity; i++) {
       dispatch({
         type: 'ADD_TO_CART',
         payload: product
       });
     }
-    alert(`¡${quantity} ${product.name} agregado(s) al carrito!`);
+    
+    console.log(` ${quantity} ${product.name} agregado(s) al carrito`);
   };
 
   const handleBuyNow = () => {
@@ -101,7 +114,7 @@ Características principales:
   };
 
   const increaseQuantity = () => {
-    if (quantity < product.stock) {
+    if (product && quantity < (product.stock || 10)) {
       setQuantity(quantity + 1);
     }
   };
@@ -113,26 +126,44 @@ Características principales:
   };
 
   const renderStars = (rating) => {
+    const numericRating = typeof rating === 'number' ? rating : 0;
+    
     return Array.from({ length: 5 }, (_, index) => (
       <span 
         key={index} 
-        className={`star ${index < Math.floor(rating) ? 'filled' : ''} ${index === Math.floor(rating) && rating % 1 !== 0 ? 'half-filled' : ''}`}
+        className={`star ${index < Math.floor(numericRating) ? 'filled' : ''}`}
       >
-        {index < Math.floor(rating) ? '★' : '☆'}
+        {index < Math.floor(numericRating) ? '★' : '☆'}
       </span>
     ));
   };
 
-  if (!product) {
+  // Estado de carga
+  if (loading) {
+    return (
+      <div className="product-detail-loading">
+        <div className="loading-spinner"></div>
+        <p>Cargando producto...</p>
+      </div>
+    );
+  }
+
+  // Estado de error
+  if (error || !product) {
     return (
       <div className="product-not-found">
-        <h2>Producto no encontrado</h2>
+        <h2>{error || 'Producto no encontrado'}</h2>
+        <p>El producto que buscas no está disponible.</p>
         <button onClick={() => navigate('/products')} className="back-btn">
           Volver a Productos
         </button>
       </div>
     );
   }
+
+  const discountPercentage = product.originalPrice && product.originalPrice !== product.price 
+    ? Math.round((1 - parsePrice(product.price) / parsePrice(product.originalPrice)) * 100)
+    : 0;
 
   return (
     <div className="product-detail">
@@ -142,23 +173,36 @@ Características principales:
         <span> / </span>
         <button onClick={() => navigate('/products')}>Productos</button>
         <span> / </span>
-        <span>{product.name}</span>
+        <span>{product.category || 'Categoría'}</span>
+        <span> / </span>
+        <span className="current-page">{product.name}</span>
       </nav>
 
       <div className="product-detail-content">
         {/* Galería de imágenes */}
         <div className="product-gallery">
           <div className="main-image">
-            <img src={product.images[selectedImage]} alt={product.name} />
+            <img 
+              src={product.images[selectedImage]} 
+              alt={product.name}
+              onError={(e) => {
+                e.target.src = '/images/placeholder.jpg';
+                e.target.alt = 'Imagen no disponible';
+              }}
+            />
           </div>
           <div className="image-thumbnails">
             {product.images.map((image, index) => (
               <img
                 key={index}
                 src={image}
-                alt={`${product.name} ${index + 1}`}
+                alt={`${product.name} vista ${index + 1}`}
                 className={`thumbnail ${selectedImage === index ? 'active' : ''}`}
                 onClick={() => setSelectedImage(index)}
+                onError={(e) => {
+                  e.target.src = '/images/placeholder.jpg';
+                  e.target.alt = 'Miniatura no disponible';
+                }}
               />
             ))}
           </div>
@@ -167,17 +211,22 @@ Características principales:
         {/* Información del producto */}
         <div className="product-info">
           <div className="product-header">
-            <span className="product-brand">{product.brand}</span>
+            {product.brand && (
+              <span className="product-brand">{product.brand}</span>
+            )}
+            {product.sku && (
+              <span className="product-sku">SKU: {product.sku}</span>
+            )}
             <h1 className="product-title">{product.name}</h1>
             
             {/* Rating */}
             <div className="product-rating">
               <div className="stars">
                 {renderStars(product.rating)}
-                <span className="rating-value">{product.rating}</span>
+                <span className="rating-value">{product.rating}/5</span>
               </div>
               <span className="review-count">({product.reviewCount} reseñas)</span>
-              <span className="stock-status {product.inStock ? 'in-stock' : 'out-of-stock'}">
+              <span className={`stock-status ${product.inStock ? 'in-stock' : 'out-of-stock'}`}>
                 {product.inStock ? `✓ En stock (${product.stock} disponibles)` : '✗ Agotado'}
               </span>
             </div>
@@ -185,18 +234,18 @@ Características principales:
             {/* Precio */}
             <div className="product-pricing">
               <span className="current-price">{product.price} {product.currency}</span>
-              {product.originalPrice && (
-                <span className="original-price">{product.originalPrice} {product.currency}</span>
-              )}
-              {product.originalPrice && (
-                <span className="discount">
-                  {Math.round((1 - parseFloat(product.price.replace(/,/g, '')) / parseFloat(product.originalPrice.replace(/,/g, ''))) * 100)}% OFF
-                </span>
+              {product.originalPrice && product.originalPrice !== product.price && (
+                <>
+                  <span className="original-price">{product.originalPrice} {product.currency}</span>
+                  <span className="discount">{discountPercentage}% OFF</span>
+                </>
               )}
             </div>
 
             {/* Descripción corta */}
-            <p className="product-short-description">{product.description}</p>
+            <p className="product-short-description">
+              {product.description}
+            </p>
           </div>
 
           {/* Selector de cantidad y acciones */}
@@ -206,9 +255,9 @@ Características principales:
               <div className="quantity-controls">
                 <button onClick={decreaseQuantity} disabled={quantity <= 1}>-</button>
                 <span>{quantity}</span>
-                <button onClick={increaseQuantity} disabled={quantity >= product.stock}>+</button>
+                <button onClick={increaseQuantity} disabled={quantity >= (product.stock || 10)}>+</button>
               </div>
-              <span className="stock-info">{product.stock} disponibles</span>
+              <span className="stock-info">{product.stock || 10} disponibles</span>
             </div>
 
             <div className="action-buttons">
@@ -230,17 +279,24 @@ Características principales:
           </div>
 
           {/* Especificaciones rápidas */}
-          <div className="quick-specs">
-            <h3>Especificaciones principales</h3>
-            <div className="specs-grid">
-              {product.specs.slice(0, 4).map((spec, index) => (
-                <div key={index} className="spec-item">
-                  <span className="spec-name">{spec.name}:</span>
-                  <span className="spec-value">{spec.value}</span>
-                </div>
-              ))}
+          {product.specs && product.specs.length > 0 && (
+            <div className="quick-specs">
+              <h3>Características principales</h3>
+              <div className="specs-grid">
+                {product.specs.slice(0, 4).map((spec, index) => (
+                  <div key={index} className="spec-item">
+                    <span className="spec-name">Característica {index + 1}:</span>
+                    <span className="spec-value">
+                      {typeof spec === 'string' && spec.length > 30 
+                        ? `${spec.substring(0, 30)}...` 
+                        : spec
+                      }
+                    </span>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
 
@@ -279,12 +335,23 @@ Características principales:
             <div className="specs-content">
               <h3>Especificaciones técnicas</h3>
               <div className="specs-table">
-                {product.specs.map((spec, index) => (
-                  <div key={index} className="spec-row">
-                    <span className="spec-label">{spec.name}</span>
-                    <span className="spec-data">{spec.value}</span>
-                  </div>
-                ))}
+                {product.specsDetailed && product.specsDetailed.length > 0 ? (
+                  product.specsDetailed.map((spec, index) => (
+                    <div key={index} className="spec-row">
+                      <span className="spec-label">{spec.name}</span>
+                      <span className="spec-data">{spec.value}</span>
+                    </div>
+                  ))
+                ) : product.specs && product.specs.length > 0 ? (
+                  product.specs.map((spec, index) => (
+                    <div key={index} className="spec-row">
+                      <span className="spec-label">Característica {index + 1}</span>
+                      <span className="spec-data">{spec}</span>
+                    </div>
+                  ))
+                ) : (
+                  <p>No hay especificaciones disponibles para este producto.</p>
+                )}
               </div>
             </div>
           )}
@@ -300,21 +367,25 @@ Características principales:
               </div>
 
               <div className="reviews-list">
-                {product.reviews.map(review => (
-                  <div key={review.id} className="review-item">
-                    <div className="review-header">
-                      <div className="reviewer-info">
-                        <span className="reviewer-name">{review.user}</span>
-                        {review.verified && <span className="verified-badge">✓ Verificado</span>}
+                {product.reviews && product.reviews.length > 0 ? (
+                  product.reviews.map(review => (
+                    <div key={review.id} className="review-item">
+                      <div className="review-header">
+                        <div className="reviewer-info">
+                          <span className="reviewer-name">{review.user}</span>
+                          {review.verified && <span className="verified-badge">✓ Verificado</span>}
+                        </div>
+                        <div className="review-meta">
+                          <div className="review-stars">{renderStars(review.rating)}</div>
+                          <span className="review-date">{review.date}</span>
+                        </div>
                       </div>
-                      <div className="review-meta">
-                        <div className="review-stars">{renderStars(review.rating)}</div>
-                        <span className="review-date">{review.date}</span>
-                      </div>
+                      <p className="review-comment">{review.comment}</p>
                     </div>
-                    <p className="review-comment">{review.comment}</p>
-                  </div>
-                ))}
+                  ))
+                ) : (
+                  <p>No hay reseñas para este producto todavía.</p>
+                )}
               </div>
             </div>
           )}

@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
-import { Link } from 'react-router-dom'; // ← Agregar esta importación
+import { Link } from 'react-router-dom';
 import './ProductsPage.css';
 
 const ProductsPage = () => {
-  const { dispatch } = useApp();
+  const { dispatch, state } = useApp();
+  const { favoritos } = state;
   
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
@@ -12,225 +13,166 @@ const ProductsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('nombre');
   const [loading, setLoading] = useState(true);
+  const [categories, setCategories] = useState([
+    { id: 'todos', name: 'Todos los Productos', count: 0 }
+  ]);
 
-  // Datos de productos más completos (agregar rating y reviews)
-  const allProducts = [
-    {
-      id: 1,
-      name: "Laptop Gaming ASUS ROG Strix",
-      price: "29,680.00",
-      originalPrice: "36,250.00",
-      currency: "MXN",
-      category: "laptops",
-      brand: "ASUS",
-      description: "Laptop para gaming de alto rendimiento con RTX 4060, 16GB RAM, 1TB SSD, pantalla 15.6\" 144Hz",
-      image: "https://images.unsplash.com/photo-1603302576837-37561b2e2302?w=400&h=300&fit=crop",
-      specs: ["RTX 4060", "16GB RAM", "1TB SSD", "15.6\" 144Hz"],
-      inStock: true,
-      rating: 4.5, // ← Agregado
-      reviewCount: 24 // ← Agregado
-    },
-    {
-      id: 2,
-      name: "iPhone 15 Pro Max",
-      price: "14,299.00",
-      originalPrice: "16,859.00",
-      currency: "MXN",
-      category: "smartphones",
-      brand: "Apple",
-      description: "Smartphone flagship con cámara triple 48MP, chip A17 Pro, 256GB, Dynamic Island",
-      image: "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=400&h=300&fit=crop",
-      specs: ["Cámara 48MP", "A17 Pro", "256GB", "iOS 17"],
-      inStock: true,
-      rating: 4.8, // ← Agregado
-      reviewCount: 32 // ← Agregado
-    },
-    {
-      id: 3,
-      name: "MacBook Pro M3 Max",
-      price: "15,299.00",
-      originalPrice: "18,999.00",
-      currency: "MXN",
-      category: "laptops",
-      brand: "Apple",
-      description: "Laptop profesional con chip M3 Max, 36GB RAM, 1TB SSD, pantalla Liquid Retina XDR",
-      image: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=400&h=300&fit=crop",
-      specs: ["M3 Max", "36GB RAM", "1TB SSD", "14.2\""],
-      inStock: true,
-      rating: 4.7, // ← Agregado
-      reviewCount: 18 // ← Agregado
-    },
-    {
-      id: 4,
-      name: "Apple Watch Series 8",
-      price: "5,299.00",
-      originalPrice: "6,499.00",
-      currency: "MXN",
-      category: "wearables",
-      brand: "Apple",
-      description: "Smartwatch con monitorización avanzada de salud, GPS, resistente al agua",
-      image: "https://images.unsplash.com/photo-1575311373937-040b8e1fd5b6?w=400&h=300&fit=crop",
-      specs: ["GPS", "Resistente agua", "Monitoreo salud", "iOS"],
-      inStock: true,
-      rating: 4.3, // ← Agregado
-      reviewCount: 15 // ← Agregado
-    },
-    {
-      id: 5,
-      name: "Samsung Galaxy S24 Ultra",
-      price: "12,999.00",
-      originalPrice: "15,499.00",
-      currency: "MXN",
-      category: "smartphones",
-      brand: "Samsung",
-      description: "Smartphone con S-Pen integrado, cámara 200MP, 12GB RAM, 512GB, pantalla Dynamic AMOLED",
-      image: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400&h=300&fit=crop",
-      specs: ["S-Pen", "200MP", "12GB RAM", "512GB"],
-      inStock: true,
-      rating: 4.6, // ← Agregado
-      reviewCount: 21 // ← Agregado
-    },
-    {
-      id: 6,
-      name: "iPad Pro 12.9\" M2",
-      price: "18,999.00",
-      originalPrice: "22,499.00",
-      currency: "MXN",
-      category: "tablets",
-      brand: "Apple",
-      description: "Tablet profesional con chip M2, pantalla Liquid Retina XDR, compatible con Apple Pencil",
-      image: "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=400&h=300&fit=crop",
-      specs: ["Chip M2", "12.9\"", "Apple Pencil", "Liquid Retina"],
-      inStock: false,
-      rating: 4.4, // ← Agregado
-      reviewCount: 12 // ← Agregado
-    },
-    {
-      id: 7,
-      name: "Audífonos Sony WH-1000XM5",
-      price: "6,499.00",
-      originalPrice: "7,999.00",
-      currency: "MXN",
-      category: "accesorios",
-      brand: "Sony",
-      description: "Audífonos noise cancelling premium con 30h de batería, sonido HD, control táctil",
-      image: "https://images.unsplash.com/photo-1583394838336-acd977736f90?w=400&h=300&fit=crop",
-      specs: ["Noise Cancelling", "30h batería", "HD Sound", "Táctil"],
-      inStock: true,
-      rating: 4.9, // ← Agregado
-      reviewCount: 28 // ← Agregado
-    },
-    {
-      id: 8,
-      name: "Teclado Mecánico Logitech MX",
-      price: "2,199.00",
-      originalPrice: "2,799.00",
-      currency: "MXN",
-      category: "accesorios",
-      brand: "Logitech",
-      description: "Teclado mecánico inalámbrico con iluminación RGB, switches táctiles, multi-dispositivo",
-      image: "https://images.unsplash.com/photo-1541140532154-b024d705b90a?w=400&h=300&fit=crop",
-      specs: ["Mecánico", "RGB", "Inalámbrico", "Multi-device"],
-      inStock: true,
-      rating: 4.2, // ← Agregado
-      reviewCount: 9 // ← Agregado
-    },
-    {
-      id: 9,
-      name: "Monitor Gaming Samsung Odyssey",
-      price: "8,999.00",
-      originalPrice: "10,499.00",
-      currency: "MXN",
-      category: "monitores",
-      brand: "Samsung",
-      description: "Monitor gaming curvo 32\" 240Hz, 1ms, QHD, FreeSync Premium Pro",
-      image: "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=400&h=300&fit=crop",
-      specs: ["32\" Curvo", "240Hz", "QHD", "FreeSync"],
-      inStock: true,
-      rating: 4.7, // ← Agregado
-      reviewCount: 14 // ← Agregado
-    },
-    {
-      id: 10,
-      name: "Consola PlayStation 5",
-      price: "13,499.00",
-      originalPrice: "15,999.00",
-      currency: "MXN",
-      category: "consolas",
-      brand: "Sony",
-      description: "Consola de última generación con SSD ultrarrápido, ray tracing, 4K 120Hz",
-      image: "https://images.unsplash.com/photo-1606813907291-d86efa9b94db?w=400&h=300&fit=crop",
-      specs: ["4K 120Hz", "SSD", "Ray Tracing", "8K"],
-      inStock: true,
-      rating: 4.8, // ← Agregado
-      reviewCount: 35 // ← Agregado
-    }
-  ];
-
-  const categories = [
-    { id: 'todos', name: 'Todos los Productos', count: allProducts.length },
-    { id: 'laptops', name: 'Laptops', count: allProducts.filter(p => p.category === 'laptops').length },
-    { id: 'smartphones', name: 'Smartphones', count: allProducts.filter(p => p.category === 'smartphones').length },
-    { id: 'tablets', name: 'Tablets', count: allProducts.filter(p => p.category === 'tablets').length },
-    { id: 'wearables', name: 'Wearables', count: allProducts.filter(p => p.category === 'wearables').length },
-    { id: 'accesorios', name: 'Accesorios', count: allProducts.filter(p => p.category === 'accesorios').length },
-    { id: 'monitores', name: 'Monitores', count: allProducts.filter(p => p.category === 'monitores').length },
-    { id: 'consolas', name: 'Consolas', count: allProducts.filter(p => p.category === 'consolas').length }
-  ];
-
-  // Simular carga de datos
+  // Cargar productos desde la API
   useEffect(() => {
     const loadProducts = async () => {
       setLoading(true);
-      await new Promise(resolve => setTimeout(resolve, 800));
-      setProducts(allProducts);
-      setFilteredProducts(allProducts);
-      setLoading(false);
+      try {
+        console.log('🔄 Iniciando carga de productos desde la API...');
+        const response = await fetch('http://localhost:3000/api/productos/products');
+        
+        if (!response.ok) {
+          throw new Error(`Error HTTP: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        console.log('✅ Productos cargados:', data);
+        
+        // Validar y limpiar datos
+        const cleanedProducts = data.map(product => ({
+          ...product,
+          // Asegurar que las URLs de imágenes sean válidas
+          image: product.image || '/images/placeholder.jpg',
+          // Limpiar descripciones duplicadas
+          description: cleanDescription(product.description),
+          // Asegurar que las categorías sean consistentes
+          category: product.category?.toLowerCase().trim() || 'otros'
+        }));
+        
+        setProducts(cleanedProducts);
+        setFilteredProducts(cleanedProducts);
+        
+        // Actualizar categorías dinámicamente
+        const categoryCounts = cleanedProducts.reduce((acc, product) => {
+          acc[product.category] = (acc[product.category] || 0) + 1;
+          return acc;
+        }, {});
+
+        const categoriesData = [
+          { 
+            id: 'todos', 
+            name: 'Todos los Productos', 
+            count: cleanedProducts.length 
+          },
+          ...Object.entries(categoryCounts).map(([category, count]) => ({
+            id: category,
+            name: formatCategoryName(category),
+            count: count
+          }))
+        ];
+        
+        setCategories(categoriesData);
+        console.log('📁 Categorías disponibles:', categoriesData);
+        
+      } catch (error) {
+        console.error('❌ Error al cargar productos:', error);
+        setProducts([]);
+        setFilteredProducts([]);
+      } finally {
+        setLoading(false);
+      }
     };
 
     loadProducts();
   }, []);
 
-  // Filtros y búsqueda
+  // Función para manejar favoritos
+  const handleAddToFavoritos = (product) => {
+    // Verificar si el producto ya está en favoritos
+    const isAlreadyFavorite = favoritos.some(fav => fav.id === product.id);
+    
+    if (isAlreadyFavorite) {
+      dispatch({ type: 'REMOVE_FROM_FAVORITOS', payload: product.id });
+      console.log(`❤️ ${product.name} removido de favoritos`);
+    } else {
+      dispatch({ type: 'ADD_TO_FAVORITOS', payload: product });
+      console.log(`💖 ${product.name} agregado a favoritos`);
+    }
+  };
+
+  // Verificar si un producto está en favoritos
+  const isProductInFavorites = (productId) => {
+    return favoritos.some(fav => fav.id === productId);
+  };
+
+  // Función para limpiar descripciones duplicadas
+  const cleanDescription = (description) => {
+    if (!description) return '';
+    
+    const sentences = description.split('.').map(s => s.trim()).filter(s => s);
+    const uniqueSentences = [...new Set(sentences)];
+    
+    return uniqueSentences.join('. ') + (uniqueSentences.length > 0 ? '.' : '');
+  };
+
+  // Función para formatear nombres de categoría
+  const formatCategoryName = (category) => {
+    const nameMap = {
+      'mouse': 'Mouse',
+      'monitores': 'Monitores',
+      'almacenamiento-externo': 'Almacenamiento Externo',
+      'audio': 'Audio',
+      'impresoras/escáneres': 'Impresoras/Escáneres'
+    };
+    
+    return nameMap[category] || category.charAt(0).toUpperCase() + category.slice(1);
+  };
+
+  // Filtros y búsqueda optimizados
   useEffect(() => {
-    let result = products;
+    let result = [...products];
 
     if (selectedCategory !== 'todos') {
-      result = result.filter(product => product.category === selectedCategory);
-    }
-
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
       result = result.filter(product => 
-        product.name.toLowerCase().includes(term) ||
-        product.brand.toLowerCase().includes(term) ||
-        product.description.toLowerCase().includes(term)
+        product.category === selectedCategory
       );
     }
 
-    result = [...result].sort((a, b) => {
+    if (searchTerm.trim()) {
+      const term = searchTerm.toLowerCase().trim();
+      result = result.filter(product => 
+        product.name?.toLowerCase().includes(term) ||
+        product.brand?.toLowerCase().includes(term) ||
+        product.description?.toLowerCase().includes(term) ||
+        product.sku?.toLowerCase().includes(term)
+      );
+    }
+
+    result.sort((a, b) => {
       switch (sortBy) {
         case 'precio-asc':
-          return parseFloat(a.price.replace(/,/g, '')) - parseFloat(b.price.replace(/,/g, ''));
+          return parsePrice(a.price) - parsePrice(b.price);
         case 'precio-desc':
-          return parseFloat(b.price.replace(/,/g, '')) - parseFloat(a.price.replace(/,/g, ''));
+          return parsePrice(b.price) - parsePrice(a.price);
         case 'nombre':
         default:
-          return a.name.localeCompare(b.name);
+          return (a.name || '').localeCompare(b.name || '');
       }
     });
 
     setFilteredProducts(result);
   }, [products, selectedCategory, searchTerm, sortBy]);
 
+  // Función auxiliar para parsear precios
+  const parsePrice = (priceString) => {
+    if (!priceString) return 0;
+    return parseFloat(priceString.toString().replace(/[^\d.-]/g, ''));
+  };
+
   const handleAddToCart = (product, e) => {
-    e.preventDefault(); // Prevenir navegación del Link
-    e.stopPropagation(); // Detener propagación
+    e.preventDefault();
+    e.stopPropagation();
+    
     dispatch({
       type: 'ADD_TO_CART',
       payload: product
     });
-    alert(`¡${product.name} agregado al carrito!`);
+    
+    console.log(`✅ ${product.name} agregado al carrito`);
   };
 
   const handleSearch = (e) => {
@@ -247,12 +189,14 @@ const ProductsPage = () => {
 
   // Función para renderizar estrellas
   const renderStars = (rating) => {
+    const numericRating = typeof rating === 'number' ? rating : 0;
+    
     return Array.from({ length: 5 }, (_, index) => (
       <span 
         key={index} 
-        className={`star ${index < Math.floor(rating) ? 'filled' : ''}`}
+        className={`star ${index < Math.floor(numericRating) ? 'filled' : ''}`}
       >
-        {index < Math.floor(rating) ? '★' : '☆'}
+        {index < Math.floor(numericRating) ? '★' : '☆'}
       </span>
     ));
   };
@@ -278,7 +222,7 @@ const ProductsPage = () => {
         <div className="search-box">
           <input
             type="text"
-            placeholder="Buscar productos..."
+            placeholder="Buscar productos, marcas, SKU..."
             value={searchTerm}
             onChange={handleSearch}
             className="search-input"
@@ -332,56 +276,93 @@ const ProductsPage = () => {
           ) : (
             <div className="products-grid">
               {filteredProducts.map(product => (
-                <div key={product.id} className="product-card">
-                  {/* Enlace al detalle del producto */}
+                <div key={product.id || product.sku} className="product-card">
                   <Link to={`/product/${product.id}`} className="product-link">
                     <div className="product-image">
-                      <img src={product.image} alt={product.name} />
+                      <img 
+                        src={product.image} 
+                        alt={product.name}
+                        onError={(e) => {
+                          e.target.src = '/images/placeholder.jpg';
+                          e.target.alt = 'Imagen no disponible';
+                        }}
+                      />
                       {!product.inStock && <div className="out-of-stock">Agotado</div>}
-                      {product.originalPrice && (
+                      {product.originalPrice && product.originalPrice !== product.price && (
                         <div className="discount-badge">
-                          -{Math.round((1 - parseFloat(product.price.replace(/,/g, '')) / parseFloat(product.originalPrice.replace(/,/g, ''))) * 100)}%
+                          -{Math.round((1 - parsePrice(product.price) / parsePrice(product.originalPrice)) * 100)}%
                         </div>
                       )}
                     </div>
 
                     <div className="product-content">
-                      <div className="product-brand">{product.brand}</div>
+                      {product.brand && (
+                        <div className="product-brand">{product.brand}</div>
+                      )}
+                      {product.sku && (
+                        <div className="product-sku">SKU: {product.sku}</div>
+                      )}
                       <h3 className="product-name">{product.name}</h3>
                       
-                      {/* Rating en la card */}
+                      {/* Rating */}
                       <div className="product-rating-card">
                         <div className="stars">
-                          {renderStars(product.rating)}
-                          <span className="rating-value">({product.reviewCount})</span>
+                          {renderStars(product.rating || 0)}
+                          <span className="rating-value">
+                            ({product.reviewCount || 0})
+                          </span>
                         </div>
                       </div>
 
-                      <p className="product-description">{product.description}</p>
+                      <p className="product-description">
+                        {product.description?.length > 120 
+                          ? `${product.description.substring(0, 120)}...` 
+                          : product.description
+                        }
+                      </p>
 
-                      <div className="product-specs">
-                        {product.specs.map((spec, index) => (
-                          <span key={index} className="spec-tag">{spec}</span>
-                        ))}
-                      </div>
+                      {product.specs && product.specs.length > 0 && (
+                        <div className="product-specs">
+                          {product.specs.slice(0, 2).map((spec, index) => (
+                            <span key={index} className="spec-tag">
+                              {typeof spec === 'string' ? spec.substring(0, 20) : spec}
+                            </span>
+                          ))}
+                          {product.specs.length > 2 && (
+                            <span className="spec-tag">+{product.specs.length - 2}</span>
+                          )}
+                        </div>
+                      )}
 
                       <div className="product-pricing">
-                        <span className="current-price">{product.price} {product.currency}</span>
-                        {product.originalPrice && (
-                          <span className="original-price">{product.originalPrice} {product.currency}</span>
+                        <span className="current-price">
+                          {product.price} {product.currency || 'MXN'}
+                        </span>
+                        {product.originalPrice && product.originalPrice !== product.price && (
+                          <span className="original-price">
+                            {product.originalPrice} {product.currency || 'MXN'}
+                          </span>
                         )}
                       </div>
                     </div>
                   </Link>
 
-                  {/* Botón fuera del Link para evitar conflictos */}
-                  <button 
-                    className={`add-to-cart-btn ${!product.inStock ? 'disabled' : ''}`}
-                    onClick={(e) => handleAddToCart(product, e)}
-                    disabled={!product.inStock}
-                  >
-                    {!product.inStock ? 'Agotado' : '🛒 Añadir al Carrito'}
-                  </button>
+                  <div className="product-actions">
+                    <button 
+                      className={`add-to-cart-btn ${!product.inStock ? 'disabled' : ''}`}
+                      onClick={(e) => handleAddToCart(product, e)}
+                      disabled={!product.inStock}
+                    >
+                      {!product.inStock ? 'Agotado' : '🛒 Añadir al Carrito'}
+                    </button>
+
+                     <button
+                      className={`add-to-favorites-btn ${isProductInFavorites(product.id) ? 'active' : ''}`}
+                       onClick={() => handleAddToFavoritos(product)}
+                      >
+                      {isProductInFavorites(product.id) ? '★ En Favoritos' : '☆ Añadir a Favoritos'}
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>

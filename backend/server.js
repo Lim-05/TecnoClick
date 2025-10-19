@@ -15,6 +15,7 @@ app.use(express.json()); // permite JSON en body
 
 // importamos rutas
 const authRoutes = require('./routes/authRoutes');
+const productRoutes = require('./routes/productRoutes'); // Rutas de productos
 
 // Ruta raíz. Verificamos que este corriendo el servidor
 app.get('/', (req, res) => {
@@ -23,6 +24,7 @@ app.get('/', (req, res) => {
 
 // rutas principales
 app.use('/api', authRoutes); // /api/login y /api/usuarios
+app.use('/api/productos', productRoutes); // Rutas de productos
 
 // POST - crear un nuevo usuario
 app.post('/api/usuarios', async (req, res) => {

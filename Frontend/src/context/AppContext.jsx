@@ -6,10 +6,23 @@ const AppContext = createContext();
 const initialState = {
   cart: [],
   user: null,
+  favoritos: [],
 };
 
 function appReducer(state, action) {
   switch (action.type) {
+    case 'ADD_TO_FAVORITOS':
+    return {
+      ...state,
+      favoritos: [...state.favoritos, action.payload],
+    };
+
+    case 'REMOVE_FROM_FAVORITOS':
+    return {
+      ...state,
+      favoritos: state.favoritos.filter(item => item.id !== action.payload),
+    };
+
     case 'ADD_TO_CART':
       const existingItem = state.cart.find(item => item.id === action.payload.id);
       if (existingItem) {

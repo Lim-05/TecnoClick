@@ -114,7 +114,7 @@ return (
 
       <div className="sidebar-right">
         <Link to="/cart" title="Carrito">Carr</Link>
-        <Link to="/favorites" title="Favoritos">Fav</Link>
+        <Link to="/favoritos" title="Favoritos">Fav</Link>
         <button onClick={handleLogout} title="Cerrar sesión" style={{border:'none', fontSize:'1.5rem', cursor:'pointer'}}>CS</button>
       </div>
     </div>
