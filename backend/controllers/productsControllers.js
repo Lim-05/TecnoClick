@@ -18,7 +18,7 @@ async function getProductos(req, res) {
         category: p.categoria ? p.categoria.toLowerCase().replace(/\s+/g, '-') : "otros",
         brand: p.marca || "Genérico",
         description: p.descripcion || "Sin descripción disponible",
-        image: `https://via.placeholder.com/400x300?text=${encodeURIComponent(p.nombre_producto)}`,
+        image: p.imagen ? `/images/${p.imagen}` : '/images/placeholder.jpg',
         specs: p.descripcion ? p.descripcion.split(',').slice(0, 4).map(s => s.trim()) : ["Sin especificaciones"],
         inStock: true, // Por defecto true (no hay campo de stock))
         stock: 10, // Valor fijo temporal
@@ -55,7 +55,7 @@ async function getProductoPorId(req, res) {
       category: productoDB.categoria ? productoDB.categoria.toLowerCase().replace(/\s+/g, '-') : "otros",
       brand: productoDB.marca || "Genérico",
       description: productoDB.descripcion || "Sin descripción disponible",
-      image: `https://via.placeholder.com/400x300?text=${encodeURIComponent(productoDB.nombre_producto)}`,
+      image: productoDB.imagen ? `/images/${productoDB.imagen}` : '/images/placeholder.jpg',
       specs: productoDB.descripcion ? productoDB.descripcion.split(',').slice(0, 4).map(s => s.trim()) : ["Sin especificaciones"],
       inStock: true,
       stock: 10,

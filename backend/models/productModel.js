@@ -10,6 +10,7 @@ async function getAllProducts() {
         p.marca,
         p.descripcion,
         p.precio,
+        p.imagen,
         c.nombre_categoria AS categoria
       FROM productos p
       LEFT JOIN categoria c ON p.id_categoria = c.id_categoria
@@ -32,6 +33,7 @@ async function getProductById(id) {
         p.marca,
         p.descripcion,
         p.precio,
+        p.imagen,
         c.nombre_categoria AS categoria
       FROM productos p
       LEFT JOIN categoria c ON p.id_categoria = c.id_categoria
