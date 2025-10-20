@@ -1,42 +1,62 @@
 // src/pages/HomePage.jsx
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useApp } from '../context/AppContext'; // ← Agregar esta importación
+import { useApp } from '../context/AppContext';
 import './HomePage.css';
 
 const HomePage = () => {
-  const { dispatch } = useApp(); // ← Ahora funciona
+  const { dispatch } = useApp();
+  const [featuredProducts, setFeaturedProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const featuredProducts = [
-    {
-      id: 1,
-      name: "Laptop-Gaming",
-      price: "29,680.00",
-      originalPrice: "36,250.00",
-      currency: "MXN"
-    },
-    {
-      id: 2,
-      name: "iPhone 15 Pro Max",
-      price: "14,299.00", 
-      originalPrice: "16,859.00",
-      currency: "MXN"
-    },
-    {
-      id: 3,
-      name: "MacBook Pro M3 Max",
-      price: "15,299.00",
-      originalPrice: "18,999.00",
-      currency: "MXN"
-    },
-    {
-      id: 4,
-      name: "Apple Watch Series 8",
-      price: "5,299.00",
-      originalPrice: "6,499.00",
-      currency: "MXN"
-    }
-  ];
+  // Función para cargar productos desde la base de datos
+  useEffect(() => {
+    const loadFeaturedProducts = async () => {
+      try {
+        setLoading(true);
+        console.log('🔄 Cargando productos destacados...');
+        
+        const response = await fetch('http://localhost:3000/api/productos/products');
+        
+        if (!response.ok) {
+          throw new Error(`Error HTTP: ${response.status}`);
+        }
+        
+        const productsData = await response.json();
+        console.log('✅ Productos cargados:', productsData);
+
+        // Tomar los primeros 4 productos como destacados
+        const featured = productsData.slice(0, 4).map(product => ({
+          id: product.id,
+          name: product.name,
+          price: product.price,
+          originalPrice: (parseFloat(product.price.replace(/,/g, '')) * 1.2).toLocaleString('es-MX', { 
+            minimumFractionDigits: 2 
+          }),
+          currency: product.currency || "MXN",
+          image: product.image,
+          description: product.description,
+          category: product.category,
+          brand: product.brand,
+          inStock: product.inStock !== false,
+          stock: product.stock || 10
+        }));
+
+        setFeaturedProducts(featured);
+        
+      } catch (err) {
+        console.error('❌ Error cargando productos:', err);
+        setError('Error al cargar los productos');
+        
+       
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadFeaturedProducts();
+  }, []);
 
   const handleAddToCart = (product) => {
     dispatch({
@@ -54,6 +74,49 @@ const HomePage = () => {
     alert(`¡${product.name} agregado a favoritos! 💙`);
   };
 
+  // Función para formatear precio
+  const formatPrice = (price) => {
+    if (typeof price === 'string') return price;
+    return price.toLocaleString('es-MX', { minimumFractionDigits: 2 });
+  };
+
+  if (loading) {
+    return (
+      <div className="home-page">
+        <section className="hero-section">
+          <div className="hero-content">
+            <h1>Las mejores tecnologías para tu día a día</h1>
+            <p>Descubre nuestros productos de última generación con los mejores precios y garantía.</p>
+            <div className="hero-buttons">
+              <Link to="/products" className="btn-primary">Ver Productos</Link>
+              <button className="btn-secondary">Ofertas especiales</button>
+            </div>
+          </div>
+        </section>
+
+        <section className="products-section">
+          <div className="section-header">
+            <h2>Nuestros Productos</h2>
+            <p>Cargando productos destacados...</p>
+          </div>
+          
+          <div className="featured-products-grid">
+            {[1, 2, 3, 4].map((item) => (
+              <div key={item} className="product-card loading">
+                <div className="product-info">
+                  <div className="product-name-skeleton"></div>
+                  <div className="product-pricing-skeleton"></div>
+                  <div className="button-skeleton"></div>
+                  <div className="button-skeleton"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      </div>
+    );
+  }
+
   return (
     <div className="home-page">
       {/* Hero Section */}
@@ -68,8 +131,8 @@ const HomePage = () => {
         </div>
         <div className="hero-stats">
           <div className="stat-card">
-            <span className="stat-number">65.1</span>
-            <span className="stat-label">x 43.4</span>
+            <span className="stat-number">{featuredProducts.length}</span>
+            <span className="stat-label">Productos destacados</span>
           </div>
         </div>
       </section>
@@ -82,77 +145,124 @@ const HomePage = () => {
         </div>
 
         <div className="categories-nav">
-          <span className="categories-label">Nota las categorías</span>
+          <span className="categories-label">Productos en stock</span>
           <div className="filter-tabs">
             <button className="filter-tab active">Destacados</button>
             <button className="filter-tab">Más Vendidos</button>
             <button className="filter-tab">Nuevos</button>
           </div>
-          
         </div>
+
+        {error && (
+          <div className="error-message">
+            <p>{error}</p>
+          </div>
+        )}
 
         <div className="featured-products-grid">
           {featuredProducts.map(product => (
             <div key={product.id} className="product-card">
-              <div className="product-info">
-                <h3 className="product-name">{product.name}</h3>
-                <div className="product-pricing">
-                  <span className="current-price">{product.price} {product.currency}</span>
-                  <span className="original-price">{product.originalPrice} {product.currency}</span>
+              {product.image && (
+                <div className="product-image">
+                  <img 
+                    src={product.image} 
+                    alt={product.name}
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                    }}
+                  />
                 </div>
-                <button 
-                  className="add-to-cart-btn"
-                  onClick={() => handleAddToCart(product)}
-                >
-                  Añadir al Carrito
-                </button>
+              )}
+              
+              <div className="product-info">
+                {product.brand && (
+                  <span className="product-brand">{product.brand}</span>
+                )}
+                
+                <h3 className="product-name">{product.name}</h3>
+                
+                {product.description && (
+                  <p className="product-short-description">
+                    {product.description.length > 80 
+                      ? `${product.description.substring(0, 80)}...` 
+                      : product.description
+                    }
+                  </p>
+                )}
 
-                <button
-                  className="add-to-favorites-btn"
-                  onClick={() => handleAddToFavoritos(product)}
-                >
-                  Favoritos
-                </button>
+                <div className="product-pricing">
+                  <span className="current-price">
+                    {formatPrice(product.price)} {product.currency}
+                  </span>
+                  {product.originalPrice && product.originalPrice !== product.price && (
+                    <span className="original-price">
+                      {formatPrice(product.originalPrice)} {product.currency}
+                    </span>
+                  )}
+                </div>
 
+                <div className="product-actions">
+                  <button 
+                    className="add-to-cart-btn"
+                    onClick={() => handleAddToCart(product)}
+                    disabled={!product.inStock}
+                  >
+                    {product.inStock ? '🛒 Añadir al Carrito' : '❌ Agotado'}
+                  </button>
+
+                  <button
+                    className="add-to-favorites-btn"
+                    onClick={() => handleAddToFavoritos(product)}
+                  >
+                     Favoritos
+                  </button>
+                </div>
+
+                {!product.inStock && (
+                  <div className="out-of-stock-badge">
+                    Agotado
+                  </div>
+                )}
               </div>
             </div>
           ))}
         </div>
-      </section> {/* ← Este cierra la section de productos */}
+      </section>
 
       {/* Footer Section */}
       <footer className="home-footer">
         <div className="footer-content">
           <div className="footer-section">
-            <h4>Namedly</h4>
-            <p>Descripte the about what your company does.</p>
+            <h4>TecnoClick</h4>
+            <p>Tu tienda de tecnología de confianza con los mejores precios y garantía.</p>
           </div>
           
           <div className="footer-section">
-            <h4>Features</h4>
+            <h4>Categorías</h4>
             <ul>
-              <li>Core features</li>
-              <li>Pro experience</li>
-              <li>Integrations</li>
+              <li>Laptops</li>
+              <li>Smartphones</li>
+              <li>Accesorios</li>
+              <li>Audio</li>
             </ul>
           </div>
 
           <div className="footer-section">
-            <h4>Learn more</h4>
+            <h4>Información</h4>
             <ul>
-              <li>Blog</li>
-              <li>Case studies</li>
-              <li>Customer stories</li>
-              <li>Best practices</li>
+              <li>Sobre nosotros</li>
+              <li>Envíos y entregas</li>
+              <li>Garantías</li>
+              <li>Preguntas frecuentes</li>
             </ul>
           </div>
 
           <div className="footer-section">
-            <h4>Support</h4>
+            <h4>Contacto</h4>
             <ul>
-              <li>Contact</li>
-              <li>Support</li>
-              <li>Legal</li>
+              <li>📞 555-123-4567</li>
+              <li>✉️ info@tecnoclick.com</li>
+              <li>🕒 Lun-Vie: 9am-6pm</li>
             </ul>
           </div>
         </div>

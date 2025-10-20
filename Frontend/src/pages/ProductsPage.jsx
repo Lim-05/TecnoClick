@@ -321,18 +321,7 @@ const ProductsPage = () => {
                         }
                       </p>
 
-                      {product.specs && product.specs.length > 0 && (
-                        <div className="product-specs">
-                          {product.specs.slice(0, 2).map((spec, index) => (
-                            <span key={index} className="spec-tag">
-                              {typeof spec === 'string' ? spec.substring(0, 20) : spec}
-                            </span>
-                          ))}
-                          {product.specs.length > 2 && (
-                            <span className="spec-tag">+{product.specs.length - 2}</span>
-                          )}
-                        </div>
-                      )}
+                      
 
                       <div className="product-pricing">
                         <span className="current-price">
@@ -353,7 +342,7 @@ const ProductsPage = () => {
                       onClick={(e) => handleAddToCart(product, e)}
                       disabled={!product.inStock}
                     >
-                      {!product.inStock ? 'Agotado' : '🛒 Añadir al Carrito'}
+                      {!product.inStock ? 'Agotado' : ' Añadir al Carrito'}
                     </button>
 
                      <button
