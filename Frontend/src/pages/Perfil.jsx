@@ -6,6 +6,7 @@ const Perfil = () => {
   const navigate = useNavigate();
   const [usuario, setUsuario] = useState(null); // aqui se guarda el usuario desde el localStorage
   const [isEditing, setIsEditing] = useState(false);
+  
   const [formData, setFormData] = useState({
     nombre_usuario: '',
     apellido_usuario: '',

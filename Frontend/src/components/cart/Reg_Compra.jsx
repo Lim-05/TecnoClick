@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Reg_compra.css';
+import { useEffect } from 'react';
 
 const Reg_Compra = () => {
   const navigate = useNavigate();
+
   
   const [formData, setFormData] = useState({
     // Datos de domicilio
@@ -30,7 +32,7 @@ const Reg_Compra = () => {
       ...prev,
       [name]: value
     }));
-    
+
     // Limpiar error del campo cuando el usuario empiece a escribir
     if (errors[name]) {
       setErrors(prev => ({
@@ -107,101 +109,6 @@ const handleSubmit = async (e) => {
     }
   }
 };
-
-
-  /*const handleSubmit = async (e) => {
-  e.preventDefault();
-
-  if (validateForm()) {
-    try {
-      const response = await fetch('http://localhost:3000/api/usuarios', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          nombre: formData.nombre,
-          apellido: formData.apellido,
-          telefono: formData.telefono,
-          correo: formData.email,
-          direccion: formData.direccion,
-          contra: formData.password,
-          CP: formData.codigoPostal,
-          estado: formData.estado,
-          municipio: formData.municipio,
-          colonia: formData.colonia,
-          referencias: formData.referencias,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        alert('Usuario guardado correctamente');
-        navigate('/checkout', { state: { customerData: formData } });
-      } else {
-        alert(`Error al guardar: ${data.mensaje || 'Error desconocido'}`);
-      }
-    } catch (error) {
-      console.error('Error al enviar datos:', error);
-      alert('Error de conexión con el servidor');
-    }
-  }
-};*/
-
-
-  /*const handleSubmit = (e) => {
-    e.preventDefault();
-    
-    if (validateForm()) {
-      // Pasar los datos al CheckoutForm a través del estado de navegación
-      navigate('/checkout', { 
-        state: { 
-          customerData: formData 
-        } 
-      });
-    }
-  };*/
-
-  /*const handleSubmit = async (e) => {
-  e.preventDefault();
-
-  if (validateForm()) {
-    try {
-      // Enviar los datos al backend
-      //no usamos localhost porque desde Windows donde corre vite no apunta a wsl
-      const response = await fetch('http://localhost:3000/api/usuarios', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          nombre: formData.nombre,
-          apellido: formData.apellido,
-          telefono: formData.telefono,
-          correo: formData.email,
-          direccion: formData.direccion,
-          contra: formData.password,
-          CP: formData.codigoPostal,
-          estado: formData.estado,
-          municipio: formData.municipio,
-          colonia: formData.colonia,
-          referencias: formData.referencias,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        alert('Usuario guardado correctamente');
-        // Opcional: pasar los datos al checkout
-        navigate('/checkout', { state: { customerData: formData } });
-      } else {
-        alert(`Error al guardar: ${data.mensaje || 'Error desconocido'}`);
-      }
-    } catch (error) {
-      console.error('Error al enviar datos:', error);
-      alert('Error de conexión con el servidor');
-    }
-  }
-};*/
-
 
   const isFormValid = () => {
     return (

@@ -9,6 +9,8 @@ const Cart = () => {
   const { state, dispatch } = useApp();
   const { cart } = state;
 
+  const usuario = JSON.parse(localStorage.getItem('usuario'));
+
   const [isModalOpen, setModalOpen] = useState(false);
 
   const updateQuantity = (productId, quantity) => {

@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
-import { Link, Navigate } from 'react-router-dom';
 import './Login.css';
+import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
+  const navigate = useNavigate();
   const [correo, setCorreo] = useState('');
   const [contrasena, setContrasena] = useState('');
   const [mensaje, setMensaje] = useState('');
+
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -27,7 +30,7 @@ const Login = () => {
         setMensaje( data.mensaje);
         // Ejemplo: guardar usuario en localStorage
         localStorage.setItem('usuario', JSON.stringify(data.usuario));
-        Navigate('/perfil')
+        navigate('/checkout');
       } else {
         setMensaje( data.mensaje);
       }
