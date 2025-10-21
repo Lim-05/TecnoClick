@@ -15,7 +15,7 @@ const HomePage = () => {
     const loadFeaturedProducts = async () => {
       try {
         setLoading(true);
-        console.log('🔄 Cargando productos destacados...');
+        console.log(' Cargando productos destacados...');
         
         const response = await fetch('http://localhost:3000/api/productos/products');
         
@@ -24,7 +24,7 @@ const HomePage = () => {
         }
         
         const productsData = await response.json();
-        console.log('✅ Productos cargados:', productsData);
+        console.log(' Productos cargados:', productsData);
 
         // Tomar los primeros 4 productos como destacados
         const featured = productsData.slice(0, 4).map(product => ({
@@ -71,7 +71,7 @@ const HomePage = () => {
       type: 'ADD_TO_FAVORITOS',
       payload: product
     });
-    alert(`¡${product.name} agregado a favoritos! 💙`);
+    alert(`¡${product.name} agregado a favoritos! `);
   };
 
   // Función para formatear precio
@@ -190,16 +190,7 @@ const HomePage = () => {
                   </p>
                 )}
 
-                <div className="product-pricing">
-                  <span className="current-price">
-                    {formatPrice(product.price)} {product.currency}
-                  </span>
-                  {product.originalPrice && product.originalPrice !== product.price && (
-                    <span className="original-price">
-                      {formatPrice(product.originalPrice)} {product.currency}
-                    </span>
-                  )}
-                </div>
+                
 
                 <div className="product-actions">
                   <button 
@@ -207,7 +198,7 @@ const HomePage = () => {
                     onClick={() => handleAddToCart(product)}
                     disabled={!product.inStock}
                   >
-                    {product.inStock ? '🛒 Añadir al Carrito' : '❌ Agotado'}
+                    {product.inStock ? '🛒 ' : '❌ Agotado'}
                   </button>
 
                   <button

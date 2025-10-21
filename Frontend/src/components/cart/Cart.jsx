@@ -38,13 +38,13 @@ const Cart = () => {
     setModalOpen(false);
   };
 
-  // ✅ CÁLCULO CORREGIDO - Eliminar comas y convertir a número
+  
   const total = cart.reduce((sum, item) => {
-    // Eliminar comas (separadores de miles) y convertir a número
+    
     const cleanPrice = item.price.replace(/,/g, '');
     const price = parseFloat(cleanPrice);
     
-    // Verificar que la conversión fue exitosa
+    
     if (isNaN(price)) {
       console.warn(`Precio inválido para ${item.name}: ${item.price}`);
       return sum;
@@ -99,7 +99,7 @@ const Cart = () => {
               </div>
               
               <div className="item-total">
-                {/* ✅ También corregir aquí el cálculo individual */}
+                
                 {(parseFloat(item.price.replace(/,/g, '')) * item.quantity).toLocaleString()} {item.currency}
               </div>
               
@@ -115,7 +115,6 @@ const Cart = () => {
 
         <div className="cart-summary">
           <div className="cart-total">
-            {/* ✅ Ahora mostrará el total correcto */}
             <h3>Total: ${total.toLocaleString()} MXN</h3>
           </div>
           
@@ -127,7 +126,7 @@ const Cart = () => {
               Continuar con la compra
             </button>
           </div>
-          {/* Modal */}
+          
           <Modal isOpen={isModalOpen} onClose={() => setModalOpen(false)}>
             <CheckoutForm onSubmit={handleCheckout} />
           </Modal>

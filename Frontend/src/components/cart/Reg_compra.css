@@ -20,7 +20,7 @@
 /* Distribuir los campos en dos columnas */
 .checkout-form .form-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr; /* dos columnas iguales */
+  grid-template-columns: 1fr 1fr; 
   gap: 0.3rem 2rem; 
 }
 

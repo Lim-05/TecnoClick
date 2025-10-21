@@ -22,7 +22,7 @@ const ProductsPage = () => {
     const loadProducts = async () => {
       setLoading(true);
       try {
-        console.log('🔄 Iniciando carga de productos desde la API...');
+        console.log(' Iniciando carga de productos desde la API...');
         const response = await fetch('http://localhost:3000/api/productos/products');
         
         if (!response.ok) {
@@ -30,7 +30,7 @@ const ProductsPage = () => {
         }
         
         const data = await response.json();
-        console.log('✅ Productos cargados:', data);
+        console.log(' Productos cargados:', data);
         
         // Validar y limpiar datos
         const cleanedProducts = data.map(product => ({
@@ -66,10 +66,10 @@ const ProductsPage = () => {
         ];
         
         setCategories(categoriesData);
-        console.log('📁 Categorías disponibles:', categoriesData);
+        console.log(' Categorías disponibles:', categoriesData);
         
       } catch (error) {
-        console.error('❌ Error al cargar productos:', error);
+        console.error(' Error al cargar productos:', error);
         setProducts([]);
         setFilteredProducts([]);
       } finally {
@@ -87,10 +87,10 @@ const ProductsPage = () => {
     
     if (isAlreadyFavorite) {
       dispatch({ type: 'REMOVE_FROM_FAVORITOS', payload: product.id });
-      console.log(`❤️ ${product.name} removido de favoritos`);
+      console.log(` ${product.name} removido de favoritos`);
     } else {
       dispatch({ type: 'ADD_TO_FAVORITOS', payload: product });
-      console.log(`💖 ${product.name} agregado a favoritos`);
+      console.log(` ${product.name} agregado a favoritos`);
     }
   };
 
@@ -172,7 +172,7 @@ const ProductsPage = () => {
       payload: product
     });
     
-    console.log(`✅ ${product.name} agregado al carrito`);
+    console.log(` ${product.name} agregado al carrito`);
   };
 
   const handleSearch = (e) => {
@@ -314,25 +314,7 @@ const ProductsPage = () => {
                         </div>
                       </div>
 
-                      <p className="product-description">
-                        {product.description?.length > 120 
-                          ? `${product.description.substring(0, 120)}...` 
-                          : product.description
-                        }
-                      </p>
-
-                      
-
-                      <div className="product-pricing">
-                        <span className="current-price">
-                          {product.price} {product.currency || 'MXN'}
-                        </span>
-                        {product.originalPrice && product.originalPrice !== product.price && (
-                          <span className="original-price">
-                            {product.originalPrice} {product.currency || 'MXN'}
-                          </span>
-                        )}
-                      </div>
+                                          
                     </div>
                   </Link>
 
@@ -342,7 +324,7 @@ const ProductsPage = () => {
                       onClick={(e) => handleAddToCart(product, e)}
                       disabled={!product.inStock}
                     >
-                      {!product.inStock ? 'Agotado' : ' Añadir al Carrito'}
+                      {!product.inStock ? 'Agotado' : '🛒'}
                     </button>
 
                      <button
