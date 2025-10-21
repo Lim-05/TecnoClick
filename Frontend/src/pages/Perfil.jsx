@@ -8,6 +8,7 @@ const Perfil = () => {
   const [isEditing, setIsEditing] = useState(false);
   
   const [formData, setFormData] = useState({
+    id_usuario: '',
     nombre_usuario: '',
     apellido_usuario: '',
     telefono_usuario: '',
@@ -34,6 +35,7 @@ const Perfil = () => {
       const usuarioData = JSON.parse(data); //convierte la cadena JSON a un objeto
       setUsuario(usuarioData); //actualiza el estado del usuario
       setFormData({
+        id_usuario: usuarioData.id_usuario, 
         nombre_usuario: usuarioData.nombre_usuario || '',
         apellido_usuario: usuarioData.apellido_usuario || '',
         telefono_usuario: usuarioData.telefono_usuario || '',
@@ -52,11 +54,29 @@ const Perfil = () => {
   const handleEditClick = () => setIsEditing(true);
 
   //guardar cambios loclamente
-  const handleSaveClick = () => {
-    setIsEditing(false);
-    setUsuario(formData); // actualizar estado del usuario
-    localStorage.setItem('usuario', JSON.stringify(formData)); // guardar en localStorage
-    console.log('Guardando datos del usuario:', formData);
+  const handleSaveClick = async (e) => {
+    e.preventDefault();
+
+    const id = formData.id_usuario || usuario?.id_usuario; //respaldo
+    if(!id) return console.error('ID de usuario no disponible');
+
+    await fetch(`http://localhost:3000/api/users/${formData.id_usuario}`, {
+      method: 'PUT',
+      headers: {'content-type':'application/json'},
+      body: JSON.stringify({
+        nombre_usuario: formData.nombre_usuario,
+        apellido_usuario: formData.apellido_usuario,
+        telefono_usuario: formData.telefono_usuario,
+        correo_usuario: formData.correo_usuario,
+        direccion_usuario: formData.direccion_usuario,
+        contrasena: formData.contrasena,
+        codigo_postal: formData.codigo_postal,
+        estado_usuario: formData.estado_usuario,
+        municipio_usuario: formData.municipio_usuario,
+        colonia_usuario: formData.colonia_usuario,
+        referencias: formData.referencias,
+      })
+    });
   };
 
   //cerrar sesion
