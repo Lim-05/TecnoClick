@@ -1,16 +1,11 @@
-
-const express = require('express'); // Framework web
-const app = express(); //instancia a express
-const db = require('./config/db'); // conexion a la base de datos - pool de pg
-const userRoutes = require('./routes/userRoutes');
-require('dotenv').config(); // Cargar variables de .env
-
 const express = require('express');
-const app = express(); // instancia de Express
-const db = require('./config/db'); // conexión PostgreSQL
-require('dotenv').config(); // variables de entorno
 const cors = require('cors');
+const dotenv = require('dotenv');
+const db = require('./config/db'); // Pool de PostgreSQL
 
+dotenv.config();
+
+const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Configuración CORS
@@ -21,24 +16,22 @@ app.use(cors({
 // Permitir JSON en requests
 app.use(express.json());
 
-// Importar rutas
+// Rutas
 const authRoutes = require('./routes/authRoutes');        // login, registro
 const productRoutes = require('./routes/productRoutes');  // productos
 const tarjetasRoutes = require('./routes/tarjetasRoutes'); // tarjetas
-const userRoutes = require('./routes/userRoutes');        // PUT /users/:id
+const userRoutes = require('./routes/userRoutes');        // PUT /usuarios/:id
 
-// Rutas principales
+// Montar rutas
 app.use('/api', authRoutes);            // /api/login y /api/usuarios (POST)
 app.use('/api/productos', productRoutes);
 app.use('/api/datos_tarjeta', tarjetasRoutes);
-app.use('/api/usuarios', userRoutes);
+app.use('/api/usuarios', userRoutes);   // PUT /api/usuarios/:id
 
-app.use('/api/users', userRoutes);            // Aquí se monta PUT /api/users/:id
-
-// POST - crear usuario (tu código existente)
+// POST - crear usuario
 app.post('/api/usuarios', async (req, res) => {
   const { nombre, apellido, telefono, correo, direccion, contra, CP, estado, municipio, colonia, referencias } = req.body;
-  
+
   if (!nombre || !apellido || !contra || !CP || !estado || !municipio || !colonia) {
     return res.status(400).json({ mensaje: 'Datos requeridos' });
   }
@@ -52,6 +45,7 @@ app.post('/api/usuarios', async (req, res) => {
     `;
     const values = [nombre, apellido, telefono, correo, direccion, contra, CP, estado, municipio, colonia, referencias];
     const result = await db.query(sql, values);
+
     res.status(201).json({ mensaje: 'Usuario creado exitosamente', usuario: result.rows[0] });
   } catch (err) {
     console.error('Error al crear usuario:', err.message);
@@ -59,20 +53,12 @@ app.post('/api/usuarios', async (req, res) => {
   }
 });
 
-// Ruta raíz para verificar servidor
+// Ruta raíz
 app.get('/', (req, res) => {
   res.send('Servidor Node.js corriendo');
 });
 
-// Mostrar rutas registradas (para debug)
-app.on('listening', () => {
-  console.log('Rutas registradas:');
-  app._router.stack
-    .filter(r => r.route)
-    .forEach(r => console.log(`${Object.keys(r.route.methods)[0].toUpperCase()} ${r.route.path}`));
-});
-
-// Inicia servidor
-app.listen(PORT, '0.0.0.0', () => {
+// Inicia servidor y muestra rutas registradas
+const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`Servidor corriendo en http://0.0.0.0:${PORT}`);
 });

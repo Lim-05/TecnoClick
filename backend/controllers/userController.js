@@ -1,5 +1,5 @@
-
 const { getAllUsers, deleteUserById } = require('../models/userModel');
+const Usuario = require('../models/userModel.js');
 
 // Obtener todos los usuarios
 async function obtenerUsuarios(req, res) {
@@ -29,11 +29,7 @@ async function eliminarUsuario(req, res) {
   }
 }
 
-module.exports = { obtenerUsuarios, eliminarUsuario };
-
-const Usuario = require('../models/userModel.js');
-const actualizar = require('../models/userModel.js');
-
+// Actualizar un usuario
 const actualizarUsuario = async (req, res) => {
   try {
     const { id } = req.params;
@@ -55,5 +51,5 @@ const actualizarUsuario = async (req, res) => {
   }
 };
 
-module.exports = { actualizarUsuario };
-
+// Exportar todas las funciones juntas
+module.exports = { obtenerUsuarios, eliminarUsuario, actualizarUsuario };
