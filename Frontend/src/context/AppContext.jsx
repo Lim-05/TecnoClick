@@ -25,19 +25,21 @@ function appReducer(state, action) {
 
     case 'ADD_TO_CART':
       const existingItem = state.cart.find(item => item.id === action.payload.id);
+      const quantityToAdd = action.payload.quantity || 1;
+      
       if (existingItem) {
         return {
           ...state,
           cart: state.cart.map(item =>
             item.id === action.payload.id
-              ? { ...item, quantity: item.quantity + 1 }
+              ? { ...item, quantity: item.quantity + quantityToAdd }
               : item
           ),
         };
       }
       return {
         ...state,
-        cart: [...state.cart, { ...action.payload, quantity: 1 }],
+        cart: [...state.cart, { ...action.payload, quantity: quantityToAdd }],
       };
 
     case 'REMOVE_FROM_CART':

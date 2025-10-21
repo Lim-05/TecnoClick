@@ -14,6 +14,7 @@ const ProductDetail = () => {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showNotification, setShowNotification] = useState(false);
 
   // Función para limpiar descripciones duplicadas
   const cleanDescription = (description) => {
@@ -98,14 +99,32 @@ const ProductDetail = () => {
   const handleAddToCart = () => {
     if (!product) return;
     
-    for (let i = 0; i < quantity; i++) {
-      dispatch({
-        type: 'ADD_TO_CART',
-        payload: product
-      });
-    }
+    // Crear objeto con los datos necesarios para el carrito
+    const cartItem = {
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      currency: product.currency || 'MXN',
+      image: product.image || product.images[0],
+      stock: product.stock || 10,
+      inStock: product.inStock
+    };
     
-    console.log(` ${quantity} ${product.name} agregado(s) al carrito`);
+    // Agregar la cantidad especificada
+    dispatch({
+      type: 'ADD_TO_CART',
+      payload: { ...cartItem, quantity }
+    });
+    
+    console.log(`✅ ${quantity} ${product.name} agregado(s) al carrito`);
+    
+    // Mostrar notificación
+    setShowNotification(true);
+    
+    // Ocultar notificación después de 3 segundos
+    setTimeout(() => {
+      setShowNotification(false);
+    }, 3000);
   };
 
   const handleBuyNow = () => {
@@ -167,6 +186,19 @@ const ProductDetail = () => {
 
   return (
     <div className="product-detail">
+      {/* Notificación de producto agregado */}
+      {showNotification && (
+        <div className="cart-notification">
+          <div className="notification-content">
+            <span className="notification-icon">✅</span>
+            <div className="notification-text">
+              <strong>¡Agregado al carrito!</strong>
+              <p>{quantity} {product.name}</p>
+            </div>
+          </div>
+        </div>
+      )}
+      
       {/* Navegación */}
       <nav className="breadcrumb">
         <button onClick={() => navigate('/')}>Inicio</button>

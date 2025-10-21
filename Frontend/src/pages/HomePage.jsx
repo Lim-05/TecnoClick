@@ -9,6 +9,8 @@ const HomePage = () => {
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showNotification, setShowNotification] = useState(false);
+  const [notificationProduct, setNotificationProduct] = useState(null);
 
   // Función para cargar productos desde la base de datos
   useEffect(() => {
@@ -63,7 +65,15 @@ const HomePage = () => {
       type: 'ADD_TO_CART',
       payload: product
     });
-    alert(`¡${product.name} agregado al carrito!`);
+    
+    // Mostrar notificación
+    setNotificationProduct(product);
+    setShowNotification(true);
+    
+    // Ocultar notificación después de 3 segundos
+    setTimeout(() => {
+      setShowNotification(false);
+    }, 3000);
   };
 
   const handleAddToFavoritos = (product) => {
@@ -119,6 +129,19 @@ const HomePage = () => {
 
   return (
     <div className="home-page">
+      {/* Notificación de producto agregado */}
+      {showNotification && notificationProduct && (
+        <div className="cart-notification">
+          <div className="notification-content">
+            <span className="notification-icon">✅</span>
+            <div className="notification-text">
+              <strong>¡Agregado al carrito!</strong>
+              <p>{notificationProduct.name}</p>
+            </div>
+          </div>
+        </div>
+      )}
+      
       {/* Hero Section */}
       <section className="hero-section">
         <div className="hero-content">

@@ -13,6 +13,8 @@ const ProductsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('nombre');
   const [loading, setLoading] = useState(true);
+  const [showNotification, setShowNotification] = useState(false);
+  const [notificationProduct, setNotificationProduct] = useState(null);
   const [categories, setCategories] = useState([
     { id: 'todos', name: 'Todos los Productos', count: 0 }
   ]);
@@ -172,6 +174,15 @@ const ProductsPage = () => {
       payload: product
     });
     
+    // Mostrar notificación
+    setNotificationProduct(product);
+    setShowNotification(true);
+    
+    // Ocultar notificación después de 3 segundos
+    setTimeout(() => {
+      setShowNotification(false);
+    }, 3000);
+    
     console.log(` ${product.name} agregado al carrito`);
   };
 
@@ -212,6 +223,19 @@ const ProductsPage = () => {
 
   return (
     <div className="products-page">
+      {/* Notificación de producto agregado */}
+      {showNotification && notificationProduct && (
+        <div className="cart-notification">
+          <div className="notification-content">
+            <span className="notification-icon">✅</span>
+            <div className="notification-text">
+              <strong>¡Agregado al carrito!</strong>
+              <p>{notificationProduct.name}</p>
+            </div>
+          </div>
+        </div>
+      )}
+      
       <div className="products-header">
         <h1>Nuestros Productos</h1>
         <p>Descubre la mejor tecnología para tus necesidades</p>

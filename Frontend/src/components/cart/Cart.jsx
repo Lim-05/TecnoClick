@@ -78,6 +78,17 @@ const Cart = () => {
         <div className="cart-items">
           {cart.map(item => (
             <div key={item.id} className="cart-item">
+              {/* Imagen del producto */}
+              <div className="item-image">
+                <img 
+                  src={item.image || '/images/placeholder.jpg'} 
+                  alt={item.name}
+                  onError={(e) => {
+                    e.target.src = '/images/placeholder.jpg';
+                  }}
+                />
+              </div>
+              
               <div className="item-details">
                 <h4>{item.name}</h4>
                 <p className="item-price">{item.price} {item.currency}</p>
