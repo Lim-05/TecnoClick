@@ -60,7 +60,7 @@ const Perfil = () => {
     const id = formData.id_usuario || usuario?.id_usuario; //respaldo
     if(!id) return console.error('ID de usuario no disponible');
 
-    await fetch(`http://localhost:3000/api/users/${formData.id_usuario}`, {
+    await fetch(`http://localhost:3000/api/usuarios/${formData.id_usuario}`, {
       method: 'PUT',
       headers: {'content-type':'application/json'},
       body: JSON.stringify({
