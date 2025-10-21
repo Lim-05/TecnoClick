@@ -1,0 +1,58 @@
+.usuarios-admin-page {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-top: 12vh;
+}
+
+.usuarios-admin-container {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.usuarios-admin-container h4 {
+  text-align: center;
+  margin-bottom: 25px;
+  font-size: 1.5rem;
+  color: #333;
+}
+
+/* Tabla */
+.usuarios-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.usuarios-table th,
+.usuarios-table td {
+  padding: 12px 15px;
+  border-bottom: 1px solid #ddd;
+  text-align: left;
+  font-size: 0.95rem;
+}
+
+.usuarios-table th {
+  background-color: #f4f4f4;
+  font-weight: 600;
+}
+
+.usuarios-table tr:hover {
+  background-color: #f9f9f9;
+}
+
+/* Botón eliminar */
+.btn-eliminar {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.btn-eliminar:hover {
+  background-color: #c82333;
+}

@@ -46,4 +46,17 @@ async function getProductById(id) {
   }
 }
 
-module.exports = { getAllProducts, getProductById };
+async function deleteProductById(id) {
+  try {
+    const result = await db.query(
+      `DELETE FROM productos WHERE id_producto = $1 RETURNING *;`,
+      [id]
+    );
+    return result.rowCount > 0; // true si se eliminó correctamente
+  } catch (error) {
+    console.error('Error en deleteProductById:', error.message);
+    throw error;
+  }
+}
+
+module.exports = { getAllProducts, getProductById, deleteProductById };

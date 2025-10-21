@@ -11,6 +11,9 @@ import Reg_Compra from './components/cart/Reg_Compra'; // ← Agregar esta impor
 import Favoritos from './components/cart/Favoritos'; 
 import Perfil from './pages/Perfil'; 
 import Login from './pages/Login';
+import UsuariosAdmin from './pages/administrador/UsuariosAdmin';
+import AdminHome from './pages/administrador/AdminHome';
+import ProductosAdmin from './pages/administrador/ProductosAdmin';
 import './App.css';
 
 function App() {
@@ -30,6 +33,9 @@ function App() {
               <Route path="/checkout" element={<CheckoutForm />} />
               <Route path="/perfil" element={<Perfil />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/admin/usuarios" element={<UsuariosAdmin />} />
+              <Route path="/admin" element={<AdminHome />} />
+              <Route path="/admin/productos" element={<ProductosAdmin />} />
             </Routes>
           </main>
         </div>

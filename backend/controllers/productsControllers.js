@@ -1,4 +1,4 @@
-const { getAllProducts, getProductById } = require('../models/productModel');
+const { getAllProducts, getProductById, deleteProductById } = require('../models/productModel');
 
 // Controlador para obtener todos los productos
 async function getProductos(req, res) {
@@ -70,4 +70,20 @@ async function getProductoPorId(req, res) {
   }
 }
 
-module.exports = { getProductos, getProductoPorId };
+async function deleteProducto(req, res) {
+  try {
+    const id = parseInt(req.params.id);
+    const eliminado = await deleteProductById(id);
+
+    if (!eliminado) {
+      return res.status(404).json({ mensaje: 'Producto no encontrado o ya eliminado' });
+    }
+
+    res.json({ mensaje: 'Producto eliminado correctamente' });
+  } catch (error) {
+    console.error('Error al eliminar producto:', error.message);
+    res.status(500).json({ mensaje: 'Error al eliminar el producto' });
+  }
+}
+
+module.exports = { getProductos, getProductoPorId, deleteProducto };

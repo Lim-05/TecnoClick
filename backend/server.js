@@ -1,6 +1,7 @@
 const express = require('express'); // Framework web
 const app = express(); //instancia a express
 const db = require('./config/db'); // conexion a la base de datos - pool de pg
+const userRoutes = require('./routes/userRoutes');
 require('dotenv').config(); // Cargar variables de .env
 
 const PORT = process.env.PORT || 3000;
@@ -27,6 +28,7 @@ app.get('/', (req, res) => {
 app.use('/api', authRoutes); // /api/login y /api/usuarios
 app.use('/api/productos', productRoutes); // Rutas de productos
 app.use('/api/datos_tarjeta', tarjetasRoutes);
+app.use('/api/usuarios', userRoutes);
 
 // POST - crear un nuevo usuario
 app.post('/api/usuarios', async (req, res) => {

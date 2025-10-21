@@ -5,5 +5,6 @@ const { getProductos, getProductoPorId } = require('../controllers/productsContr
 // Rutas de productos
 router.get('/products', getProductos);          // Obtener todos
 router.get('/products/:id', getProductoPorId);  // Obtener uno por ID
+router.delete('/products/:id', deleteProducto);
 
 module.exports = router;

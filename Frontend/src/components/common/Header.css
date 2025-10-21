@@ -70,3 +70,29 @@
 .cart-link:hover {
   background: #386fb3;
 }
+
+@media (max-width: 992px) {
+  .header {
+    height: auto;
+    padding: 10px 0;
+  }
+
+  .logo img {
+    height: 80px;
+  }
+
+  .nav {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .header-actions {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .cart-link {
+    width: 100%;
+    text-align: center;
+  }
+}

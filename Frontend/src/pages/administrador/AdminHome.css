@@ -1,0 +1,60 @@
+.admin-home-page {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-top: 12vh; /* igual que perfil */
+}
+
+.admin-home-container {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.admin-home-container h4 {
+  margin-bottom: 10px;
+}
+
+.admin-subtitle {
+  color: #666;
+  margin-bottom: 2rem;
+  font-size: 1rem;
+}
+
+.admin-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 2rem;
+}
+
+.admin-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  background: #f9f9f9;
+  border-radius: 12px;
+  padding: 2rem 1rem;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border-top: 5px solid #007bff;
+}
+
+.admin-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+}
+
+.admin-icon {
+  font-size: 3rem;
+  margin-bottom: 10px;
+}
+
+.admin-card h5 {
+  color: #333;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
