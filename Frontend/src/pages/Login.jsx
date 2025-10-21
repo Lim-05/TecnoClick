@@ -30,6 +30,7 @@ const Login = () => {
         setMensaje( data.mensaje);
         // Ejemplo: guardar usuario en localStorage
         localStorage.setItem('usuario', JSON.stringify(data.usuario));
+        window.dispatchEvent(new Event('usuarioChange'));
         navigate('/checkout');
       } else {
         setMensaje( data.mensaje);

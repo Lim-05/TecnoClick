@@ -1,5 +1,6 @@
 // controllers/authController.js
 const db = require('../config/db');
+const bcrypt = require('bcrypt');
 
 const login = async (req, res) => {
   const { correo, contra } = req.body;
@@ -20,16 +21,18 @@ const login = async (req, res) => {
 
     const usuario = result.rows[0];
 
-    // Si no estás usando contraseñas encriptadas (texto plano)
-    if (usuario.contrasena !== contra) {
+    const esValida = await bcrypt.compare(contra, usuario.contrasena);
+    if (!esValida) {
       return res.status(401).json({ mensaje: 'Contraseña incorrecta' });
     }
 
-    // Si las contraseñas coinciden
+    delete usuario.contrasena;
+
     res.status(200).json({
       mensaje: 'Inicio de sesión exitoso',
-      usuario: result.rows[0], //se devuelven todos los campos para perfil
+      usuario, 
     });
+
   } catch (err) {
     console.error('Error en login:', err.message);
     res.status(500).json({ mensaje: 'Error del servidor', error: err.message });

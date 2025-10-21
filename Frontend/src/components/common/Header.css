@@ -58,6 +58,18 @@
   background: rgba(0, 0, 0, 0.199);
 }
 
+.logout-btn {
+  color: rgb(0, 0, 0);
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  transition: background 0.3s;
+}
+
+.logout-btn:hover {
+  background: rgba(0, 0, 0, 0.199);
+}
+
 .cart-link {
   color: white;
   text-decoration: none;

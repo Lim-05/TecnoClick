@@ -80,10 +80,13 @@ const Perfil = () => {
   };
 
   //cerrar sesion
-  const handleLogout = () => {
-    console.log('Cerrar sesión'); 
-    navigate('/login');
-  };
+const handleLogout = () => {
+  console.log('Cerrar sesión');
+  localStorage.removeItem('usuario'); // elimina los datos del usuario guardado
+  navigate('/'); // redirige a la página principal
+  window.location.reload(); // opcional, fuerza recarga para limpiar estados
+};
+
 
 return (
   <div className="perfil-page">

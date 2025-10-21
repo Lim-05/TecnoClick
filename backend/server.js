@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const bcrypt = require('bcrypt');
 const db = require('./config/db'); // Pool de PostgreSQL
 
 dotenv.config();
@@ -37,13 +38,16 @@ app.post('/api/usuarios', async (req, res) => {
   }
 
   try {
+
+    const hashedPassword = await bcrypt.hash(contra, 10);
+
     const sql = `
       INSERT INTO usuario 
       (nombre_usuario, apellido_usuario, telefono_usuario, correo_usuario, direccion_usuario, contrasena, codigo_postal, estado_usuario, municipio_usuario, colonia_usuario, referencias)
       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
       RETURNING *;
     `;
-    const values = [nombre, apellido, telefono, correo, direccion, contra, CP, estado, municipio, colonia, referencias];
+    const values = [nombre, apellido, telefono, correo, direccion, hashedPassword, CP, estado, municipio, colonia, referencias];
     const result = await db.query(sql, values);
 
     res.status(201).json({ mensaje: 'Usuario creado exitosamente', usuario: result.rows[0] });
