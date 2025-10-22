@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import usuarioRuta from '../rutes/userRoutes.js';
 
+
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -17,6 +18,7 @@ const authController = require('../controllers/authController');
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(session({ secret: 'secret', resave: true, saveUninitialized: true }));
 app.use(express.static('public'));
+
 
 app.get('/', (req, res) => res.sendFile(__dirname + '/views/login.html'));
 app.post('/login', authController.login);

@@ -15,6 +15,7 @@ import UsuariosAdmin from './pages/administrador/UsuariosAdmin';
 import AdminHome from './pages/administrador/AdminHome';
 import ProductosAdmin from './pages/administrador/ProductosAdmin';
 import CompraPage from './pages/CompraPage'; 
+import HistorialCompras from './components/historial/HistorialCompras';
 import './App.css';
 
 function App() {
@@ -27,15 +28,17 @@ function App() {
             <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/products" element={<ProductsPage />} />
-              <Route path="/product/:id" element={<ProductDetail />} /> {/* ✅ Ruta agregada */}
+              <Route path="/product/:id" element={<ProductDetail />} /> 
               <Route path="/cart" element={<Cart />} />
-              <Route path="/compra" element={<CompraPage />} /> {/* ← NUEVO */}              <Route path="/favoritos" element={<Favoritos />} />
+              <Route path="/compra" element={<CompraPage />} /> {/* ← NUEVO */}
+              <Route path="/favoritos" element={<Favoritos />} />
               <Route path="/checkout" element={<CheckoutForm />} />
               <Route path="/perfil" element={<Perfil />} />
               <Route path="/login" element={<Login />} />
               <Route path="/admin/usuarios" element={<UsuariosAdmin />} />
               <Route path="/admin" element={<AdminHome />} />
               <Route path="/admin/productos" element={<ProductosAdmin />} />
+              <Route path="/historial-compras" element={<HistorialCompras />} />
             </Routes>
           </main>
         </div>
