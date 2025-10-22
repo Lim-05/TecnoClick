@@ -56,13 +56,8 @@ const ProductDetail = () => {
           image: data.image || '/images/placeholder.jpg',
           // Limpiar descripción duplicada
           description: cleanDescription(data.description),
-          // Crear array de imágenes
-          images: [
-            data.image || '/images/placeholder.jpg',
-            '/images/placeholder-2.jpg',
-            '/images/placeholder-3.jpg',
-            '/images/placeholder-4.jpg'
-          ],
+          // Crear array de imágenes - solo usar la imagen real del producto
+          images: [data.image || '/images/placeholder.jpg'],
           // Descripción completa
           fullDescription: cleanDescription(data.description),
           // Especificaciones detalladas
@@ -223,6 +218,7 @@ const ProductDetail = () => {
               }}
             />
           </div>
+          {/* Mostrar siempre la miniatura */}
           <div className="image-thumbnails">
             {product.images.map((image, index) => (
               <img
