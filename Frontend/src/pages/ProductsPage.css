@@ -87,6 +87,17 @@
   font-weight: 500;
 }
 
+/* Notificación de favoritos */
+.fav-notification .notification-content {
+  background: linear-gradient(135deg, #e74c3c, #ff6b9d);
+  box-shadow: 0 8px 32px rgba(231, 76, 60, 0.4);
+}
+
+.fav-notification.removed .notification-content {
+  background: linear-gradient(135deg, #95a5a6, #bdc3c7);
+  box-shadow: 0 8px 32px rgba(149, 165, 166, 0.4);
+}
+
 .products-header {
   text-align: center;
   margin-bottom: 3rem;

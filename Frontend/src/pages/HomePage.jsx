@@ -11,6 +11,8 @@ const HomePage = () => {
   const [error, setError] = useState(null);
   const [showNotification, setShowNotification] = useState(false);
   const [notificationProduct, setNotificationProduct] = useState(null);
+  const [showFavNotification, setShowFavNotification] = useState(false);
+  const [favNotificationProduct, setFavNotificationProduct] = useState(null);
 
   // Función para cargar productos desde la base de datos
   useEffect(() => {
@@ -81,7 +83,15 @@ const HomePage = () => {
       type: 'ADD_TO_FAVORITOS',
       payload: product
     });
-    alert(`¡${product.name} agregado a favoritos! `);
+    
+    // Mostrar notificación
+    setFavNotificationProduct(product);
+    setShowFavNotification(true);
+    
+    // Ocultar notificación después de 3 segundos
+    setTimeout(() => {
+      setShowFavNotification(false);
+    }, 3000);
   };
 
   // Función para formatear precio
@@ -129,7 +139,7 @@ const HomePage = () => {
 
   return (
     <div className="home-page">
-      {/* Notificación de producto agregado */}
+      {/* Notificación de producto agregado al carrito */}
       {showNotification && notificationProduct && (
         <div className="cart-notification">
           <div className="notification-content">
@@ -137,6 +147,19 @@ const HomePage = () => {
             <div className="notification-text">
               <strong>¡Agregado al carrito!</strong>
               <p>{notificationProduct.name}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Notificación de favoritos */}
+      {showFavNotification && favNotificationProduct && (
+        <div className="cart-notification fav-notification added">
+          <div className="notification-content">
+            <span className="notification-icon">❤️</span>
+            <div className="notification-text">
+              <strong>¡Agregado a favoritos!</strong>
+              <p>{favNotificationProduct.name}</p>
             </div>
           </div>
         </div>

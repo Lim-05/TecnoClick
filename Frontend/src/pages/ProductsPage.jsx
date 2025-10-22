@@ -15,6 +15,9 @@ const ProductsPage = () => {
   const [loading, setLoading] = useState(true);
   const [showNotification, setShowNotification] = useState(false);
   const [notificationProduct, setNotificationProduct] = useState(null);
+  const [showFavNotification, setShowFavNotification] = useState(false);
+  const [favNotificationProduct, setFavNotificationProduct] = useState(null);
+  const [favNotificationType, setFavNotificationType] = useState('added'); // 'added' o 'removed'
   const [categories, setCategories] = useState([
     { id: 'todos', name: 'Todos los Productos', count: 0 }
   ]);
@@ -89,11 +92,22 @@ const ProductsPage = () => {
     
     if (isAlreadyFavorite) {
       dispatch({ type: 'REMOVE_FROM_FAVORITOS', payload: product.id });
+      setFavNotificationType('removed');
+      setFavNotificationProduct(product);
+      setShowFavNotification(true);
       console.log(` ${product.name} removido de favoritos`);
     } else {
       dispatch({ type: 'ADD_TO_FAVORITOS', payload: product });
+      setFavNotificationType('added');
+      setFavNotificationProduct(product);
+      setShowFavNotification(true);
       console.log(` ${product.name} agregado a favoritos`);
     }
+    
+    // Ocultar notificación después de 3 segundos
+    setTimeout(() => {
+      setShowFavNotification(false);
+    }, 3000);
   };
 
   // Verificar si un producto está en favoritos
@@ -223,7 +237,7 @@ const ProductsPage = () => {
 
   return (
     <div className="products-page">
-      {/* Notificación de producto agregado */}
+      {/* Notificación de producto agregado al carrito */}
       {showNotification && notificationProduct && (
         <div className="cart-notification">
           <div className="notification-content">
@@ -231,6 +245,25 @@ const ProductsPage = () => {
             <div className="notification-text">
               <strong>¡Agregado al carrito!</strong>
               <p>{notificationProduct.name}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Notificación de favoritos */}
+      {showFavNotification && favNotificationProduct && (
+        <div className={`cart-notification fav-notification ${favNotificationType}`}>
+          <div className="notification-content">
+            <span className="notification-icon">
+              {favNotificationType === 'added' ? '❤️' : '💔'}
+            </span>
+            <div className="notification-text">
+              <strong>
+                {favNotificationType === 'added' 
+                  ? '¡Agregado a favoritos!' 
+                  : '¡Eliminado de favoritos!'}
+              </strong>
+              <p>{favNotificationProduct.name}</p>
             </div>
           </div>
         </div>
