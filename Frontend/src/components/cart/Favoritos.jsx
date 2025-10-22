@@ -28,9 +28,13 @@ const Favoritos = () => {
             {favoritos.map((producto) => (
               <div key={producto.id} className="favorito-item">
                 <img
-                  src={producto.imagen || "/placeholder.jpg"}
+                  src={producto.image || producto.imagen || "/placeholder.jpg"}
                   alt={producto.name || producto.nombre}
                   className="favorito-imagen"
+                  onError={(e) => {
+                    e.target.src = '/placeholder.jpg';
+                    e.target.alt = 'Imagen no disponible';
+                  }}
                 />
                 <div className="favorito-info">
                   <h5>{producto.name || producto.nombre}</h5>
