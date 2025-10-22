@@ -14,6 +14,7 @@ import Login from './pages/Login';
 import UsuariosAdmin from './pages/administrador/UsuariosAdmin';
 import AdminHome from './pages/administrador/AdminHome';
 import ProductosAdmin from './pages/administrador/ProductosAdmin';
+import CompraPage from './pages/CompraPage'; 
 import './App.css';
 
 function App() {
@@ -28,8 +29,7 @@ function App() {
               <Route path="/products" element={<ProductsPage />} />
               <Route path="/product/:id" element={<ProductDetail />} /> {/* ✅ Ruta agregada */}
               <Route path="/cart" element={<Cart />} />
-              <Route path="/registro-compra" element={<Reg_Compra />} /> {/* ✅ Ruta agregada */}
-              <Route path="/favoritos" element={<Favoritos />} />
+              <Route path="/compra" element={<CompraPage />} /> {/* ← NUEVO */}              <Route path="/favoritos" element={<Favoritos />} />
               <Route path="/checkout" element={<CheckoutForm />} />
               <Route path="/perfil" element={<Perfil />} />
               <Route path="/login" element={<Login />} />

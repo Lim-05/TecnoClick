@@ -1,8 +1,8 @@
 import React, {useState} from 'react';
 import { useApp } from '../../context/AppContext';
-import { Link } from 'react-router-dom';
 import Modal from '../common/Modal';
 import CheckoutForm from './Reg_Compra';
+import { Link, useNavigate } from 'react-router-dom';
 import './Cart.css';
 
 const Cart = () => {
@@ -10,6 +10,8 @@ const Cart = () => {
   const { cart } = state;
 
   const usuario = JSON.parse(localStorage.getItem('usuario'));
+
+const navigate = useNavigate();
 
   const [isModalOpen, setModalOpen] = useState(false);
 
@@ -133,8 +135,17 @@ const Cart = () => {
             <Link to="/products" className="continue-shopping">
               Seguir Comprando
             </Link>
-            <button className="checkout-btn" onClick={() => setModalOpen(true)}>
-              Continuar con la compra
+            <button
+              className="checkout-btn"
+              onClick={() => {
+                if (usuario) {
+                  // Usuario logueado → ir directo al checkout
+                  navigate('/checkout'); 
+                } else {
+                  // Usuario NO logueado → abrir modal de registro
+                  setModalOpen(true);
+                }
+              }} >Continuar con la compra
             </button>
           </div>
           
