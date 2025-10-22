@@ -116,31 +116,31 @@ const CheckoutForm = () => {
           throw new Error(data.error || 'Error al registrar el pago en efectivo');
         }
 
-        alert(`Compra completada ✅ Folio: ${data.folio}`);
+        alert(`Compra completada Folio: ${data.folio}`);
 
       } else if (paymentMethod === 'tarjeta') {
-        // Preparar datos de tarjeta
-        const tarjetaData = {
+        const tarjeta = {
           nombre_titular: formData.nombreTitular,
           numero_tarjeta: formData.numeroTarjeta.replace(/\s/g, ''),
           fecha_vencimiento: formData.fechaExpiracion,
-          cvv: formData.cvv,
-          id_usuario: idUsuario
+          cvv: formData.cvv
         };
 
-        const response = await fetch('http://localhost:3000/api/datos_tarjeta', {
+        const response = await fetch('http://localhost:3000/api/checkout/tarjeta', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(tarjetaData)
+          body: JSON.stringify({
+            idUsuario,
+            productos: orderData.productos,
+            total: orderData.total,
+            tarjeta
+          })
         });
 
         const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Error al registrar el pago con tarjeta');
 
-        if (!response.ok) {
-          throw new Error(data.error || 'Error al guardar los datos de la tarjeta');
-        }
-
-        alert('Pago con tarjeta registrado correctamente ✅');
+        alert(`Pago completado Folio: ${data.folio}`);
       }
 
       // Limpiar carrito y redirigir

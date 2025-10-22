@@ -8,13 +8,13 @@ async function procesarPagoEfectivo(req, res) {
       return res.status(400).json({ mensaje: 'Datos incompletos para procesar el pago' });
     }
 
-    // 1️⃣ Crear pedido
+    // Crear pedido + detalle + actualizar stock
     const idPedido = await crearPedido(idUsuario, productos, total);
 
-    // 2️⃣ Registrar pago en efectivo
+    // Registrar pago en efectivo
     await registrarPagoEfectivo(idPedido, idUsuario, folio);
 
-    // 3️⃣ Registrar ingreso
+    // Registrar ingreso
     await registrarIngreso(idPedido);
 
     res.status(201).json({
