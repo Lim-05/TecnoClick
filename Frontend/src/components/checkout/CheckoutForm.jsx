@@ -66,12 +66,92 @@ const CheckoutForm = () => {
   };
 
   const handleSubmit = async (e) => {
+  e.preventDefault();
+  setIsSubmitting(true);
+
+  try {
+    // Simular procesamiento de pago
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
+    // Recuperar id_usuario del localStorage
+    const usuario = JSON.parse(localStorage.getItem('usuario'));
+    const id_usuario = usuario ? usuario.id_usuario : null; // Asegúrate que en localStorage se guarde así
+
+    let orderData = {
+      ...formData,
+      paymentMethod,
+      productos: state.cart,
+      total: state.cart.reduce((sum, item) => {
+        const price = parseFloat(item.price.replace(/,/g, ''));
+        return sum + (price * item.quantity);
+      }, 0),
+      fecha: new Date().toISOString(),
+    };
+
+    if (paymentMethod === 'efectivo') {
+      orderData.folio = generateFolio();
+      orderData.estado = 'pendiente';
+    } else {
+      orderData.estado = 'procesado';
+    }
+
+    // Si el método de pago es tarjeta, guardar en BD
+    if (paymentMethod === 'tarjeta') {
+      const tarjetaData = {
+        nombre_titular: formData.nombreTitular,
+        numero_tarjeta: formData.numeroTarjeta.replace(/\s/g, ''), // sin espacios
+        fecha_vencimiento: formData.fechaExpiracion,
+        cvv: formData.cvv,
+        id_usuario: id_usuario,
+      };
+
+      const response = await fetch('http://localhost:3000/api/datos_tarjeta', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(tarjetaData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Error al guardar datos de tarjeta');
+      }
+
+      console.log('✅ Tarjeta guardada correctamente:', data);
+    }
+
+    console.log('Orden creada:', orderData);
+
+    // Limpiar carrito
+    dispatch({ type: 'CLEAR_CART' });
+
+    // Mostrar mensaje de éxito
+    alert(paymentMethod === 'efectivo'
+      ? `¡Pedido creado! Tu folio de pago es: ${orderData.folio}`
+      : '¡Pago procesado exitosamente!'
+    );
+
+    // Redirigir a home
+    navigate('/');
+
+  } catch (error) {
+    console.error('Error al procesar pedido:', error);
+    alert('Error al procesar el pedido. Intenta nuevamente.');
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
+  /*const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
 
     try {
       // Simular procesamiento de pago
       await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      const usuario = JSON.parse(localStorage.getItem('usuario'));
+      const id_usuario = usuario ? usuario.id_usuario : null
 
       let orderData = {
         ...formData,
@@ -89,6 +169,31 @@ const CheckoutForm = () => {
         orderData.estado = 'pendiente';
       } else {
         orderData.estado = 'procesado';
+      }
+
+      //si es con tarejeta guardamos en bd
+      if(paymentMethod === 'tarjeta'){
+        const tarjetaData = {
+          nombre_titular: formData.nombreTitular,
+          numero_tarjeta: formData.numeroTarjeta.replace(/\s+/g, ''),
+          fecha_vencimiento: formData.fechaExpiracion,
+          CVV: formData.cvv,
+          id_usuario: id_usuario,
+        }
+      }
+
+      const response = await fetch('http://localhost:3000/api/datos_tarjeta', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(tarjetaData),
+      })
+
+      const data = await response.json();
+
+      if(!response.ok){
+        throw new Error(data.error || 'Error al guardar los datos de la tarjeta');
       }
 
       console.log('Orden creada:', orderData);
@@ -111,7 +216,7 @@ const CheckoutForm = () => {
     } finally {
       setIsSubmitting(false);
     }
-  };
+  };*/
 
   const total = state.cart.reduce((sum, item) => {
     const price = parseFloat(item.price.replace(/,/g, ''));
@@ -214,7 +319,7 @@ const CheckoutForm = () => {
                   </div>
                   
                   <div className="form-group">
-                    <label>CVV *</label>
+                    <label>cvv *</label>
                     <input
                       type="text"
                       name="cvv"

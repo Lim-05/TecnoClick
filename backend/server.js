@@ -20,8 +20,8 @@ app.use(express.json());
 // Rutas
 const authRoutes = require('./routes/authRoutes');        // login, registro
 const productRoutes = require('./routes/productRoutes');  // productos
-const tarjetasRoutes = require('./routes/tarjetasRoutes'); // tarjetas
-const userRoutes = require('./routes/userRoutes');        // PUT /usuarios/:id
+const userRoutes = require('./routes/userRoutes');   
+const tarjetasRoutes = require('./routes/tarjetasRoutes');   // PUT /usuarios/:id
 
 // Montar rutas
 app.use('/api', authRoutes);            // /api/login y /api/usuarios (POST)
