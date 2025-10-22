@@ -22,10 +22,12 @@ const authRoutes = require('./routes/authRoutes');        // login, registro
 const productRoutes = require('./routes/productRoutes');  // productos
 const userRoutes = require('./routes/userRoutes');   
 const tarjetasRoutes = require('./routes/tarjetasRoutes');   // PUT /usuarios/:id
+const checkoutRoutes = require('./routes/checkoutRoutes');
 
 // Montar rutas
 app.use('/api', authRoutes);            // /api/login y /api/usuarios (POST)
 app.use('/api/productos', productRoutes);
+app.use('/api', checkoutRoutes);
 app.use('/api/datos_tarjeta', tarjetasRoutes);
 app.use('/api/usuarios', userRoutes);   // PUT /api/usuarios/:id
 

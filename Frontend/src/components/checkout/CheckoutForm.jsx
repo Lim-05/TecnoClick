@@ -89,11 +89,34 @@ const CheckoutForm = () => {
     };
 
     if (paymentMethod === 'efectivo') {
-      orderData.folio = generateFolio();
-      orderData.estado = 'pendiente';
-    } else {
-      orderData.estado = 'procesado';
+      const folio = generateFolio();
+      const idUsuario = state.user?.id_usuario || 1; // Ajusta según tu contexto de sesión
+
+      const response = await fetch('http://localhost:3000/api/checkout/efectivo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          idUsuario,
+          productos: state.cart.map(item => ({
+            id: item.id,
+            quantity: item.quantity
+          })),
+          total,
+          folio
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert(`Compra completada ✅ Folio: ${data.folio}`);
+        dispatch({ type: 'CLEAR_CART' });
+        navigate('/');
+      } else {
+        alert('Error al registrar el pago en efectivo.');
+      }
     }
+
 
     // Si el método de pago es tarjeta, guardar en BD
     if (paymentMethod === 'tarjeta') {
