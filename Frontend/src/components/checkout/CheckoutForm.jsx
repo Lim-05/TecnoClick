@@ -66,104 +66,95 @@ const CheckoutForm = () => {
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  setIsSubmitting(true);
+    e.preventDefault();
+    setIsSubmitting(true);
 
-  try {
-    // Simular procesamiento de pago
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    try {
+      // Recuperar id_usuario del localStorage
+      const usuario = JSON.parse(localStorage.getItem('usuario'));
+      const idUsuario = usuario?.id_usuario;
 
-    // Recuperar id_usuario del localStorage
-    const usuario = JSON.parse(localStorage.getItem('usuario'));
-    const id_usuario = usuario ? usuario.id_usuario : null; // Asegúrate que en localStorage se guarde así
-
-    let orderData = {
-      ...formData,
-      paymentMethod,
-      productos: state.cart,
-      total: state.cart.reduce((sum, item) => {
-        const price = parseFloat(item.price.replace(/,/g, ''));
-        return sum + (price * item.quantity);
-      }, 0),
-      fecha: new Date().toISOString(),
-    };
-
-    if (paymentMethod === 'efectivo') {
-      const folio = generateFolio();
-      const idUsuario = state.user?.id_usuario || 1; // Ajusta según tu contexto de sesión
-
-      const response = await fetch('http://localhost:3000/api/checkout/efectivo', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          idUsuario,
-          productos: state.cart.map(item => ({
-            id: item.id,
-            quantity: item.quantity
-          })),
-          total,
-          folio
-        })
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        alert(`Compra completada ✅ Folio: ${data.folio}`);
-        dispatch({ type: 'CLEAR_CART' });
-        navigate('/');
-      } else {
-        alert('Error al registrar el pago en efectivo.');
+      if (!idUsuario) {
+        alert("No se pudo determinar el usuario logueado.");
+        setIsSubmitting(false);
+        return;
       }
-    }
 
+      // Calcular total
+      const total = state.cart.reduce((sum, item) => {
+        const price = parseFloat(item.price.replace(/,/g, ''));
+        return sum + price * item.quantity;
+      }, 0);
 
-    // Si el método de pago es tarjeta, guardar en BD
-    if (paymentMethod === 'tarjeta') {
-      const tarjetaData = {
-        nombre_titular: formData.nombreTitular,
-        numero_tarjeta: formData.numeroTarjeta.replace(/\s/g, ''), // sin espacios
-        fecha_vencimiento: formData.fechaExpiracion,
-        cvv: formData.cvv,
-        id_usuario: id_usuario,
+      // Generar datos de pedido comunes
+      const orderData = {
+        productos: state.cart.map(item => ({
+          id: item.id,
+          quantity: item.quantity
+        })),
+        total,
+        fecha: new Date().toISOString()
       };
 
-      const response = await fetch('http://localhost:3000/api/datos_tarjeta', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(tarjetaData),
-      });
+      if (paymentMethod === 'efectivo') {
+        const folio = 'TEC' + Date.now().toString().slice(-8);
 
-      const data = await response.json();
+        const response = await fetch('http://localhost:3000/api/checkout/efectivo', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            idUsuario,
+            productos: orderData.productos,
+            total: orderData.total,
+            folio
+          })
+        });
 
-      if (!response.ok) {
-        throw new Error(data.error || 'Error al guardar datos de tarjeta');
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Error al registrar el pago en efectivo');
+        }
+
+        alert(`Compra completada ✅ Folio: ${data.folio}`);
+
+      } else if (paymentMethod === 'tarjeta') {
+        // Preparar datos de tarjeta
+        const tarjetaData = {
+          nombre_titular: formData.nombreTitular,
+          numero_tarjeta: formData.numeroTarjeta.replace(/\s/g, ''),
+          fecha_vencimiento: formData.fechaExpiracion,
+          cvv: formData.cvv,
+          id_usuario: idUsuario
+        };
+
+        const response = await fetch('http://localhost:3000/api/datos_tarjeta', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(tarjetaData)
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Error al guardar los datos de la tarjeta');
+        }
+
+        alert('Pago con tarjeta registrado correctamente ✅');
       }
 
-      console.log('✅ Tarjeta guardada correctamente:', data);
+      // Limpiar carrito y redirigir
+      dispatch({ type: 'CLEAR_CART' });
+      navigate('/');
+
+    } catch (error) {
+      console.error('Error al procesar pedido:', error);
+      alert('Error al procesar el pedido. Intenta nuevamente.');
+    } finally {
+      setIsSubmitting(false);
     }
+  };
 
-    console.log('Orden creada:', orderData);
-
-    // Limpiar carrito
-    dispatch({ type: 'CLEAR_CART' });
-
-    // Mostrar mensaje de éxito
-    alert(paymentMethod === 'efectivo'
-      ? `¡Pedido creado! Tu folio de pago es: ${orderData.folio}`
-      : '¡Pago procesado exitosamente!'
-    );
-
-    // Redirigir a home
-    navigate('/');
-
-  } catch (error) {
-    console.error('Error al procesar pedido:', error);
-    alert('Error al procesar el pedido. Intenta nuevamente.');
-  } finally {
-    setIsSubmitting(false);
-  }
-};
 
   /*const handleSubmit = async (e) => {
     e.preventDefault();
