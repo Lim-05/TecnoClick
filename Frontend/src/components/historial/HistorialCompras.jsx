@@ -9,6 +9,12 @@ const HistorialCompras = () => {
   const [detalleVisible, setDetalleVisible] = useState(null);
   const navigate = useNavigate();
 
+  const getImageUrl = (imagen) => {
+  if (!imagen) return '/images/placeholder.png';
+  if (imagen.startsWith('http')) return imagen;
+  return `/images/${imagen}`;
+};
+
   useEffect(() => {
     cargarHistorial();
   }, []);
@@ -76,9 +82,7 @@ const HistorialCompras = () => {
     return fecha.toLocaleDateString('es-MX', {
       year: 'numeric',
       month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+      day: 'numeric',      
     });
   };
 
@@ -145,11 +149,11 @@ const HistorialCompras = () => {
           </div>
         ) : (
           <div className="historial-list">
-            {historial.map((compra) => (
+            {historial.map((compra, index) => (
               <div key={compra.id} className="compra-card">
                 <div className="compra-header">
                   <div className="compra-info">
-                    <div className="compra-id">Orden #{compra.id}</div>
+                    <div className="compra-id">Pedido {historial.length - index}</div>
                     <div className="compra-fecha">{formatFecha(compra.fecha)}</div>
                   </div>
                   <div className="compra-estado">
@@ -200,10 +204,10 @@ const HistorialCompras = () => {
                         <div key={index} className="producto-item">
                           <div className="producto-imagen">
                             <img 
-                              src={producto.imagen || '/images/placeholder.jpg'} 
+                              src={getImageUrl(producto.imagen)} 
                               alt={producto.nombre}
                               onError={(e) => {
-                                e.target.src = '/images/placeholder.jpg';
+                                e.target.src = '/Frontend/public/images/placeholder.png';
                               }}
                             />
                           </div>

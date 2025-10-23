@@ -5,24 +5,13 @@ async function obtenerHistorialCompras(req, res) {
   try {
     const { idUsuario } = req.params;
 
-    console.log(' Buscando historial para usuario:', idUsuario);
+    console.log('Buscando historial para usuario:', idUsuario);
 
-    // Llamar al modelo
     const pedidos = await getPedidosByUsuario(idUsuario);
 
-    console.log(' Pedidos encontrados:', pedidos);
+    console.log('Pedidos encontrados:', pedidos.length);
 
-    // Si no hay pedidos, devolver array vacío
-    if (!pedidos || pedidos.length === 0) {
-      console.log('📭 No hay pedidos para este usuario');
-      return res.status(200).json({
-        mensaje: 'No hay compras registradas',
-        historial: [],
-        totalCompras: 0
-      });
-    }
-
-    // Formatear la respuesta para un solo producto por pedido
+    // Formatear la respuesta con múltiples productos por pedido
     const historial = pedidos.map(pedido => ({
       id: pedido.id_pedido,
       fecha: pedido.fecha_pedido,
@@ -30,21 +19,9 @@ async function obtenerHistorialCompras(req, res) {
       estado: pedido.estado_pedido,
       folio: pedido.folio_pago,
       metodoPago: pedido.metodo_pago,
-      productos: [
-        {
-          id: pedido.id_producto,
-          nombre: pedido.nombre_producto,
-          cantidad: pedido.cantidad,
-          precioUnitario: parseFloat(pedido.precio),
-          subtotal: parseFloat(pedido.subtotal),
-          imagen: pedido.imagen,
-          marca: pedido.marca
-        }
-      ],
-      cantidadProductos: 1
+      productos: pedido.productos || [],
+      cantidadProductos: pedido.productos ? pedido.productos.reduce((sum, prod) => sum + prod.cantidad, 0) : 0
     }));
-
-    console.log(' Historial formateado:', historial.length, 'pedidos');
 
     res.status(200).json({
       mensaje: 'Historial de compras obtenido exitosamente',
@@ -53,8 +30,7 @@ async function obtenerHistorialCompras(req, res) {
     });
 
   } catch (error) {
-    console.error(' Error en obtenerHistorialCompras:', error.message);
-    console.error(' Stack trace:', error.stack);
+    console.error('Error en obtenerHistorialCompras:', error.message);
     res.status(500).json({ 
       mensaje: 'Error al obtener el historial de compras', 
       error: error.message 
@@ -67,7 +43,7 @@ async function obtenerDetalleCompra(req, res) {
   try {
     const { idPedido, idUsuario } = req.params;
 
-    console.log('🔍 Buscando detalle del pedido:', idPedido, 'para usuario:', idUsuario);
+    console.log('Buscando detalle del pedido:', idPedido, 'para usuario:', idUsuario);
 
     const pedido = await getPedidoById(idPedido, idUsuario);
 
@@ -77,7 +53,7 @@ async function obtenerDetalleCompra(req, res) {
       });
     }
 
-    // Formatear la respuesta para un solo producto
+    
     const detalle = {
       id: pedido.id_pedido,
       fecha: pedido.fecha_pedido,
@@ -85,18 +61,16 @@ async function obtenerDetalleCompra(req, res) {
       estado: pedido.estado_pedido,
       folio: pedido.folio_pago,
       metodoPago: pedido.metodo_pago,
-      productos: [
-        {
-          id: pedido.id_producto,
-          nombre: pedido.nombre_producto,
-          cantidad: pedido.cantidad,
-          precioUnitario: parseFloat(pedido.precio),
-          subtotal: parseFloat(pedido.subtotal),
-          imagen: pedido.imagen,
-          marca: pedido.marca,
-          descripcion: pedido.descripcion
-        }
-      ]
+      productos: (pedido.productos || []).map(producto => ({
+        id: producto.id_producto,
+        nombre: producto.nombre_producto,
+        marca: producto.marca,
+        descripcion: producto.descripcion,
+        cantidad: producto.cantidad,
+        precioUnitario: parseFloat(producto.precio_unitario),
+        subtotal: parseFloat(producto.subtotal),
+        imagen: producto.imagen
+      }))
     };
 
     res.status(200).json({
@@ -105,7 +79,7 @@ async function obtenerDetalleCompra(req, res) {
     });
 
   } catch (error) {
-    console.error(' Error en obtenerDetalleCompra:', error.message);
+    console.error('Error en obtenerDetalleCompra:', error.message);
     res.status(500).json({ 
       mensaje: 'Error al obtener el detalle de la compra', 
       error: error.message 
