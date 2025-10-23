@@ -20,8 +20,8 @@ async function getProductos(req, res) {
         description: p.descripcion || "Sin descripción disponible",
         image: p.imagen ? `/images/${p.imagen}` : '/images/placeholder.jpg',
         specs: p.descripcion ? p.descripcion.split(',').slice(0, 4).map(s => s.trim()) : ["Sin especificaciones"],
-        inStock: true, // Por defecto true (no hay campo de stock))
-        stock: 10, // Valor fijo temporal
+        inStock: p.stock > 0,    // true si hay stock
+        stock: p.stock,
         rating: 4.5, // valor fijo temporal
         reviewCount: 10 // valor fijo temporal
       };
@@ -49,16 +49,16 @@ async function getProductoPorId(req, res) {
     const producto = {
       id: productoDB.id_producto,
       name: productoDB.nombre_producto,
-      price: precioNumero.toLocaleString('es-MX', { minimumFractionDigits: 2 }),
-      originalPrice: (precioNumero * 1.2).toLocaleString('es-MX', { minimumFractionDigits: 2 }),
+      price: precioNumero, // ✅ número real
+      originalPrice: precioNumero * 1.2, // ✅ número real
       currency: "MXN",
       category: productoDB.categoria ? productoDB.categoria.toLowerCase().replace(/\s+/g, '-') : "otros",
       brand: productoDB.marca || "Genérico",
       description: productoDB.descripcion || "Sin descripción disponible",
       image: productoDB.imagen ? `/images/${productoDB.imagen}` : '/images/placeholder.jpg',
       specs: productoDB.descripcion ? productoDB.descripcion.split(',').slice(0, 4).map(s => s.trim()) : ["Sin especificaciones"],
-      inStock: true,
-      stock: 10,
+      inStock: productoDB.stock > 0,
+      stock: productoDB.stock,
       rating: 4.5,
       reviewCount: 10
     };

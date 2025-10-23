@@ -68,7 +68,8 @@ const ProductDetail = () => {
           // Reseñas (si vienen de la BD, si no, array vacío)
           reviews: data.reviews || [],
           // Asegurar que el stock esté definido
-          stock: data.stock || (data.inStock ? 10 : 0),
+          stock: data.stock ?? 0,
+          inStock: (data.stock ?? 0) > 0,
           // Asegurar que la moneda esté definida
           currency: data.currency || 'MXN',
           // Asegurar que el rating esté definido
@@ -101,7 +102,7 @@ const ProductDetail = () => {
       price: product.price,
       currency: product.currency || 'MXN',
       image: product.image || product.images[0],
-      stock: product.stock || 10,
+      stock: product.stock,
       inStock: product.inStock
     };
     
@@ -128,7 +129,7 @@ const ProductDetail = () => {
   };
 
   const increaseQuantity = () => {
-    if (product && quantity < (product.stock || 10)) {
+    if (product && quantity < (product.stock)) {
       setQuantity(quantity + 1);
     }
   };
@@ -261,13 +262,13 @@ const ProductDetail = () => {
 
             {/* Precio */}
             <div className="product-pricing">
-              <span className="current-price">{product.price} {product.currency}</span>
-              {product.originalPrice && product.originalPrice !== product.price && (
-                <>
-                  <span className="original-price">{product.originalPrice} {product.currency}</span>
-                  <span className="discount">{discountPercentage}% OFF</span>
-                </>
-              )}
+            <span className="current-price">
+              {product.price.toLocaleString('es-MX', { minimumFractionDigits: 2 })} {product.currency}
+            </span>
+            <span className="original-price">
+              {product.originalPrice.toLocaleString('es-MX', { minimumFractionDigits: 2 })} {product.currency}
+            </span>
+
             </div>
 
             {/* Descripción corta */}
@@ -283,9 +284,9 @@ const ProductDetail = () => {
               <div className="quantity-controls">
                 <button onClick={decreaseQuantity} disabled={quantity <= 1}>-</button>
                 <span>{quantity}</span>
-                <button onClick={increaseQuantity} disabled={quantity >= (product.stock || 10)}>+</button>
+                <button onClick={increaseQuantity} disabled={quantity >= (product.stock)}>+</button>
               </div>
-              <span className="stock-info">{product.stock || 10} disponibles</span>
+              <span className="stock-info">{product.stock} disponibles</span>
             </div>
 
             <div className="action-buttons">

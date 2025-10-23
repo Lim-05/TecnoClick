@@ -8,8 +8,15 @@ async function getAllUsers() {
       SELECT 
         id_usuario,
         nombre_usuario,
+        apellido_usuario,
+        telefono_usuario,
         correo_usuario,
-        estado_usuario
+        direccion_usuario,
+        codigo_postal,
+        estado_usuario,
+        municipio_usuario,
+        colonia_usuario,
+        referencias
       FROM usuario
       ORDER BY id_usuario ASC;
     `);
@@ -19,6 +26,7 @@ async function getAllUsers() {
     throw error;
   }
 }
+
 
 // Eliminar usuario por ID
 async function deleteUserById(id) {
@@ -34,18 +42,16 @@ async function deleteUserById(id) {
   }
 }
 
-module.exports = { getAllUsers, deleteUserById };
-const pool = require('../config/db');
 
 const Usuario = {
   obtenerPorId: async (id) => {
     const sql = 'SELECT * FROM usuario WHERE id_usuario = $1';
-    const result = await pool.query(sql, [id]);
+    const result = await db.query(sql, [id]);
     return result.rows[0];
   },
 
   actualizar: async (id, datos) => {
-    const usuarioActual = await pool.query(
+    const usuarioActual = await db.query(
       'SELECT contrasena FROM usuario WHERE id_usuario=$1',
       [id]
     );
@@ -97,10 +103,14 @@ const Usuario = {
       id
     ];
 
-    const result = await pool.query(sql, values);
+    const result = await db.query(sql, values);
     return result.rows[0];
   }
 };
 
-module.exports = Usuario;
+module.exports = {
+  getAllUsers,
+  deleteUserById,
+  ...Usuario
+};
 

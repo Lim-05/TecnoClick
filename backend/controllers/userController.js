@@ -1,5 +1,5 @@
-const { getAllUsers, deleteUserById } = require('../models/userModel');
-const Usuario = require('../models/userModel.js');
+const { getAllUsers, deleteUserById, actualizar, obtenerPorId } = require('../models/userModel');
+
 
 // Obtener todos los usuarios
 async function obtenerUsuarios(req, res) {
@@ -9,6 +9,22 @@ async function obtenerUsuarios(req, res) {
   } catch (error) {
     console.error('Error al obtener usuarios:', error.message);
     res.status(500).json({ mensaje: 'Error al obtener usuarios' });
+  }
+}
+
+async function obtenerUsuarioPorId(req, res) {
+  try {
+    const id = parseInt(req.params.id);
+    const usuario = await obtenerPorId(id);
+
+    if (!usuario) {
+      return res.status(404).json({ mensaje: 'Usuario no encontrado' });
+    }
+
+    res.status(200).json({ usuario });
+  } catch (error) {
+    console.error('Error al obtener usuario por ID:', error.message);
+    res.status(500).json({ mensaje: 'Error al obtener usuario' });
   }
 }
 
@@ -38,7 +54,7 @@ const actualizarUsuario = async (req, res) => {
     // temporal: no actualizar contraseña
     delete datosActualizados.contrasena;
 
-    const usuarioActualizado = await Usuario.actualizar(id, datosActualizados);
+    const usuarioActualizado = await actualizar(id, datosActualizados);
 
     if (usuarioActualizado) {
       res.status(200).json({ mensaje: "Actualización válida", usuario: usuarioActualizado });
@@ -52,4 +68,4 @@ const actualizarUsuario = async (req, res) => {
 };
 
 // Exportar todas las funciones juntas
-module.exports = { obtenerUsuarios, eliminarUsuario, actualizarUsuario };
+module.exports = { obtenerUsuarios, obtenerUsuarioPorId, eliminarUsuario, actualizarUsuario };

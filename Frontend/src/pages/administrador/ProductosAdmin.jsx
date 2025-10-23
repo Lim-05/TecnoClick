@@ -63,6 +63,7 @@ const ProductosAdmin = () => {
                 <th>Marca</th>
                 <th>Precio</th>
                 <th>Categoría</th>
+                <th>Stock</th>
                 <th>Acciones</th>
               </tr>
             </thead>
@@ -73,6 +74,7 @@ const ProductosAdmin = () => {
                   <td>{p.brand}</td>
                   <td>${p.price}</td>
                   <td>{p.category}</td>
+                  <td>{p.stock}</td>
                   <td>
                     <button
                       className="btn-eliminar"
