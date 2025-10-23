@@ -129,7 +129,7 @@ return (
           ))}
         </div>
       </fieldset>
-
+      {/*no funciona*/}
       {!isEditing ? (
         <button className="continue-btn active" onClick={handleEditClick}>Editar</button>
       ) : (
