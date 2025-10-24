@@ -99,7 +99,7 @@ const ProductDetail = () => {
     const cartItem = {
       id: product.id,
       name: product.name,
-      price: product.price,
+      price: typeof product.price === 'number' ? product.price.toString() : product.price,
       currency: product.currency || 'MXN',
       image: product.image || product.images[0],
       stock: product.stock,

@@ -82,7 +82,14 @@ const CheckoutForm = () => {
 
       // Calcular total
       const total = state.cart.reduce((sum, item) => {
-        const price = parseFloat(item.price.replace(/,/g, ''));
+        let price;
+        if (typeof item.price === 'number') {
+          price = item.price;
+        } else if (typeof item.price === 'string') {
+          price = parseFloat(item.price.replace(/,/g, ''));
+        } else {
+          return sum;
+        }
         return sum + price * item.quantity;
       }, 0);
 
@@ -233,7 +240,14 @@ const CheckoutForm = () => {
   };*/
 
   const total = state.cart.reduce((sum, item) => {
-    const price = parseFloat(item.price.replace(/,/g, ''));
+    let price;
+    if (typeof item.price === 'number') {
+      price = item.price;
+    } else if (typeof item.price === 'string') {
+      price = parseFloat(item.price.replace(/,/g, ''));
+    } else {
+      return sum;
+    }
     return sum + (price * item.quantity);
   }, 0);
 
@@ -371,7 +385,12 @@ const CheckoutForm = () => {
               {state.cart.map(item => (
                 <div key={item.id} className="order-item">
                   <span>{item.name} x {item.quantity}</span>
-                  <span>${(parseFloat(item.price.replace(/,/g, '')) * item.quantity).toLocaleString()} MXN</span>
+                  <span>${(() => {
+                    const price = typeof item.price === 'number' 
+                      ? item.price 
+                      : parseFloat(item.price.replace(/,/g, ''));
+                    return (price * item.quantity).toLocaleString();
+                  })()} MXN</span>
                 </div>
               ))}
             </div>

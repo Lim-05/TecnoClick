@@ -12,7 +12,12 @@ const Favoritos = () => {
   };
 
   const agregarAlCarrito = (producto) => {
-    dispatch({ type: 'ADD_TO_CART', payload: producto });
+    // Asegurar que el precio sea string
+    const productoConPrecioString = {
+      ...producto,
+      price: typeof producto.price === 'number' ? producto.price.toString() : producto.price
+    };
+    dispatch({ type: 'ADD_TO_CART', payload: productoConPrecioString });
     alert(`¡${producto.name} agregado al carrito!`);
   };
 

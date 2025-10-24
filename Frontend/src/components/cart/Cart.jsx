@@ -42,10 +42,17 @@ const navigate = useNavigate();
 
   
   const total = cart.reduce((sum, item) => {
-    
-    const cleanPrice = item.price.replace(/,/g, '');
-    const price = parseFloat(cleanPrice);
-    
+    // Manejar tanto números como strings
+    let price;
+    if (typeof item.price === 'number') {
+      price = item.price;
+    } else if (typeof item.price === 'string') {
+      const cleanPrice = item.price.replace(/,/g, '');
+      price = parseFloat(cleanPrice);
+    } else {
+      console.warn(`Precio inválido para ${item.name}: ${item.price}`);
+      return sum;
+    }
     
     if (isNaN(price)) {
       console.warn(`Precio inválido para ${item.name}: ${item.price}`);
@@ -112,8 +119,12 @@ const navigate = useNavigate();
               </div>
               
               <div className="item-total">
-                
-                {(parseFloat(item.price.replace(/,/g, '')) * item.quantity).toLocaleString()} {item.currency}
+                {(() => {
+                  const price = typeof item.price === 'number' 
+                    ? item.price 
+                    : parseFloat(item.price.replace(/,/g, ''));
+                  return (price * item.quantity).toLocaleString();
+                })()} {item.currency}
               </div>
               
               <button 

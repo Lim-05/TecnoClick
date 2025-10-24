@@ -183,9 +183,15 @@ const ProductsPage = () => {
     e.preventDefault();
     e.stopPropagation();
     
+    // Asegurar que el precio sea string
+    const productWithStringPrice = {
+      ...product,
+      price: typeof product.price === 'number' ? product.price.toString() : product.price
+    };
+    
     dispatch({
       type: 'ADD_TO_CART',
-      payload: product
+      payload: productWithStringPrice
     });
     
     // Mostrar notificación
