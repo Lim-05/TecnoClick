@@ -83,8 +83,9 @@ const Perfil = () => {
 const handleLogout = () => {
   console.log('Cerrar sesión');
   localStorage.removeItem('usuario'); // elimina los datos del usuario guardado
+  // Disparar evento personalizado para notificar al contexto
+  window.dispatchEvent(new Event('usuarioChange'));
   navigate('/'); // redirige a la página principal
-  window.location.reload(); // opcional, fuerza recarga para limpiar estados
 };
 
 

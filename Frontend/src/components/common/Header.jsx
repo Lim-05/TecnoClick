@@ -40,8 +40,9 @@ useEffect(() => {
   const handleLogout = () => {
     localStorage.removeItem('usuario');
     setUsuario(null);
+    // Disparar evento personalizado para notificar al contexto
+    window.dispatchEvent(new Event('usuarioChange'));
     navigate('/');
-    window.location.reload(); 
   };
 
   return (
