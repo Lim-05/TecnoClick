@@ -14,6 +14,7 @@ import Login from './pages/Login';
 import UsuariosAdmin from './pages/administrador/UsuariosAdmin';
 import AdminHome from './pages/administrador/AdminHome';
 import ProductosAdmin from './pages/administrador/ProductosAdmin';
+import IngresosAdmin from './pages/administrador/IngresosAdmin';
 import CompraPage from './pages/CompraPage'; 
 import HistorialCompras from './components/historial/HistorialCompras';
 import TarjetaForm from './components/tarjetas/TarjetaForm';
@@ -39,6 +40,7 @@ function App() {
               <Route path="/admin/usuarios" element={<UsuariosAdmin />} />
               <Route path="/admin" element={<AdminHome />} />
               <Route path="/admin/productos" element={<ProductosAdmin />} />
+              <Route path="/admin/ingresos" element={<IngresosAdmin />} />
               <Route path="/historial-compras" element={<HistorialCompras />} />
               <Route path="/tarjetas" element={<TarjetaForm />}/>
             </Routes>

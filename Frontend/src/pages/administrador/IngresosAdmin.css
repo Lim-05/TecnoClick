@@ -1,0 +1,84 @@
+/* Contenedor principal */
+.ingresos-admin-page {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-top: 12vh; /* igual que Perfil.css */
+  background: #f9f9f9;
+}
+
+/* Título */
+.ingresos-admin-page h4 {
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 1.5rem;
+  color: #333;
+}
+
+/* Botones de alternancia */
+.botones-tabla {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.botones-tabla button {
+  margin-right: 10px;
+  padding: 10px 20px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  background-color: #e0e0e0;
+  color: #333;
+  transition: all 0.2s;
+}
+
+.botones-tabla button:hover {
+  background-color: #d4d4d4;
+}
+
+.botones-tabla .activo {
+  background-color: #007bff;
+  color: #fff;
+  box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3);
+}
+
+/* Contenedor de la tabla */
+.tabla-container {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  overflow-x: auto;
+}
+
+/* Tabla */
+.ingresos-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.ingresos-table th, .ingresos-table td {
+  border-bottom: 1px solid #ddd;
+  padding: 12px 10px;
+  text-align: left;
+}
+
+.ingresos-table th {
+  background-color: #f0f0f0;
+  font-weight: 600;
+  color: #333;
+}
+
+.ingresos-table tr:hover {
+  background-color: #f9f9f9;
+}
+
+/* Mensajes de carga o error */
+.loading, .error {
+  font-size: 1rem;
+  margin-top: 20px;
+  text-align: center;
+  color: #555;
+}

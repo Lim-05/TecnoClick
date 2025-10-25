@@ -19,7 +19,7 @@ const AdminHome = () => {
     {
       id: 3,
       titulo: "Gestionar Compras",
-      ruta: "/admin/compras",
+      ruta: "/admin/ingresos",
       color: "#ffc107",
     },
   ];
