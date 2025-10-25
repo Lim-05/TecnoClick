@@ -16,6 +16,7 @@ import AdminHome from './pages/administrador/AdminHome';
 import ProductosAdmin from './pages/administrador/ProductosAdmin';
 import CompraPage from './pages/CompraPage'; 
 import HistorialCompras from './components/historial/HistorialCompras';
+import TarjetaForm from './components/tarjetas/TarjetaForm';
 import './App.css';
 
 function App() {
@@ -39,6 +40,7 @@ function App() {
               <Route path="/admin" element={<AdminHome />} />
               <Route path="/admin/productos" element={<ProductosAdmin />} />
               <Route path="/historial-compras" element={<HistorialCompras />} />
+              <Route path="/tarjetas" element={<TarjetaForm />}/>
             </Routes>
           </main>
         </div>

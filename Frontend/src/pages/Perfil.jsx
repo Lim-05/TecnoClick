@@ -80,13 +80,13 @@ const Perfil = () => {
   };
 
   //cerrar sesion
-const handleLogout = () => {
-  console.log('Cerrar sesión');
-  localStorage.removeItem('usuario'); // elimina los datos del usuario guardado
+  const handleLogout = () => {
+    console.log('Cerrar sesión');
+    localStorage.removeItem('usuario'); // elimina los datos del usuario guardado
   // Disparar evento personalizado para notificar al contexto
-  window.dispatchEvent(new Event('usuarioChange'));
-  navigate('/'); // redirige a la página principal
-};
+    window.dispatchEvent(new Event('usuarioChange'));
+    navigate('/'); // redirige a la página principal
+  };
 
 
 return (
@@ -130,7 +130,6 @@ return (
           ))}
         </div>
       </fieldset>
-      {/*no funciona*/}
       {!isEditing ? (
         <button className="continue-btn active" onClick={handleEditClick}>Editar</button>
       ) : (
