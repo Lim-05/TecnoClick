@@ -18,6 +18,7 @@ import IngresosAdmin from './pages/administrador/IngresosAdmin';
 import CompraPage from './pages/CompraPage'; 
 import HistorialCompras from './components/historial/HistorialCompras';
 import TarjetaForm from './components/tarjetas/TarjetaForm';
+import ProtectedRoute from './components/common/ProtectedRoute';
 import './App.css';
 
 function App() {
@@ -37,12 +38,30 @@ function App() {
               <Route path="/checkout" element={<CheckoutForm />} />
               <Route path="/perfil" element={<Perfil />} />
               <Route path="/login" element={<Login />} />
-              <Route path="/admin/usuarios" element={<UsuariosAdmin />} />
-              <Route path="/admin" element={<AdminHome />} />
-              <Route path="/admin/productos" element={<ProductosAdmin />} />
-              <Route path="/admin/ingresos" element={<IngresosAdmin />} />
               <Route path="/historial-compras" element={<HistorialCompras />} />
               <Route path="/tarjetas" element={<TarjetaForm />}/>
+
+              <Route path="/admin" element={
+                <ProtectedRoute requiredRole="admin">
+                  <AdminHome />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/usuarios" element={
+                <ProtectedRoute requiredRole="admin">
+                  <UsuariosAdmin />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/productos" element={
+                <ProtectedRoute requiredRole="admin">
+                  <ProductosAdmin />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/ingresos" element={
+                <ProtectedRoute requiredRole="admin">
+                  <IngresosAdmin />
+                </ProtectedRoute>
+              } />
+
             </Routes>
           </main>
         </div>

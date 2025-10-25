@@ -26,18 +26,27 @@ const Login = () => {
 
       const data = await response.json();
 
+
       if (response.ok) {
-        setMensaje( data.mensaje);
-        // Ejemplo: guardar usuario en localStorage
+        setMensaje(data.mensaje);
+
+        // Guardar usuario en localStorage
         localStorage.setItem('usuario', JSON.stringify(data.usuario));
         window.dispatchEvent(new Event('usuarioChange'));
-        navigate('/checkout');
+
+        // Detectar rol
+        if (data.usuario.rol === 'admin') {
+          navigate('/admin'); // panel de administrador
+        } else {
+          navigate('/checkout');
+        }
       } else {
-        setMensaje( data.mensaje);
+        setMensaje(data.mensaje);
       }
     } catch (error) {
       console.error('Error al iniciar sesión:', error);
-      }
+      setMensaje('Error al conectar con el servidor.');
+    }
   };
 
   return (

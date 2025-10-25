@@ -28,9 +28,16 @@ const login = async (req, res) => {
 
     delete usuario.contrasena;
 
+    const rol = usuario.rol || 'cliente';
+
     res.status(200).json({
       mensaje: 'Inicio de sesión exitoso',
-      usuario, 
+      usuario: {
+        id_usuario: usuario.id_usuario,
+        nombre_usuario: usuario.nombre_usuario,
+        correo_usuario: usuario.correo_usuario,
+        rol, // devolvemos el rol
+      },
     });
 
   } catch (err) {
