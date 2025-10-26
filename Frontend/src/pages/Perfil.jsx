@@ -30,6 +30,7 @@ const Perfil = () => {
 
   // Cargar datos del usuario desde localStorage al montar el componente
   useEffect(() => {
+    //localStorage.removeItem('usuario')
     const data = localStorage.getItem('usuario'); //recupera los datos del usuario guardados
     if (data) {
       const usuarioData = JSON.parse(data); //convierte la cadena JSON a un objeto

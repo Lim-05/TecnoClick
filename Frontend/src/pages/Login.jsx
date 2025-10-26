@@ -30,8 +30,10 @@ const Login = () => {
       if (response.ok) {
         setMensaje(data.mensaje);
 
+        const usuarioCompleto = data.usuario;
+
         // Guardar usuario en localStorage
-        localStorage.setItem('usuario', JSON.stringify(data.usuario));
+        localStorage.setItem('usuario', JSON.stringify(usuarioCompleto));
         window.dispatchEvent(new Event('usuarioChange'));
 
         // Detectar rol
