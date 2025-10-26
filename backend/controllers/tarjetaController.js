@@ -4,20 +4,14 @@ const db = require('../config/db');
 
 const guardarDatosTarjeta = async (req, res) => {
   try {
-        console.log('Datos recibidos en el backend:', req.body); 
+    console.log('Datos recibidos en el backend:', req.body); 
     const { id_usuario, tarjeta } = req.body;
     const {nombre_titular, numero_tarjeta, fecha_vencimiento, cvv} = tarjeta;
 
     if (!id_usuario) {
       return res.status(400).json({ error: 'Falta el id_usuario' });
     }
-
-    // Validar si el usuario ya tiene tarjeta registrada (opcional)
-    const tarjetasExistentes = await buscarTarjetaPorUsuario(id_usuario);
-    if (tarjetasExistentes.length > 0) {
-      return res.status(400).json({ error: 'Ya existe una tarjeta registrada para este usuario' });
-    }
-
+    
     // Guardar en la base de datos
     const tarjetaInsertada = await insertarDatosTarjeta(
       nombre_titular, 

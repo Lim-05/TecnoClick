@@ -1,5 +1,5 @@
 const { crearPedido, registrarPagoTarjeta, registrarIngreso } = require('../models/checkoutModel');
-const { insertarDatosTarjeta, buscarTarjetaPorUsuario } = require('../models/tarjetaModel');
+const { insertarDatosTarjeta, obtenerPorUsuario } = require('../models/tarjetaModel');
 
 async function procesarPagoTarjeta(req, res) {
   try {
@@ -12,21 +12,16 @@ async function procesarPagoTarjeta(req, res) {
     // Crear pedido + detalle + actualizar stock
     const idPedido = await crearPedido(idUsuario, productos, total);
 
-    // Guardar o reutilizar tarjeta
-    let tarjetaExistente = await buscarTarjetaPorUsuario(idUsuario);
-    let idTarjeta;
-    if (tarjetaExistente.length > 0) {
-      idTarjeta = tarjetaExistente[0].id_tarjeta;
-    } else {
-      const tarjetaGuardada = await insertarDatosTarjeta(
-        tarjeta.nombre_titular,
-        tarjeta.numero_tarjeta,
-        tarjeta.fecha_vencimiento,
-        tarjeta.cvv,
-        idUsuario
-      );
-      idTarjeta = tarjetaGuardada.id_tarjeta;
-    }
+    //insertar la tarjeta que se pone en el form este o no en la bd
+    const tarjetaGuardada = await insertarDatosTarjeta(
+      tarjeta.nombre_titular,
+      tarjeta.numero_tarjeta,
+      tarjeta.fecha_vencimiento,
+      tarjeta.cvv,
+      idUsuario
+    );
+
+    const idTarjeta = tarjetaGuardada.id_tarjeta;
 
     const folio = 'TEC' + Date.now().toString().slice(-8);
     await registrarPagoTarjeta(idPedido, idUsuario, idTarjeta, folio);
