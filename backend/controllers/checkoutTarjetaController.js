@@ -12,7 +12,7 @@ async function procesarPagoTarjeta(req, res) {
     // Crear pedido + detalle + actualizar stock
     const idPedido = await crearPedido(idUsuario, productos, total);
 
-    // Guardar o reutilizar tarjeta
+    //guardar o reutilizar tarjeta (evita duplicados)
     let tarjetaExistente = await obtenerPorUsuario(idUsuario);
     let idTarjeta;
     if (tarjetaExistente.length > 0) {

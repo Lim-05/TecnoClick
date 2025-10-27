@@ -50,7 +50,15 @@ const login = async (req, res) => {
       usuario: {
         id_usuario: usuario.id_usuario,
         nombre_usuario: usuario.nombre_usuario,
+        apellido_usuario: usuario.apellido_usuario,
+        telefono_usuario: usuario.telefono_usuario,
         correo_usuario: usuario.correo_usuario,
+        direccion_usuario: usuario.direccion_usuario,
+        codigo_postal: usuario.codigo_postal,
+        estado_usuario: usuario.estado_usuario,
+        municipio_usuario: usuario.municipio_usuario,
+        colonia_usuario: usuario.colonia_usuario,
+        referencias: usuario.referencias,
         rol, // devolvemos el rol
       },
     });

@@ -36,15 +36,17 @@ const Login = () => {
           console.log('✅ Token guardado:', data.token);
         }
 
-        //guardar usuario en localStorage
-        localStorage.setItem('usuario', JSON.stringify(data.usuario));
+        const usuarioCompleto = data.usuario;
+
+        // Guardar usuario en localStorage
+        localStorage.setItem('usuario', JSON.stringify(usuarioCompleto));
         window.dispatchEvent(new Event('usuarioChange'));
 
-        //detectar rol
+        // Detectar rol
         if (data.usuario.rol === 'admin') {
           navigate('/admin'); // panel de administrador
         } else {
-          navigate('/');  // Ir a home en lugar de checkout
+          navigate('/');
         }
       } else {
         setMensaje(data.mensaje);
