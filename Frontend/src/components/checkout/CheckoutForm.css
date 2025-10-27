@@ -1,4 +1,93 @@
 /* src/components/checkout/CheckoutForm.css */
+
+/*Notificación de pago exitoso*/
+.payment-notification {
+  position: fixed;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  animation: slideInDown 0.5s ease-out;
+}
+
+@keyframes slideInDown {
+  from {
+    transform: translate(-50%, -100px);
+    opacity: 0;
+  }
+  to {
+    transform: translate(-50%, 0);
+    opacity: 1;
+  }
+}
+
+.payment-notification-content {
+  background: linear-gradient(135deg, #3498db, #5dade2);
+  color: white;
+  padding: 1.5rem 2rem;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(52, 152, 219, 0.5);
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  min-width: 350px;
+  max-width: 500px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  animation: pulse 0.6s ease-out;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.payment-notification-icon {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #27ae60;
+  background: white;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: bounce 0.6s ease-out;
+  box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.payment-notification-text {
+  flex: 1;
+}
+
+.payment-notification-text strong {
+  display: block;
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 0.35rem;
+  letter-spacing: 0.3px;
+}
+
+.payment-notification-text p {
+  margin: 0;
+  font-size: 1rem;
+  opacity: 0.95;
+  font-weight: 500;
+}
+
 .checkout-page {
   padding: 2rem;
   padding-top: 12vh;
@@ -196,5 +285,33 @@
 
   .checkout-form {
     padding: 1rem;
+  }
+
+  /* Notificación responsive */
+  .payment-notification {
+    top: 70px;
+    left: 1rem;
+    right: 1rem;
+    transform: none;
+  }
+
+  .payment-notification-content {
+    min-width: auto;
+    width: 100%;
+    padding: 1.25rem 1.5rem;
+  }
+
+  .payment-notification-icon {
+    width: 45px;
+    height: 45px;
+    font-size: 2rem;
+  }
+
+  .payment-notification-text strong {
+    font-size: 1.1rem;
+  }
+
+  .payment-notification-text p {
+    font-size: 0.95rem;
   }
 }

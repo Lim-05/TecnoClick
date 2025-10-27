@@ -41,7 +41,7 @@ const login = async (req, res) => {
         rol: rol
       },
       SECRET,
-      { expiresIn: '24h' }
+      { expiresIn: '7d' }
     );
 
     res.status(200).json({

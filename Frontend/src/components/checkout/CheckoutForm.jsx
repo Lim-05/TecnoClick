@@ -27,6 +27,8 @@ const CheckoutForm = () => {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showNotification, setShowNotification] = useState(false);
+  const [notificationData, setNotificationData] = useState({ folio: '', method: '' });
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -123,7 +125,14 @@ const CheckoutForm = () => {
           throw new Error(data.error || 'Error al registrar el pago en efectivo');
         }
 
-        alert(`Compra completada Folio: ${data.folio}`);
+        // Mostrar notificación en lugar de alert
+        setNotificationData({ folio: data.folio, method: 'efectivo' });
+        setShowNotification(true);
+        
+        // Ocultar notificación después de 4 segundos
+        setTimeout(() => {
+          setShowNotification(false);
+        }, 6000);
 
       } else if (paymentMethod === 'tarjeta') {
         const tarjeta = {
@@ -147,12 +156,21 @@ const CheckoutForm = () => {
         const data = await response.json();
         if (!response.ok) throw new Error(data.error || 'Error al registrar el pago con tarjeta');
 
-        alert(`Pago completado Folio: ${data.folio}`);
+        //mostrar notificación 
+        setNotificationData({ folio: data.folio, method: 'tarjeta' });
+        setShowNotification(true);
+        
+        //ocultar notificación después de 6 segundos
+        setTimeout(() => {
+          setShowNotification(false);
+        }, 6000);
       }
 
-      // Limpiar carrito y redirigir
-      dispatch({ type: 'CLEAR_CART' });
-      navigate('/');
+      //limpiar carrito y redirigir después de un breve delay
+      setTimeout(() => {
+        dispatch({ type: 'CLEAR_CART' });
+        navigate('/');
+      }, 6000);
 
     } catch (error) {
       console.error('Error al procesar pedido:', error);
@@ -188,6 +206,21 @@ const CheckoutForm = () => {
 
   return (
     <div className="checkout-page">
+      {/* Notificación de pago exitoso */}
+      {showNotification && (
+        <div className="payment-notification">
+          <div className="payment-notification-content">
+            <span className="payment-notification-icon">✓</span>
+            <div className="payment-notification-text">
+              <strong>
+                {notificationData.method === 'efectivo' ? '¡Compra completada!' : '¡Pago completado!'}
+              </strong>
+              <p>Folio: {notificationData.folio}</p>
+            </div>
+          </div>
+        </div>
+      )}
+      
       <div className="checkout-container">
         <h1>Finalizar Compra</h1>
         
