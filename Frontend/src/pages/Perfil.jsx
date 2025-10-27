@@ -1,11 +1,16 @@
 import React, { useEffect, useState } from 'react'; //
 import { Link, useNavigate } from 'react-router-dom';
 import './Perfil.css';
+import Modal from '../components/common/Modal';
 
 const Perfil = () => {
   const navigate = useNavigate();
   const [usuario, setUsuario] = useState(null); // aqui se guarda el usuario desde el localStorage
   const [isEditing, setIsEditing] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalMessage, setModalMessage] = useState('');
+  const [modalType, setModalType] = useState('success'); // 'success' o 'error'
+
   
   const [formData, setFormData] = useState({
     id_usuario: '',
@@ -60,26 +65,38 @@ const Perfil = () => {
 
     const id = formData.id_usuario || usuario?.id_usuario; //respaldo
     if(!id) return console.error('ID de usuario no disponible');
+      try {
+        const response = await fetch(`http://localhost:3000/api/usuarios/${formData.id_usuario}`, {
+          method: 'PUT',
+          headers: {'content-type':'application/json'},
+          body: JSON.stringify({
+          nombre_usuario: formData.nombre_usuario,
+          apellido_usuario: formData.apellido_usuario,
+          telefono_usuario: formData.telefono_usuario,
+          correo_usuario: formData.correo_usuario,
+          direccion_usuario: formData.direccion_usuario,
+          contrasena: formData.contrasena,
+          codigo_postal: formData.codigo_postal,
+          estado_usuario: formData.estado_usuario,
+          municipio_usuario: formData.municipio_usuario,
+          colonia_usuario: formData.colonia_usuario,
+          referencias: formData.referencias,
+        })
+      });
 
-    await fetch(`http://localhost:3000/api/usuarios/${formData.id_usuario}`, {
-      method: 'PUT',
-      headers: {'content-type':'application/json'},
-      body: JSON.stringify({
-        nombre_usuario: formData.nombre_usuario,
-        apellido_usuario: formData.apellido_usuario,
-        telefono_usuario: formData.telefono_usuario,
-        correo_usuario: formData.correo_usuario,
-        direccion_usuario: formData.direccion_usuario,
-        contrasena: formData.contrasena,
-        codigo_postal: formData.codigo_postal,
-        estado_usuario: formData.estado_usuario,
-        municipio_usuario: formData.municipio_usuario,
-        colonia_usuario: formData.colonia_usuario,
-        referencias: formData.referencias,
-      })
-    });
+      if (response.ok) {
+        const updateUser = { ...usuario, ...formData };
+        localStorage.setItem('usuario', JSON.stringify(updateUser));
+        setUsuario(updateUser);
+        setIsEditing(false);
+        alert('Datos actualizados correctamente');
+      } else {
+        alert('Error al actualizar los datos del usuario');
+      }
+    } catch (error) {
+      console.error('Error al actualizar el usuario:', error);
+    }
   };
-
   //cerrar sesion
   const handleLogout = () => {
     console.log('Cerrar sesión');
