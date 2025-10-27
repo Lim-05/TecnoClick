@@ -8,8 +8,6 @@ const Login = () => {
   const [contrasena, setContrasena] = useState('');
   const [mensaje, setMensaje] = useState('');
 
-  
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMensaje(''); // Limpia mensaje previo
@@ -20,7 +18,7 @@ const Login = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           correo,
-          contra: contrasena, // Debe coincidir con lo que espera el backend
+          contra: contrasena, 
         }),
       });
 

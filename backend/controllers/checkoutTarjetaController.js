@@ -12,21 +12,22 @@ async function procesarPagoTarjeta(req, res) {
     // Crear pedido + detalle + actualizar stock
     const idPedido = await crearPedido(idUsuario, productos, total);
 
-    //guardar o reutilizar tarjeta (evita duplicados)
-    let tarjetaExistente = await obtenerPorUsuario(idUsuario);
-    let idTarjeta;
-    if (tarjetaExistente.length > 0) {
-      idTarjeta = tarjetaExistente[0].id_tarjeta;
-    } else {
-      const tarjetaGuardada = await insertarDatosTarjeta(
-        tarjeta.nombre_titular,
-        tarjeta.numero_tarjeta,
-        tarjeta.fecha_vencimiento,
-        tarjeta.cvv,
-        idUsuario
-      );
-      idTarjeta = tarjetaGuardada.id_tarjeta;
-    }
+    // Insertar nueva tarjeta sin bloquear por usuario
+
+  console.log('Datos de la tarjeta a insertar:', tarjeta);
+
+  const tarjetaGuardada = await insertarDatosTarjeta(
+    tarjeta.nombre_titular,
+    tarjeta.numero_tarjeta,
+    tarjeta.fecha_vencimiento,
+    tarjeta.cvv,
+    idUsuario
+  );
+
+  console.log('Resultado: ', tarjetaGuardada);
+  
+  const idTarjeta = tarjetaGuardada.id_tarjeta;
+
 
     const folio = 'TEC' + Date.now().toString().slice(-8);
     await registrarPagoTarjeta(idPedido, idUsuario, idTarjeta, folio);

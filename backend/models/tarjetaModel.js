@@ -2,6 +2,7 @@ const pool = require('../config/db');
 
 // Inserta los datos de la tarjeta
 const insertarDatosTarjeta = async (nombre_titular, numero_tarjeta, fecha_vencimiento, cvv, id_usuario) => {
+  
   const query = `
     INSERT INTO datos_tarjeta (nombre_titular, numero_tarjeta, fecha_vencimiento, cvv, id_usuario)
     VALUES ($1, $2, $3, $4, $5)
@@ -9,6 +10,9 @@ const insertarDatosTarjeta = async (nombre_titular, numero_tarjeta, fecha_vencim
   `;
   const values = [nombre_titular, numero_tarjeta, fecha_vencimiento, cvv, id_usuario];
   const result = await pool.query(query, values);
+  
+  console.log('Resulatdo insertarDatosTarjeta', result.rows[0]);
+  
   return result.rows[0];
 };
 
