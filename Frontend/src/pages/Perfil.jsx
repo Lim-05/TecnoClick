@@ -10,6 +10,7 @@ const Perfil = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
   const [modalType, setModalType] = useState('success'); // 'success' o 'error'
+  const [showNotification, setShowNotification] = useState(false);
 
   
   const [formData, setFormData] = useState({
@@ -90,7 +91,14 @@ const Perfil = () => {
         localStorage.setItem('usuario', JSON.stringify(updateUser));
         setUsuario(updateUser);
         setIsEditing(false);
-        alert('Datos actualizados correctamente');
+        
+        //mostrar notificación de éxito al editar los datos
+        setShowNotification(true);
+        
+        //ocultar notificación después de 4 segundos
+        setTimeout(() => {
+          setShowNotification(false);
+        }, 4000);
       } else {
         alert('Error al actualizar los datos del usuario');
       }
@@ -110,6 +118,19 @@ const Perfil = () => {
 
 return (
   <div className="perfil-page">
+    {/* Notificación de datos actualizados */}
+    {showNotification && (
+      <div className="update-notification">
+        <div className="update-notification-content">
+          <span className="update-notification-icon">✓</span>
+          <div className="update-notification-text">
+            <strong>¡Datos actualizados!</strong>
+            <p>Tu información ha sido guardada correctamente</p>
+          </div>
+        </div>
+      </div>
+    )}
+    
     <div className="perfil-container">
       <h4>Mi Perfil</h4>
 

@@ -1,5 +1,93 @@
 /* Perfil.css */
 
+/*notificación de datos actualizados */
+.update-notification {
+  position: fixed;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  animation: slideInDown 0.5s ease-out;
+}
+/*animación de entrada del mensaje*/
+@keyframes slideInDown {
+  from {
+    transform: translate(-50%, -100px);
+    opacity: 0;
+  }
+  to {
+    transform: translate(-50%, 0);
+    opacity: 1;
+  }
+}
+
+.update-notification-content {
+  background: linear-gradient(135deg, #3498db, #5dade2);
+  color: white;
+  padding: 1.5rem 2rem;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(52, 152, 219, 0.5);
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  min-width: 350px;
+  max-width: 500px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  animation: pulse 0.6s ease-out;
+}
+/*la noti hace un "latido", crece y vuelve a su tamaño*/
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.update-notification-icon {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #27ae60;
+  background: white;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: bounce 0.6s ease-out;
+  box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
+}
+/*efecto rebote */
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.update-notification-text {
+  flex: 1;
+}
+
+.update-notification-text strong {
+  display: block;
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 0.35rem;
+  letter-spacing: 0.3px;
+}
+
+.update-notification-text p {
+  margin: 0;
+  font-size: 1rem;
+  opacity: 0.95;
+  font-weight: 500;
+}
+
 /* Contenedor principal */
 .perfil-page {
   padding: 2rem;
@@ -100,5 +188,60 @@ button.continue-btn:hover {
   background-color: #f0f0f0;
   border-radius: 0 8px 8px 0;
 }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .perfil-page {
+    padding: 1rem;
+    padding-top: 10vh;
+  }
+
+  .perfil-container {
+    padding: 1rem;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar-right {
+    right: -5px;
+  }
+
+  .sidebar-right a {
+    width: 50px;
+    height: 50px;
+    font-size: 1.2rem;
+  }
+
+  /* Notificación responsive */
+  .update-notification {
+    top: 70px;
+    left: 1rem;
+    right: 1rem;
+    transform: none;
+  }
+
+  .update-notification-content {
+    min-width: auto;
+    width: 100%;
+    padding: 1.25rem 1.5rem;
+  }
+
+  .update-notification-icon {
+    width: 45px;
+    height: 45px;
+    font-size: 2rem;
+  }
+
+  .update-notification-text strong {
+    font-size: 1.1rem;
+  }
+
+  .update-notification-text p {
+    font-size: 0.95rem;
+  }
+}
+
 
 
