@@ -51,7 +51,8 @@ const Perfil = () => {
         estado_usuario: usuarioData.estado_usuario || '',
         municipio_usuario: usuarioData.municipio_usuario || '',
         colonia_usuario: usuarioData.colonia_usuario || '',
-        referencias: usuarioData.referencias || ''
+        referencias: usuarioData.referencias || '',
+        contrasena: usuarioData.contrasena || ''
       });
     }
   }, []);
