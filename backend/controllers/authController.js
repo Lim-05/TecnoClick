@@ -1,6 +1,9 @@
 // controllers/authController.js
 const db = require('../config/db');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+
+const SECRET = process.env.JWT_SECRET || 'claveSecreta';
 
 const login = async (req, res) => {
   const { correo, contra } = req.body;
@@ -30,8 +33,20 @@ const login = async (req, res) => {
 
     const rol = usuario.rol || 'cliente';
 
+    //generar token JWT
+    const token = jwt.sign(
+      { 
+        id_usuario: usuario.id_usuario,
+        correo: usuario.correo_usuario,
+        rol: rol
+      },
+      SECRET,
+      { expiresIn: '24h' }
+    );
+
     res.status(200).json({
       mensaje: 'Inicio de sesión exitoso',
+      token: token,  //devolver el token
       usuario: {
         id_usuario: usuario.id_usuario,
         nombre_usuario: usuario.nombre_usuario,

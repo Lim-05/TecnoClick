@@ -1,4 +1,5 @@
 const { getAllProducts, getProductById, deleteProductById } = require('../models/productModel');
+const { getAverageRating } = require('../models/resenaModel');
 
 // Controlador para obtener todos los productos
 async function getProductos(req, res) {
@@ -45,6 +46,11 @@ async function getProductoPorId(req, res) {
     }
 
     const precioNumero = parseFloat(productoDB.precio);
+    
+    // Obtener rating real de la base de datos
+    const ratingData = await getAverageRating(id);
+    const rating = parseFloat(ratingData.promedio) || 0;
+    const reviewCount = parseInt(ratingData.total_resenas) || 0;
 
     const producto = {
       id: productoDB.id_producto,
@@ -59,8 +65,8 @@ async function getProductoPorId(req, res) {
       specs: productoDB.descripcion ? productoDB.descripcion.split(',').slice(0, 4).map(s => s.trim()) : ["Sin especificaciones"],
       inStock: productoDB.stock > 0,
       stock: productoDB.stock,
-      rating: 4.5,
-      reviewCount: 10
+      rating: rating,
+      reviewCount: reviewCount
     };
 
     res.json(producto);

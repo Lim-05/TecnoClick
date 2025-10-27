@@ -39,6 +39,7 @@ useEffect(() => {
   // Cerrar sesión
   const handleLogout = () => {
     localStorage.removeItem('usuario');
+    localStorage.removeItem('token'); // ✅ Eliminar token también
     setUsuario(null);
     // Disparar evento personalizado para notificar al contexto
     window.dispatchEvent(new Event('usuarioChange'));

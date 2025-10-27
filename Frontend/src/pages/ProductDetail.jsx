@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
+import ResenaForm from '../components/resenas/ResenaForm';
 import './ProductDetail.css';
 
 const ProductDetail = () => {
@@ -15,6 +16,11 @@ const ProductDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showNotification, setShowNotification] = useState(false);
+  const [resenas, setResenas] = useState([]);
+  const [loadingResenas, setLoadingResenas] = useState(false);
+  const [puedeResenar, setPuedeResenar] = useState(false);
+  const [yaReseno, setYaReseno] = useState(false);
+  const [haComprado, setHaComprado] = useState(false);
 
   // Función para limpiar descripciones duplicadas
   const cleanDescription = (description) => {
@@ -31,6 +37,81 @@ const ProductDetail = () => {
   const parsePrice = (priceString) => {
     if (!priceString) return 0;
     return parseFloat(priceString.toString().replace(/[^\d.-]/g, ''));
+  };
+
+  // Cargar reseñas del producto
+  const loadResenas = async (productId) => {
+    setLoadingResenas(true);
+    try {
+      const response = await fetch(`http://localhost:3000/api/resenas/producto/${productId}`);
+      
+      if (!response.ok) {
+        throw new Error('Error al cargar reseñas');
+      }
+      
+      const data = await response.json();
+      console.log('Reseñas cargadas:', data);
+      
+      // Formatear reseñas para el frontend
+      const resenasFormateadas = data.resenas.map(r => ({
+        id: r.id_resena,
+        user: `${r.nombre_usuario} ${r.apellido_usuario}`,
+        rating: 5, // Rating fijo ya que no está en la BD
+        comment: r.resena,
+        date: 'Recientemente', // Sin fecha en la BD
+        verified: true // Todos los usuarios que compraron están verificados
+      }));
+      
+      setResenas(resenasFormateadas);
+      
+      // Actualizar rating y reviewCount del producto
+      if (product) {
+        setProduct(prev => ({
+          ...prev,
+          rating: parseFloat(data.promedio) || 0,
+          reviewCount: parseInt(data.total) || 0
+        }));
+      }
+    } catch (error) {
+      console.error('Error al cargar reseñas:', error);
+    } finally {
+      setLoadingResenas(false);
+    }
+  };
+
+  // Verificar permisos de reseña
+  const verificarPermisosResena = async (productId, token) => {
+    try {
+      const response = await fetch(`http://localhost:3000/api/resenas/puede-resenar/${productId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error('Error al verificar permisos');
+      }
+      
+      const data = await response.json();
+      console.log('Permisos de reseña:', data);
+      
+      setPuedeResenar(data.puedeResenar);
+      setYaReseno(data.yaReseno);
+      setHaComprado(data.haComprado);
+    } catch (error) {
+      console.error('Error al verificar permisos:', error);
+    }
+  };
+
+  // Callback cuando se crea una nueva reseña
+  const handleResenaCreada = () => {
+    // Recargar reseñas
+    loadResenas(id);
+    // Actualizar permisos
+    const token = localStorage.getItem('token');
+    if (token) {
+      verificarPermisosResena(id, token);
+    }
   };
 
   // Cargar producto desde la API
@@ -65,8 +146,6 @@ const ProductDetail = () => {
             name: `Especificación ${index + 1}`,
             value: typeof spec === 'string' ? spec : JSON.stringify(spec)
           })) : [],
-          // Reseñas (si vienen de la BD, si no, array vacío)
-          reviews: data.reviews || [],
           // Asegurar que el stock esté definido
           stock: data.stock ?? 0,
           inStock: (data.stock ?? 0) > 0,
@@ -79,6 +158,15 @@ const ProductDetail = () => {
         };
         
         setProduct(cleanedProduct);
+        
+        // Cargar reseñas del producto
+        loadResenas(id);
+        
+        // Verificar permisos de reseña si el usuario está autenticado
+        const token = localStorage.getItem('token');
+        if (token) {
+          verificarPermisosResena(id, token);
+        }
       } catch (error) {
         console.error(' Error al cargar producto:', error);
         setError('Error al cargar el producto. Verifica que el servidor esté funcionando.');
@@ -389,20 +477,44 @@ const ProductDetail = () => {
             <div className="reviews-content">
               <div className="reviews-summary">
                 <div className="average-rating">
-                  <div className="rating-number">{product.rating}</div>
+                  <div className="rating-number">{product.rating.toFixed(1)}</div>
                   <div className="rating-stars">{renderStars(product.rating)}</div>
-                  <div className="rating-text">{product.reviewCount} reseñas</div>
+                  <div className="rating-text">{product.reviewCount} reseña{product.reviewCount !== 1 ? 's' : ''}</div>
                 </div>
               </div>
 
+              {/* Formulario para agregar reseña */}
+              {localStorage.getItem('token') ? (
+                <ResenaForm 
+                  idProducto={product.id}
+                  onResenaCreada={handleResenaCreada}
+                  puedeResenar={puedeResenar}
+                  yaReseno={yaReseno}
+                  haComprado={haComprado}
+                />
+              ) : (
+                <div className="resena-login-prompt">
+                  <p>
+                    <span className="info-icon">ℹ️</span>
+                    Debes <button onClick={() => navigate('/login')} className="login-link">iniciar sesión</button> para escribir una reseña
+                  </p>
+                </div>
+              )}
+
+              {/* Lista de reseñas */}
               <div className="reviews-list">
-                {product.reviews && product.reviews.length > 0 ? (
-                  product.reviews.map(review => (
+                {loadingResenas ? (
+                  <div className="loading-resenas">
+                    <div className="loading-spinner-small"></div>
+                    <p>Cargando reseñas...</p>
+                  </div>
+                ) : resenas && resenas.length > 0 ? (
+                  resenas.map(review => (
                     <div key={review.id} className="review-item">
                       <div className="review-header">
                         <div className="reviewer-info">
                           <span className="reviewer-name">{review.user}</span>
-                          {review.verified && <span className="verified-badge">✓ Verificado</span>}
+                          {review.verified && <span className="verified-badge">✓ Compra verificada</span>}
                         </div>
                         <div className="review-meta">
                           <div className="review-stars">{renderStars(review.rating)}</div>
@@ -413,7 +525,12 @@ const ProductDetail = () => {
                     </div>
                   ))
                 ) : (
-                  <p>No hay reseñas para este producto todavía.</p>
+                  <div className="no-reviews">
+                    <p>No hay reseñas para este producto todavía.</p>
+                    {haComprado && !yaReseno && (
+                      <p className="be-first">¡Sé el primero en compartir tu opinión!</p>
+                    )}
+                  </div>
                 )}
               </div>
             </div>

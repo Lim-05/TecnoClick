@@ -30,15 +30,21 @@ const Login = () => {
       if (response.ok) {
         setMensaje(data.mensaje);
 
-        // Guardar usuario en localStorage
+        //guardar TOKEN JWT en localStorage (CRÍTICO para reseñas)
+        if (data.token) {
+          localStorage.setItem('token', data.token);
+          console.log('✅ Token guardado:', data.token);
+        }
+
+        //guardar usuario en localStorage
         localStorage.setItem('usuario', JSON.stringify(data.usuario));
         window.dispatchEvent(new Event('usuarioChange'));
 
-        // Detectar rol
+        //detectar rol
         if (data.usuario.rol === 'admin') {
           navigate('/admin'); // panel de administrador
         } else {
-          navigate('/checkout');
+          navigate('/');  // Ir a home en lugar de checkout
         }
       } else {
         setMensaje(data.mensaje);
