@@ -1,0 +1,72 @@
+/* Contenedor principal */
+.pedido-admin-page {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-top: 12vh;
+  background: #f9f9f9;
+}
+
+/* Título */
+.pedido-admin-page h4 {
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 1.6rem;
+  color: #333;
+}
+
+/* Contenedor de tabla */
+.tabla-container {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  overflow-x: auto;
+}
+
+/* Tabla */
+.pedido-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.pedido-table th,
+.pedido-table td {
+  border-bottom: 1px solid #ddd;
+  padding: 12px 10px;
+  text-align: left;
+}
+
+.pedido-table th {
+  background-color: #f0f0f0;
+  font-weight: 600;
+  color: #333;
+}
+
+.pedido-table tr:hover {
+  background-color: #f9f9f9;
+}
+
+/* Botón de completar */
+.btn-completar {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-completar:hover {
+  background-color: #0056b3;
+  box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3);
+}
+
+/* Mensaje vacío */
+.mensaje-vacio {
+  text-align: center;
+  color: #555;
+  font-size: 1rem;
+  margin-top: 10px;
+}

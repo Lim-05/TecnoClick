@@ -1,6 +1,6 @@
 const db = require('../config/db');
 
-async function crearPedido(idUsuario, productos, total) {
+async function crearPedido(idUsuario, productos, total, estado = 'pendiente') {
   const fecha = new Date();
 
   // Inserta pedido principal
@@ -8,7 +8,7 @@ async function crearPedido(idUsuario, productos, total) {
     `INSERT INTO pedido (monto_pedido, fecha_pedido, estado_pedido, id_usuario)
      VALUES ($1, $2, $3, $4)
      RETURNING id_pedido;`,
-    [total, fecha, 'completado', idUsuario]
+    [total, fecha, estado, idUsuario]
   );
 
   const idPedido = pedidoResult.rows[0].id_pedido;
@@ -18,10 +18,8 @@ async function crearPedido(idUsuario, productos, total) {
     const precioProducto = await obtenerPrecioProducto(producto.id);
     const subtotal = precioProducto * producto.quantity;
 
-    // Insertar en detalle_pedido
     await registrarDetallePedido(idPedido, producto.id, producto.quantity, subtotal);
 
-    // Descontar stock
     await db.query(
       `UPDATE productos SET stock = stock - $1 WHERE id_producto = $2 AND stock >= $1;`,
       [producto.quantity, producto.id]
@@ -30,6 +28,7 @@ async function crearPedido(idUsuario, productos, total) {
 
   return idPedido;
 }
+
 
 async function registrarDetallePedido(idPedido, idProducto, cantidad, subtotal) {
   await db.query(

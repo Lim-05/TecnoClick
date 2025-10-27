@@ -22,6 +22,12 @@ const AdminHome = () => {
       ruta: "/admin/ingresos",
       color: "#ffc107",
     },
+    {
+      id: 4,
+      titulo: "Gestionar Pedidos",
+      ruta: "/admin/pedidos",
+      color: "#6e0000ff",
+    },
   ];
 
   return (

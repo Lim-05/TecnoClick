@@ -15,6 +15,7 @@ import UsuariosAdmin from './pages/administrador/UsuariosAdmin';
 import AdminHome from './pages/administrador/AdminHome';
 import ProductosAdmin from './pages/administrador/ProductosAdmin';
 import IngresosAdmin from './pages/administrador/IngresosAdmin';
+import PedidoAdmin from './pages/administrador/PedidosAdmin';
 import CompraPage from './pages/CompraPage'; 
 import HistorialCompras from './components/historial/HistorialCompras';
 import TarjetaForm from './components/tarjetas/TarjetaForm';
@@ -59,6 +60,11 @@ function App() {
               <Route path="/admin/ingresos" element={
                 <ProtectedRoute requiredRole="admin">
                   <IngresosAdmin />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/pedidos" element={
+                <ProtectedRoute requiredRole="admin">
+                  <PedidoAdmin />
                 </ProtectedRoute>
               } />
 

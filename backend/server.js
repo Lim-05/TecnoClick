@@ -25,6 +25,8 @@ const checkoutTarjetaRoutes = require('./routes/checkoutTarjetaRoutes');
 const pedidoRoutes = require('./routes/pedidoRoutes');
 const ingresosRoutes = require('./routes/ingresosRoutes');
 const resenaRoutes = require('./routes/resenaRoutes');
+const pedidosAdminRoutes = require('./routes/pedidosAdminRoutes');
+
 
 // Montar rutas
 app.use('/api', authRoutes);
@@ -36,6 +38,8 @@ app.use('/api', checkoutTarjetaRoutes);
 app.use('/api/pedidos', pedidoRoutes);
 app.use('/api/ingresos', ingresosRoutes);
 app.use('/api/resenas', resenaRoutes);
+app.use('/api/pedidos', pedidosAdminRoutes);
+
 
 // POST - crear usuario (mantener esta ruta aquí si no la tienes en otro archivo)
 app.post('/api/usuarios', async (req, res) => {
