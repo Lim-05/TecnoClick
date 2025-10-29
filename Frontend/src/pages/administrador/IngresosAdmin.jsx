@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { getToken } from "../../utils/authUtils";
 import "./IngresosAdmin.css";
 
 const IngresosAdmin = () => {
@@ -11,10 +12,20 @@ const IngresosAdmin = () => {
   useEffect(() => {
     const fetchIngresos = async () => {
       try {
-        const resEfectivo = await fetch("http://localhost:3000/api/ingresos/efectivo");
+        const token = getToken();
+        
+        const resEfectivo = await fetch("http://localhost:3000/api/ingresos/efectivo", {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
         const dataEfectivo = await resEfectivo.json();
 
-        const resTarjeta = await fetch("http://localhost:3000/api/ingresos/tarjeta");
+        const resTarjeta = await fetch("http://localhost:3000/api/ingresos/tarjeta", {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
         const dataTarjeta = await resTarjeta.json();
 
         setIngresosEfectivo(dataEfectivo);

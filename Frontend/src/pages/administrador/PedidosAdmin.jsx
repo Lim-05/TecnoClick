@@ -1,21 +1,45 @@
 import React, { useEffect, useState } from "react";
+import { getToken } from "../../utils/authUtils";
 import "./PedidosAdmin.css";
 
 const PedidoAdmin = () => {
   const [pedidos, setPedidos] = useState([]);
+  const [error, setError] = useState(null);
+  const [cargando, setCargando] = useState(true);
 
   useEffect(() => {
-    fetch("http://localhost:3000/api/pedidos/pendientes")
-      .then(res => res.json())
-      .then(data => setPedidos(data))
-      .catch(err => console.error(err));
+    const token = getToken();
+    fetch("http://localhost:3000/api/pedidos/pendientes", {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
+      .then(res => {
+        if (!res.ok) {
+          throw new Error(`Error ${res.status}: ${res.statusText}`);
+        }
+        return res.json();
+      })
+      .then(data => {
+        setPedidos(data);
+        setCargando(false);
+      })
+      .catch(err => {
+        console.error('Error al cargar pedidos:', err);
+        setError(err.message);
+        setCargando(false);
+      });
   }, []);
 
   const completarPedido = async (id) => {
     if (!window.confirm("¿Marcar este pedido como completado?")) return;
 
+    const token = getToken();
     const response = await fetch(`http://localhost:3000/api/pedidos/${id}/completar`, {
-      method: "PUT"
+      method: "PUT",
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
     });
 
     if (response.ok) {
@@ -25,6 +49,9 @@ const PedidoAdmin = () => {
       alert("Error al completar el pedido ❌");
     }
   };
+
+  if (cargando) return <div className="pedido-admin-page"><p>Cargando pedidos...</p></div>;
+  if (error) return <div className="pedido-admin-page"><p className="error">❌ Error: {error}</p></div>;
 
   return (
     <div className="pedido-admin-page">

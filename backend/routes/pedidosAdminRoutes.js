@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
+const adminAuthMiddleware = require('../middleware/adminAuth');
 const db = require('../config/db');
 
-// Obtener pedidos pendientes
-router.get('/pendientes', async (req, res) => {
+// Obtener pedidos pendientes - SOLO ADMINISTRADORES
+router.get('/pendientes', adminAuthMiddleware, async (req, res) => {
   try {
     const result = await db.query(`
       SELECT p.id_pedido, p.monto_pedido, p.fecha_pedido, u.nombre_usuario, u.correo_usuario
@@ -18,8 +19,8 @@ router.get('/pendientes', async (req, res) => {
   }
 });
 
-// Marcar pedido como completado
-router.put('/:id/completar', async (req, res) => {
+// Marcar pedido como completado - SOLO ADMINISTRADORES
+router.put('/:id/completar', adminAuthMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
 

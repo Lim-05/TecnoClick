@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { useNavigate } from 'react-router-dom';
+import { getToken } from '../../utils/authUtils';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import './CheckoutForm.css';
@@ -205,10 +206,14 @@ const CheckoutForm = () => {
 
       if (paymentMethod === 'efectivo') {
         const folio = 'TEC' + Date.now().toString().slice(-8);
+        const token = getToken();
 
         const response = await fetch('http://localhost:3000/api/checkout/efectivo', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
           body: JSON.stringify({
             idUsuario,
             productos: orderData.productos,
@@ -247,10 +252,14 @@ const CheckoutForm = () => {
           fecha_vencimiento: formData.fechaExpiracion,
           cvv: formData.cvv
         };
+        const token = getToken();
 
         const response = await fetch('http://localhost:3000/api/checkout/tarjeta', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
           body: JSON.stringify({
             idUsuario,
             productos: orderData.productos,

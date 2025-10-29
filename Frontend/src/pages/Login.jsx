@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import './Login.css';
 import { useNavigate } from 'react-router-dom';
+import { setToken, getTokenTimeRemaining } from '../utils/authUtils';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -24,14 +25,17 @@ const Login = () => {
 
       const data = await response.json();
 
-
       if (response.ok) {
         setMensaje(data.mensaje);
 
-        //guardar TOKEN JWT en localStorage (CRÍTICO para reseñas)
+        // Guardar TOKEN JWT en localStorage (CRÍTICO para autenticación)
         if (data.token) {
-          localStorage.setItem('token', data.token);
-          console.log('✅ Token guardado:', data.token);
+          setToken(data.token);
+          console.log('✅Token guardado correctamente');
+          
+          // Mostrar tiempo de expiración
+          const minutosRestantes = getTokenTimeRemaining();
+          console.log(`⏱️ Tu sesión expirará en ${minutosRestantes} minutos (${Math.floor(minutosRestantes / 60 / 24)} días)`);
         }
 
         const usuarioCompleto = data.usuario;
@@ -40,10 +44,16 @@ const Login = () => {
         localStorage.setItem('usuario', JSON.stringify(usuarioCompleto));
         window.dispatchEvent(new Event('usuarioChange'));
 
-        // Detectar rol
-        if (data.usuario.rol === 'admin') {
+        // Detectar rol y redirigir
+        console.log('🔍 Rol detectado:', data.usuario.rol);
+        console.log('🔍 Usuario completo:', data.usuario);
+        
+        // Acepta tanto "admin" como "administrador" para mayor flexibilidad
+        if (data.usuario.rol === 'administrador' || data.usuario.rol === 'admin') {
+          console.log('Redirigiendo a /admin');
           navigate('/admin'); // panel de administrador
         } else {
+          console.log('Redirigiendo a / (home)');
           navigate('/');
         }
       } else {

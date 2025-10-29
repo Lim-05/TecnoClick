@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'; //
 import { Link, useNavigate } from 'react-router-dom';
+import { getToken } from '../utils/authUtils';
 import './Perfil.css';
 import Modal from '../components/common/Modal';
 
@@ -68,9 +69,13 @@ const Perfil = () => {
     const id = formData.id_usuario || usuario?.id_usuario; //respaldo
     if(!id) return console.error('ID de usuario no disponible');
       try {
+        const token = getToken();
         const response = await fetch(`http://localhost:3000/api/usuarios/${formData.id_usuario}`, {
           method: 'PUT',
-          headers: {'content-type':'application/json'},
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
           body: JSON.stringify({
           nombre_usuario: formData.nombre_usuario,
           apellido_usuario: formData.apellido_usuario,

@@ -31,7 +31,11 @@ const login = async (req, res) => {
 
     delete usuario.contrasena;
 
-    const rol = usuario.rol || 'cliente';
+    // Normalizar rol: si es "administrador", cambiarlo a "admin"
+    let rol = usuario.rol || 'cliente';
+    if (rol === 'administrador') {
+      rol = 'admin';
+    }
 
     //generar token JWT
     const token = jwt.sign(
@@ -41,7 +45,7 @@ const login = async (req, res) => {
         rol: rol
       },
       SECRET,
-      { expiresIn: '7d' }
+      { expiresIn: '2d' } // Token expira en 2 días
     );
 
     res.status(200).json({

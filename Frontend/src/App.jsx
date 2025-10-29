@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AppProvider } from './context/AppContext';
 import Header from './components/common/Header';
+import SessionMonitor from './components/common/SessionMonitor';
 import HomePage from './pages/HomePage';
 import ProductsPage from './pages/ProductsPage';
 import Cart from './components/cart/Cart';
@@ -28,6 +29,7 @@ function App() {
       <Router>
         <div className="App">
           <Header />
+          <SessionMonitor /> {/* Monitor de sesión global */}
           <main className="main-content">
             <Routes>
               <Route path="/" element={<HomePage />} />

@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
+import { logout, isAuthenticated } from '../../utils/authUtils';
 import './Header.css';
 
 const Header = () => {
@@ -14,10 +15,17 @@ const Header = () => {
 useEffect(() => {
   const checkUsuario = () => {
     const data = localStorage.getItem('usuario');
-    if (data) {
+    
+    // Verificar si hay usuario Y si el token es válido
+    if (data && isAuthenticated()) {
       setUsuario(JSON.parse(data));
     } else {
       setUsuario(null);
+      // Si hay un usuario pero el token no es válido, limpiar todo
+      if (data && !isAuthenticated()) {
+        console.warn('⚠️ Token inválido detectado. Cerrando sesión...');
+        logout();
+      }
     }
   };
 
@@ -38,11 +46,7 @@ useEffect(() => {
 
   // Cerrar sesión
   const handleLogout = () => {
-    localStorage.removeItem('usuario');
-    localStorage.removeItem('token'); // ✅ Eliminar token también
-    setUsuario(null);
-    // Disparar evento personalizado para notificar al contexto
-    window.dispatchEvent(new Event('usuarioChange'));
+    logout(); // Usa la función de authUtils que limpia todo correctamente
     navigate('/');
   };
 

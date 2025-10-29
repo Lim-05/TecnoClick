@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { getToken } from "../../utils/authUtils";
 import Modal from "../../components/common/Modal";
 import "./UsuariosAdmin.css";
 
@@ -23,7 +24,12 @@ const UsuariosAdmin = () => {
   // 🔹 Obtener todos los usuarios (solo datos necesarios para la tabla)
   const obtenerUsuarios = async () => {
     try {
-      const res = await fetch("http://localhost:3000/api/usuarios");
+      const token = getToken();
+      const res = await fetch("http://localhost:3000/api/usuarios", {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       const data = await res.json();
       setUsuarios(data);
       setCargando(false);
@@ -40,7 +46,12 @@ const UsuariosAdmin = () => {
   // 🔹 Abrir modal y traer datos completos del usuario
   const abrirModalEdicion = async (usuario) => {
     try {
-      const res = await fetch(`http://localhost:3000/api/usuarios/${usuario.id_usuario}`);
+      const token = getToken();
+      const res = await fetch(`http://localhost:3000/api/usuarios/${usuario.id_usuario}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       const data = await res.json();
       const u = data.usuario; // datos completos del usuario
 
