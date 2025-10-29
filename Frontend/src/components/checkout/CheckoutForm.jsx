@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { useNavigate } from 'react-router-dom';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 import './CheckoutForm.css';
 
 const CheckoutForm = () => {
@@ -67,6 +69,102 @@ const CheckoutForm = () => {
     return 'TEC' + Date.now().toString().slice(-8);
   };
 
+  const generarPDF = async (folio, userData, productos, total) => {
+    const { jsPDF } = await import('jspdf');
+    const doc = new jsPDF();
+
+    // Colores y estilos
+    const colorPrimario = [41, 128, 185]; // azul elegante
+    const colorTexto = [60, 60, 60];
+
+    // Encabezado
+    doc.setFillColor(...colorPrimario);
+    doc.rect(0, 0, 210, 25, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(18);
+    doc.text('Comprobante de Pago - TecnoClick', 105, 16, { align: 'center' });
+
+    // Datos generales
+    doc.setTextColor(...colorTexto);
+    doc.setFontSize(12);
+    doc.text(`Folio: ${folio}`, 20, 40);
+    doc.text(`Cliente: ${userData.nombre}`, 20, 50);
+    doc.text(`Correo: ${userData.email}`, 20, 60);
+    doc.text(`Método de pago: Efectivo`, 20, 70);
+    doc.text(`Fecha: ${new Date().toLocaleString()}`, 20, 80);
+
+    // Línea separadora
+    doc.setDrawColor(...colorPrimario);
+    doc.line(20, 85, 190, 85);
+
+    // Tabla de productos
+    let y = 95;
+    doc.setFontSize(13);
+    doc.setTextColor(...colorPrimario);
+    doc.text('Detalle de productos', 20, y);
+    y += 8;
+
+    // Encabezados
+    doc.setFontSize(11);
+    doc.setTextColor(255, 255, 255);
+    doc.setFillColor(...colorPrimario);
+    doc.rect(20, y, 170, 8, 'F');
+    doc.text('Producto', 25, y + 6);
+    doc.text('Cant.', 110, y + 6);
+    doc.text('Precio', 135, y + 6);
+    doc.text('Subtotal', 165, y + 6);
+    y += 12;
+
+    // Filas
+    doc.setTextColor(...colorTexto);
+    productos.forEach((item) => {
+      const price = typeof item.price === 'number'
+        ? item.price
+        : parseFloat(item.price.replace(/,/g, ''));
+      const subtotal = price * item.quantity;
+
+      doc.text(item.name, 25, y);
+      doc.text(String(item.quantity), 112, y);
+      doc.text(`$${price.toLocaleString()}`, 135, y);
+      doc.text(`$${subtotal.toLocaleString()}`, 165, y);
+      y += 8;
+
+      // salto de página si se llena
+      if (y > 250) {
+        doc.addPage();
+        y = 30;
+      }
+    });
+
+    // Línea separadora
+    doc.setDrawColor(...colorPrimario);
+    doc.line(20, y + 4, 190, y + 4);
+
+    // Total
+    doc.setFontSize(13);
+    doc.setTextColor(...colorPrimario);
+    doc.text(`Total a pagar: $${total.toLocaleString()} MXN`, 130, y + 14);
+
+    // Pie de página
+    doc.setFontSize(11);
+    doc.setTextColor(100);
+    doc.text(
+      'Gracias por tu compra en TecnoClick. ¡Esperamos verte pronto!',
+      105,
+      280,
+      { align: 'center' }
+    );
+
+    doc.setFontSize(9);
+    doc.text('Documento generado electrónicamente - No requiere firma', 105, 288, { align: 'center' });
+
+    // Guardar PDF
+    doc.save(`Comprobante_${folio}.pdf`);
+  };
+
+
+
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -128,6 +226,14 @@ const CheckoutForm = () => {
         // Mostrar notificación en lugar de alert
         setNotificationData({ folio: data.folio, method: 'efectivo' });
         setShowNotification(true);
+        // Generar PDF del comprobante
+        generarPDF(
+          data.folio,
+          { nombre: usuario.nombre_usuario, email: usuario.correo_usuario },
+          state.cart,
+          orderData.total
+        );
+
         
         // Ocultar notificación después de 4 segundos
         setTimeout(() => {
