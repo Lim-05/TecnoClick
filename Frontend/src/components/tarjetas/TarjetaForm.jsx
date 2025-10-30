@@ -6,21 +6,30 @@ const TarjetaForm = () => {
 
   useEffect(() => {
     const usuario = JSON.parse(localStorage.getItem("usuario"));
-    if (!usuario) return;
+    const token = localStorage.getItem("token");
+    if (!usuario | !token) return;
 
-    fetch(`http://localhost:3000/api/datos_tarjeta/${usuario.id_usuario}`)
-      .then((res) => res.json())
-      .then((data) => {
-        console.log("Datos recibidos del backend:", data);
+    fetch(`http://localhost:3000/api/datos_tarjeta/${usuario.id_usuario}`, {
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+      }
+    })
+    .then((res)=>{
+      if(!res.ok)throw new Error(`Error ${res.status}`);
+      return res.json();
+    })
+    .then((data)=> {
+      console.log("Datos recibidos del backend:", data);
 
-        if (data && data.id_tarjeta) {
-          setTarjeta(data);
-        } else {
-          setTarjeta(null);
-          console.log("No hay tarjeta registrada");
-        }
-      })
-      .catch((err) => console.error("Error cargando tarjeta:", err));
+      if(data && data.id_tarjeta) {
+        setTarjeta(data);
+      }else{
+        setTarjeta(null);
+        console.log("No tarjeta registrada")
+      }
+    })
+    .catch((err)=> console.error("Error cargando tarjetas:", err));   
   }, []);
 
   return (

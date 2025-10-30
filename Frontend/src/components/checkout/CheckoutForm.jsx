@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react'; // CAMBIO: agregamos useEffect
 import { useApp } from '../../context/AppContext';
 import { useNavigate } from 'react-router-dom';
 import { getToken } from '../../utils/authUtils';
@@ -32,6 +32,52 @@ const CheckoutForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showNotification, setShowNotification] = useState(false);
   const [notificationData, setNotificationData] = useState({ folio: '', method: '' });
+
+  const [userCards, setUserCards] = useState([]);
+
+  useEffect(() => {
+  const fetchUserCards = async () => {
+    try {
+      const usuario = JSON.parse(localStorage.getItem("usuario"));
+      const token = localStorage.getItem("token");
+
+      if (!usuario || !token) {
+        console.warn("No hay usuario o token en localStorage");
+        return;
+      }
+
+      const res = await fetch(`http://localhost:3000/api/datos_tarjeta/${usuario.id_usuario}`, {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!res.ok) {
+        console.error("Error de respuesta del backend:", res.status);
+        return;
+      }
+
+      const data = await res.json();
+      console.log("Tarjetas cargadas:", data);
+
+      // Evita romper el render
+      if (Array.isArray(data)) {
+        setUserCards(data);
+      } else if (data && data.id_tarjeta) {
+        setUserCards([data]);
+      } else {
+        setUserCards([]);
+      }
+    } catch (error) {
+      console.error("Error cargando tarjetas del usuario:", error);
+    }
+  };
+
+  fetchUserCards();
+  }, []);
+
+  // FIN CAMBIO
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -162,9 +208,6 @@ const CheckoutForm = () => {
     // Guardar PDF
     doc.save(`Comprobante_${folio}.pdf`);
   };
-
-
-
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -429,6 +472,38 @@ const CheckoutForm = () => {
                       required
                     />
                   </div>
+
+                  {/* CAMBIO: select tarjetas */}
+                  {userCards.length > 0 && (
+                    <div className="form-group full-width">
+                      <label>Seleccionar tarjeta existente</label>
+                      <select
+                        onChange={(e) => {
+                          const selectedCard = userCards.find(card => card.numero_tarjeta.slice(-4) === e.target.value);
+                          if (selectedCard) {
+                            setFormData(prev => ({
+                              ...prev,
+                              numeroTarjeta: selectedCard.numero_tarjeta,
+                              nombreTitular: selectedCard.nombre_titular,
+                              fechaExpiracion: selectedCard.fecha_vencimiento,
+                              cvv: selectedCard.cvv
+                            }));
+                          }
+                        }}
+                        defaultValue=""
+                      >
+                        <option value="" disabled>-- Elige una tarjeta --</option>
+                        {userCards.map((card, idx) => (
+                          <option key={idx} value={card.numero_tarjeta.slice(-4)}>
+                            **** **** **** {card.numero_tarjeta.slice(-4)} - {card.nombre_titular}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                  {/* FIN CAMBIO */}
+
+
                 </div>
               </div>
             )}
