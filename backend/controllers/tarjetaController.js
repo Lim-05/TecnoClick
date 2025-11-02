@@ -42,8 +42,8 @@ const obtenerTarjetaUsuario = async (req, res) => {
       return res.status(404).json({ error: 'No se encontró tarjeta para este usuario' });
     }
 
-    // Si solo quieres mostrar la primera tarjeta
-    res.json(tarjetas[0]);
+    // TODAS tarjetas
+    res.json(tarjetas);
   } catch (error) {
     console.error('Error en obtenerTarjetaUsuario:', error);
     res.status(500).json({ error: 'Error al obtener la tarjeta' });
