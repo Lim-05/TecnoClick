@@ -95,7 +95,6 @@ const TarjetaForm = () => {
                 </div>
                 
                 <div className="tarjeta-acciones">
-                  <button className="btn-editar">Editar</button>
                   <button className="btn-eliminar">Eliminar</button>
                 </div>
               </div>
