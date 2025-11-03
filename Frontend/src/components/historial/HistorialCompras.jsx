@@ -23,16 +23,25 @@ const HistorialCompras = () => {
     try {
       setLoading(true);
       setError(null);
-      
+
       const usuario = JSON.parse(localStorage.getItem('usuario'));
-      
-      if (!usuario || !usuario.id_usuario) {
+      const token = localStorage.getItem('token');
+
+      if (!usuario || !usuario.id_usuario || !token) {
         setError('Usuario no autenticado. Por favor, inicia sesión nuevamente.');
         setLoading(false);
         return;
       }
 
-      const response = await fetch(`http://localhost:3000/api/pedidos/historial/${usuario.id_usuario}`);
+      const response = await fetch(
+        `http://localhost:3000/api/pedidos/historial/${usuario.id_usuario}`,
+        {
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json"
+          }
+        }
+      );
 
       if (!response.ok) {
         throw new Error('Error al cargar el historial');
@@ -49,6 +58,7 @@ const HistorialCompras = () => {
     }
   };
 
+
   const verDetalle = async (idPedido) => {
     if (detalleVisible === idPedido) {
       setDetalleVisible(null);
@@ -57,25 +67,41 @@ const HistorialCompras = () => {
 
     try {
       const usuario = JSON.parse(localStorage.getItem('usuario'));
-      const response = await fetch(`http://localhost:3000/api/pedidos/detalle/${idPedido}/${usuario.id_usuario}`);
+      const token = localStorage.getItem('token');
+
+      if (!usuario || !token) {
+        alert('Usuario no autenticado. Por favor, inicia sesión nuevamente.');
+        return;
+      }
+
+      const response = await fetch(
+        `http://localhost:3000/api/pedidos/detalle/${idPedido}/${usuario.id_usuario}`,
+        {
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json"
+          }
+        }
+      );
 
       if (!response.ok) {
         throw new Error('Error al cargar el detalle');
       }
 
       const data = await response.json();
-      setHistorial(prev => prev.map(pedido => 
-        pedido.id === idPedido 
+      setHistorial(prev => prev.map(pedido =>
+        pedido.id === idPedido
           ? { ...pedido, detalleCompleto: data.compra }
           : pedido
       ));
-      
+
       setDetalleVisible(idPedido);
     } catch (err) {
       console.error('Error al cargar detalle:', err);
       alert('Error al cargar el detalle de la compra');
     }
   };
+
 
   const formatFecha = (fechaString) => {
     const fecha = new Date(fechaString);
