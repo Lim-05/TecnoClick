@@ -41,7 +41,7 @@ const ProductsPage = () => {
         const cleanedProducts = data.map(product => ({
           ...product,
           // Asegurar que las URLs de imágenes sean válidas
-          image: product.image || '/images/placeholder.jpg',
+          image: product.image || '/imagenes_productos/placeholder.jpg',
           // Limpiar descripciones duplicadas
           description: cleanDescription(product.description),
           // Asegurar que las categorías sean consistentes
@@ -346,7 +346,7 @@ const ProductsPage = () => {
                         src={product.image} 
                         alt={product.name}
                         onError={(e) => {
-                          e.target.src = '/images/placeholder.jpg';
+                          e.target.src = '/imagenes_productos/placeholder.jpg';
                           e.target.alt = 'Imagen no disponible';
                         }}
                       />

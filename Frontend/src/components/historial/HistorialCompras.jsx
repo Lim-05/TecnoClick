@@ -10,9 +10,9 @@ const HistorialCompras = () => {
   const navigate = useNavigate();
 
   const getImageUrl = (imagen) => {
-  if (!imagen) return '/images/placeholder.png';
+  if (!imagen) return '/imagenes_productos/placeholder.png';
   if (imagen.startsWith('http')) return imagen;
-  return `/images/${imagen}`;
+  return `/imagenes_productos/${imagen}`;
 };
 
   useEffect(() => {
@@ -207,7 +207,7 @@ const HistorialCompras = () => {
                               src={getImageUrl(producto.imagen)} 
                               alt={producto.nombre}
                               onError={(e) => {
-                                e.target.src = '/Frontend/public/images/placeholder.png';
+                                e.target.src = '/imagenes_productos/placeholder.png';
                               }}
                             />
                           </div>

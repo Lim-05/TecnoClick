@@ -90,10 +90,10 @@ const navigate = useNavigate();
               {/* Imagen del producto */}
               <div className="item-image">
                 <img 
-                  src={item.image || '/images/placeholder.jpg'} 
+                  src={item.image || '/imagenes_productos/placeholder.jpg'} 
                   alt={item.name}
                   onError={(e) => {
-                    e.target.src = '/images/placeholder.jpg';
+                    e.target.src = '/imagenes_productos/placeholder.jpg';
                   }}
                 />
               </div>

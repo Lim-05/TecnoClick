@@ -134,11 +134,11 @@ const ProductDetail = () => {
         const cleanedProduct = {
           ...data,
           // Asegurar que la imagen sea válida
-          image: data.image || '/images/placeholder.jpg',
+          image: data.image || '/imagenes_productos/placeholder.jpg',
           // Limpiar descripción duplicada
           description: cleanDescription(data.description),
           // Crear array de imágenes - solo usar la imagen real del producto
-          images: [data.image || '/images/placeholder.jpg'],
+          images: [data.image || '/imagenes_productos/placeholder.jpg'],
           // Descripción completa
           fullDescription: cleanDescription(data.description),
           // Especificaciones detalladas
@@ -302,7 +302,7 @@ const ProductDetail = () => {
               src={product.images[selectedImage]} 
               alt={product.name}
               onError={(e) => {
-                e.target.src = '/images/placeholder.jpg';
+                e.target.src = '/imagenes_productos/placeholder.jpg';
                 e.target.alt = 'Imagen no disponible';
               }}
             />
@@ -317,7 +317,7 @@ const ProductDetail = () => {
                 className={`thumbnail ${selectedImage === index ? 'active' : ''}`}
                 onClick={() => setSelectedImage(index)}
                 onError={(e) => {
-                  e.target.src = '/images/placeholder.jpg';
+                  e.target.src = '/imagenes_productos/placeholder.jpg';
                   e.target.alt = 'Miniatura no disponible';
                 }}
               />
