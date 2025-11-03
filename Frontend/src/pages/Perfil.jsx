@@ -185,6 +185,7 @@ return (
         <Link to="/cart" title="Carrito">Carr</Link>
         <Link to="/favoritos" title="Favoritos">Fav</Link>
         <Link to="/historial-compras" title="Historial de Compras">His</Link>
+        <Link to="/Tarjetas" title="Tarjetas">Tarj</Link>
         <button onClick={handleLogout} title="Cerrar sesión" style={{border:'none', fontSize:'1.5rem', cursor:'pointer'}}>CS</button>
       </div>
     </div>

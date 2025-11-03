@@ -1,11 +1,11 @@
-/* TarjetaForm.css */
+/* TarjetaForm.css - Versión Mejorada */
 
 /* Contenedor principal */
 .tarjeta-page {
   padding: 2rem;
-  max-width: 800px;
+  max-width: 1000px;
   margin: 0 auto;
-  padding-top: 12vh; /* mismo margen superior que perfil */
+  padding-top: 12vh;
 }
 
 .tarjeta-container {
@@ -18,115 +18,208 @@
 /* Títulos */
 .tarjeta-page h4 {
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 30px;
+  color: #333;
+  font-size: 1.5rem;
 }
 
-/* Fieldset y form-grid */
-fieldset {
-  border: 1px solid #ccc;
-  padding: 15px;
-  margin-bottom: 20px;
-  border-radius: 6px;
-}
-
-legend {
-  font-weight: 600;
-  color: #007bff;
-  padding: 0 8px;
-}
-
-.form-grid {
+/* Grid de tarjetas */
+.tarjetas-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 25px;
+}
+
+/* Tarjeta individual */
+.tarjeta-card {
+  background: linear-gradient(135deg, #2c3e50, #4a6491);
+  border-radius: 12px;
+  padding: 20px;
+  color: white;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.tarjeta-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+}
+
+.tarjeta-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 80px;
+  height: 80px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 0 0 0 80px;
+}
+
+/* Header de la tarjeta */
+.tarjeta-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.tarjeta-tipo {
+  font-weight: 600;
+  font-size: 0.9rem;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+
+.tarjeta-chip {
+  width: 40px;
+  height: 30px;
+  background: linear-gradient(135deg, #c9b36e, #d4c690);
+  border-radius: 5px;
+  position: relative;
+}
+
+.tarjeta-chip::before {
+  content: "";
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  right: 5px;
+  bottom: 5px;
+  border: 1px solid rgba(0, 0, 0, 0.3);
+  border-radius: 3px;
+}
+
+/* Número de tarjeta */
+.tarjeta-numero {
+  font-size: 1.4rem;
+  letter-spacing: 2px;
+  margin-bottom: 25px;
+  font-family: 'Courier New', monospace;
+  text-align: center;
+  font-weight: 500;
+}
+
+/* Información de la tarjeta */
+.tarjeta-info {
+  display: flex;
+  flex-direction: column;
   gap: 15px;
 }
 
-label {
+.tarjeta-titular {
   display: flex;
   flex-direction: column;
+}
+
+.tarjeta-detalles {
+  display: flex;
+  justify-content: space-between;
+}
+
+.tarjeta-vencimiento, .tarjeta-cvv {
+  display: flex;
+  flex-direction: column;
+}
+
+.label {
+  font-size: 0.7rem;
+  opacity: 0.8;
+  margin-bottom: 3px;
+}
+
+.value {
   font-size: 0.9rem;
+  font-weight: 500;
 }
 
-input {
-  margin-top: 5px;
-  padding: 8px;
-  border: 1px solid #aaa;
-  border-radius: 4px;
-  font-size: 0.9rem;
+/* Acciones de la tarjeta */
+.tarjeta-acciones {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+  gap: 10px;
 }
 
-input:disabled {
-  background-color: #f5f5f5;
-}
-
-/* Estilo especial para número de tarjeta */
-input[name="numero_tarjeta"] {
-  letter-spacing: 2px;
-  font-weight: bold;
-}
-
-/* Botones */
-button.continue-btn {
-  padding: 10px 20px;
-  font-size: 1rem;
+.tarjeta-acciones button {
+  flex: 1;
+  padding: 8px 12px;
   border: none;
   border-radius: 5px;
+  font-size: 0.8rem;
   cursor: pointer;
-  background-color: #007bff;
-  color: #fff;
-  display: block;
-  margin: 0 auto;
+  transition: all 0.2s ease;
+}
+
+.btn-editar {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+.btn-editar:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.btn-eliminar {
+  background: rgba(220, 53, 69, 0.7);
+  color: white;
+}
+
+.btn-eliminar:hover {
+  background: rgba(220, 53, 69, 0.9);
+}
+
+/* Estado sin tarjetas */
+.no-tarjetas {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.no-tarjetas p {
+  margin-bottom: 20px;
+  color: #666;
+  font-size: 1.1rem;
+}
+
+.btn-agregar {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  font-size: 1rem;
+  cursor: pointer;
   transition: background 0.3s ease;
 }
 
-button.continue-btn:hover {
-  background-color: #0056b3;
-}
-
-/* Barra lateral derecha (igual que Perfil) */
-.sidebar-right {
-  position: fixed;
-  top: 50%;
-  right: 0;
-  transform: translateY(-50%);
-  display: flex;
-  flex-direction: column;
-  background-color: #fff;
-  border-left: 1px solid #ccc;
-  border-radius: 8px 0 0 8px;
-  box-shadow: -2px 2px 10px rgba(0,0,0,0.1);
-  z-index: 10;
-}
-
-.sidebar-right a {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 60px;
-  height: 60px;
-  margin: 10px 0;
-  font-size: 1.5rem;
-  color: #333;
-  text-decoration: none;
-  transition: background 0.2s;
-}
-
-.sidebar-right a:hover {
-  background-color: #f0f0f0;
-  border-radius: 0 8px 8px 0;
+.btn-agregar:hover {
+  background: #0056b3;
 }
 
 /* Responsivo */
-@media (max-width: 600px) {
-  .tarjeta-container {
-    padding: 1rem;
-  }
-
-  .form-grid {
+@media (max-width: 768px) {
+  .tarjetas-grid {
     grid-template-columns: 1fr;
   }
+  
+  .tarjeta-page {
+    padding: 1rem;
+  }
+  
+  .tarjeta-container {
+    padding: 1.5rem;
+  }
+}
 
-  button.continue-btn {
-    width: 100%;
+@media (max-width: 480px) {
+  .tarjeta-card {
+    padding: 15px;
+  }
+  
+  .tarjeta-numero {
+    font-size: 1.2rem;
   }
 }

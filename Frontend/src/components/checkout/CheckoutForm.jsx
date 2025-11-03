@@ -169,12 +169,16 @@ const CheckoutForm = () => {
         ? item.price
         : parseFloat(item.price.replace(/,/g, ''));
       const subtotal = price * item.quantity;
+      const productLines = doc.splitTextToSize(item.name, 80);
 
       doc.text(item.name, 25, y);
+      const lineHeight = 6;
+      const textHeight = productLines.length * lineHeight;
+
       doc.text(String(item.quantity), 112, y);
       doc.text(`$${price.toLocaleString()}`, 135, y);
       doc.text(`$${subtotal.toLocaleString()}`, 165, y);
-      y += 8;
+      y += textHeight + 4;
 
       // salto de página si se llena
       if (y > 250) {
