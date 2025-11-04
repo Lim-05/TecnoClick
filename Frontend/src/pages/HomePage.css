@@ -137,7 +137,7 @@
 }
 
 .btn-primary {
-  background: #e74c3c;
+  background: #c58000!important;
   color: white;
   padding: 1rem 2rem;
   text-decoration: none;
@@ -147,7 +147,7 @@
 }
 
 .btn-primary:hover {
-  background: #c0392b;
+  background: #cc9022!important;
 }
 
 .btn-secondary {

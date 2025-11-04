@@ -87,14 +87,14 @@
 .btn-agregar {
   padding: 8px 12px;
   border: none;
-  background-color: #007bff;
+  background-color: #f1bd2d;
   color: white;
   border-radius: 6px;
   cursor: pointer;
 }
 
 .btn-agregar:hover {
-  background-color: #0056b3;
+  background-color: #dba81d;
 }
 
 .no-favoritos {

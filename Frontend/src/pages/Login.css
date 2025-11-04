@@ -49,7 +49,7 @@ input {
 
 input:focus {
   outline: none;
-  border-color: #007bff;
+  border-color: #d69b2c;
 }
 
 /* ======= Botón ======= */
@@ -60,13 +60,13 @@ button.continue-btn {
   border: none;
   border-radius: 5px;
   cursor: pointer;
-  background-color: #007bff;
+  background-color: #ffb936;
   color: #fff;
   transition: background 0.2s;
 }
 
 button.continue-btn:hover {
-  background-color: #0056b3;
+  background-color: #db9d29;
 }
 
 /* ======= Enlace de registro ======= */

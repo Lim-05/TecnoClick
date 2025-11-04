@@ -155,12 +155,12 @@
 }
 
 .btn-editar {
-  background: rgba(255, 255, 255, 0.2);
-  color: white;
+  background: rgba(231, 168, 32, 0.658);
+  color: rgb(0, 0, 0);
 }
 
 .btn-editar:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: rgb(223, 160, 45);
 }
 
 .btn-eliminar {
@@ -185,7 +185,7 @@
 }
 
 .btn-agregar {
-  background: #007bff;
+  background: #ffb936;
   color: white;
   border: none;
   padding: 10px 20px;
@@ -196,7 +196,7 @@
 }
 
 .btn-agregar:hover {
-  background: #0056b3;
+  background: #c79202;
 }
 
 /* Responsivo */

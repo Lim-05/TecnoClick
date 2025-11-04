@@ -74,13 +74,13 @@
   color: white;
   text-decoration: none;
   padding: 0.4rem 0.8rem;
-  background: #043c69;
+  background: #ffb936;
   border-radius: 20px;
   transition: background 0.3s;
 }
 
 .cart-link:hover {
-  background: #386fb3;
+  background: #cc9122;
 }
 
 @media (max-width: 992px) {
