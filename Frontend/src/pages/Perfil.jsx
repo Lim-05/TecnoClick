@@ -1,16 +1,12 @@
 import React, { useEffect, useState } from 'react'; //
 import { Link, useNavigate } from 'react-router-dom';
-import { getToken } from '../utils/authUtils';
+import { getToken, logout } from '../utils/authUtils';
 import './Perfil.css';
-import Modal from '../components/common/Modal';
 
 const Perfil = () => {
   const navigate = useNavigate();
   const [usuario, setUsuario] = useState(null); // aqui se guarda el usuario desde el localStorage
   const [isEditing, setIsEditing] = useState(false);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [modalMessage, setModalMessage] = useState('');
-  const [modalType, setModalType] = useState('success'); // 'success' o 'error'
   const [showNotification, setShowNotification] = useState(false);
 
   
@@ -92,8 +88,10 @@ const Perfil = () => {
       });
 
       if (response.ok) {
-        const updateUser = { ...usuario, ...formData };
+        const data = await response.json();
+        const updateUser = { ...usuario, ...data.usuario };
         localStorage.setItem('usuario', JSON.stringify(updateUser));
+        window.dispatchEvent(new Event('usuarioChange'));
         setUsuario(updateUser);
         setIsEditing(false);
         
@@ -114,7 +112,7 @@ const Perfil = () => {
   //cerrar sesion
   const handleLogout = () => {
     console.log('Cerrar sesión');
-    localStorage.removeItem('usuario'); // elimina los datos del usuario guardado
+    logout();
   // Disparar evento personalizado para notificar al contexto
     window.dispatchEvent(new Event('usuarioChange'));
     navigate('/'); // redirige a la página principal

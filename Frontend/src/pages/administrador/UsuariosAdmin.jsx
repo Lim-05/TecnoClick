@@ -1,272 +1,87 @@
-import React, { useEffect, useState } from "react";
-import { getToken } from "../../utils/authUtils";
-import Modal from "../../components/common/Modal";
-import "./UsuariosAdmin.css";
-
-const UsuariosAdmin = () => {
+import { useEffect, useState } from 'react';
+import { api } from '../../utils/api';
+import { hasPermission } from '../../utils/authUtils';
+import Modal from '../../components/common/Modal';
+import './UsuariosAdmin.css';
+import './Gestion.css';
+const fields = [
+  ['nombre_usuario','Nombre'], ['apellido_usuario','Apellido'], ['telefono_usuario','Teléfono'],
+  ['correo_usuario','Correo'], ['direccion_usuario','Dirección'], ['codigo_postal','Código postal'],
+  ['estado_usuario','Estado'], ['municipio_usuario','Municipio'], ['colonia_usuario','Colonia'],
+  ['referencias','Referencias'],
+];
+const empty = Object.fromEntries(fields.map(([key]) => [key, '']));
+export default function UsuariosAdmin() {
   const [usuarios, setUsuarios] = useState([]);
-  const [cargando, setCargando] = useState(true);
-  const [modalAbierto, setModalAbierto] = useState(false);
-  const [usuarioEditando, setUsuarioEditando] = useState(null);
-  const [formData, setFormData] = useState({
-    nombre_usuario: "",
-    apellido_usuario: "",
-    telefono_usuario: "",
-    correo_usuario: "",
-    direccion_usuario: "",
-    codigo_postal: "",
-    estado_usuario: "",
-    municipio_usuario: "",
-    colonia_usuario: "",
-    referencias: "",
-  });
-
-  // 🔹 Obtener todos los usuarios (solo datos necesarios para la tabla)
-  const obtenerUsuarios = async () => {
+  const [roles, setRoles] = useState([]);
+  const [form, setForm] = useState(null);
+  const [editing, setEditing] = useState(null);
+  const [error, setError] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const canAssign = hasPermission('roles.asignar');
+  async function load() {
+    const [users, available] = await Promise.all([api('/usuarios'), api('/roles')]);
+    setUsuarios(users); setRoles(available);
+  }
+  useEffect(() => { load().catch(e => setError(e.message)).finally(() => setLoading(false)); }, []);
+  function open(user) {
+    setError('');
+    setEditing(user?.id_usuario ?? null);
+    setForm(user ? { ...empty, ...user } : { ...empty, contrasena: '', id_rol: roles.find(r => r.codigo === 'cliente')?.id_rol ?? '' });
+  }
+  async function save(event) {
+    event.preventDefault(); setBusy(true); setError('');
     try {
-      const token = getToken();
-      const res = await fetch("http://localhost:3000/api/usuarios", {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      const data = await res.json();
-      setUsuarios(data);
-      setCargando(false);
-    } catch (error) {
-      console.error("Error al obtener usuarios:", error);
-      setCargando(false);
-    }
-  };
-
-  useEffect(() => {
-    obtenerUsuarios();
-  }, []);
-
-  // 🔹 Abrir modal y traer datos completos del usuario
-  const abrirModalEdicion = async (usuario) => {
-    try {
-      const token = getToken();
-      const res = await fetch(`http://localhost:3000/api/usuarios/${usuario.id_usuario}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      const data = await res.json();
-      const u = data.usuario; // datos completos del usuario
-
-      setUsuarioEditando(u);
-      setFormData({
-        nombre_usuario: u.nombre_usuario || "",
-        apellido_usuario: u.apellido_usuario || "",
-        telefono_usuario: u.telefono_usuario || "",
-        correo_usuario: u.correo_usuario || "",
-        direccion_usuario: u.direccion_usuario || "",
-        codigo_postal: u.codigo_postal || "",
-        estado_usuario: u.estado_usuario || "",
-        municipio_usuario: u.municipio_usuario || "",
-        colonia_usuario: u.colonia_usuario || "",
-        referencias: u.referencias || "",
-      });
-
-      setModalAbierto(true);
-    } catch (error) {
-      console.error("Error al obtener usuario para edición:", error);
-    }
-  };
-
-  // 🔹 Cerrar modal
-  const cerrarModal = () => {
-    setModalAbierto(false);
-    setUsuarioEditando(null);
-  };
-
-  // 🔹 Manejar cambios en inputs
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  // 🔹 Guardar cambios en la base de datos
-  const guardarCambios = async () => {
-    try {
-      const res = await fetch(
-        `http://localhost:3000/api/usuarios/${usuarioEditando.id_usuario}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formData),
-        }
-      );
-
-      if (res.ok) {
-        const data = await res.json();
-        // Actualizar usuario en estado local
-        setUsuarios(
-          usuarios.map((u) =>
-            u.id_usuario === usuarioEditando.id_usuario ? data.usuario : u
-          )
-        );
-        cerrarModal();
-      } else {
-        const errorData = await res.json();
-        alert(errorData.mensaje || "Error al actualizar usuario");
-      }
-    } catch (error) {
-      console.error("Error al actualizar usuario:", error);
-    }
-  };
-
-  if (cargando) return <p>Cargando usuarios...</p>;
-
-  return (
-    <div className="usuarios-admin-page">
-      <div className="usuarios-admin-container">
-        <h4>Gestión de Usuarios</h4>
-
-        {usuarios.length === 0 ? (
-          <p>No hay usuarios registrados.</p>
-        ) : (
-          <table className="usuarios-table">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Nombre</th>
-                <th>Correo</th>
-                <th>Estado</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {usuarios.map((u) => (
-                <tr key={u.id_usuario}>
-                  <td>{u.id_usuario}</td>
-                  <td>{u.nombre_usuario}</td>
-                  <td>{u.correo_usuario}</td>
-                  <td>{u.estado_usuario}</td>
-                  <td>
-                    <button
-                      className="btn-editar"
-                      onClick={() => abrirModalEdicion(u)}
-                    >
-                      Editar
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
-
-      {/* Modal de edición */}
-      <Modal isOpen={modalAbierto} onClose={cerrarModal}>
-        <h3>Editar Usuario</h3>
-        {usuarioEditando && (
-          <>
-            <div className="form-group">
-              <label>Nombre:</label>
-              <input
-                type="text"
-                name="nombre_usuario"
-                value={formData.nombre_usuario}
-                onChange={handleChange}
-              />
-            </div>
-            <div className="form-group">
-              <label>Apellido:</label>
-              <input
-                type="text"
-                name="apellido_usuario"
-                value={formData.apellido_usuario}
-                onChange={handleChange}
-              />
-            </div>
-            <div className="form-group">
-              <label>Teléfono:</label>
-              <input
-                type="text"
-                name="telefono_usuario"
-                value={formData.telefono_usuario}
-                onChange={handleChange}
-              />
-            </div>
-            <div className="form-group">
-              <label>Correo:</label>
-              <input
-                type="email"
-                name="correo_usuario"
-                value={formData.correo_usuario}
-                onChange={handleChange}
-              />
-            </div>
-            <div className="form-group">
-              <label>Dirección:</label>
-              <input
-                type="text"
-                name="direccion_usuario"
-                value={formData.direccion_usuario}
-                onChange={handleChange}
-              />
-            </div>
-            <div className="form-group">
-              <label>Código postal:</label>
-              <input
-                type="text"
-                name="codigo_postal"
-                value={formData.codigo_postal}
-                onChange={handleChange}
-              />
-            </div>
-            <div className="form-group">
-              <label>Estado:</label>
-              <input
-                type="text"
-                name="estado_usuario"
-                value={formData.estado_usuario}
-                onChange={handleChange}
-              />
-            </div>
-            <div className="form-group">
-              <label>Municipio:</label>
-              <input
-                type="text"
-                name="municipio_usuario"
-                value={formData.municipio_usuario}
-                onChange={handleChange}
-              />
-            </div>
-            <div className="form-group">
-              <label>Colonia:</label>
-              <input
-                type="text"
-                name="colonia_usuario"
-                value={formData.colonia_usuario}
-                onChange={handleChange}
-              />
-            </div>
-            <div className="form-group">
-              <label>Referencias:</label>
-              <input
-                type="text"
-                name="referencias"
-                value={formData.referencias}
-                onChange={handleChange}
-              />
-            </div>
-
-            <div className="modal-buttons">
-              <button className="btn-guardar" onClick={guardarCambios}>
-                Guardar cambios
-              </button>
-              <button className="btn-cancelar" onClick={cerrarModal}>
-                Cancelar
-              </button>
-            </div>
-          </>
-        )}
-      </Modal>
-    </div>
-  );
-};
-
-export default UsuariosAdmin;
+      const body = editing && !hasPermission('usuarios.editar') ? {} : Object.fromEntries(fields.map(([key]) => [key, form[key]]));
+      if (!editing) body.contrasena = form.contrasena;
+      if (canAssign || !editing) body.id_rol = Number(form.id_rol);
+      await api(editing ? '/usuarios/' + editing : '/usuarios/admin', { method: editing ? 'PUT' : 'POST', body });
+      await load(); setForm(null);
+    } catch (e) { setError(e.message); } finally { setBusy(false); }
+  }
+  async function action(user, revoke) {
+    if (!window.confirm(revoke ? '¿Revocar el rol y devolver este usuario a Cliente?' : '¿Eliminar este usuario?')) return;
+    setBusy(true); setError('');
+    try { await api('/usuarios/' + user.id_usuario + (revoke ? '/rol' : ''), { method: 'DELETE' }); await load(); }
+    catch (e) { setError(e.message); } finally { setBusy(false); }
+  }
+  if (loading) return <p>Cargando usuarios...</p>;
+  return <div className="usuarios-admin-page"><div className="usuarios-admin-container gestion">
+    <h4>Gestión de Usuarios</h4>
+    {hasPermission('usuarios.crear') && <button disabled={busy} onClick={() => open(null)}>Registrar usuario</button>}
+    {error && <p role="alert" className="gestion-error">{error}</p>}
+    <div className="gestion-table"><table className="usuarios-table"><thead><tr>
+      <th>ID</th><th>Nombre</th><th>Correo</th><th>Rol</th><th>Acciones</th>
+    </tr></thead><tbody>{usuarios.map(u => <tr key={u.id_usuario}>
+      <td>{u.id_usuario}</td><td>{u.nombre_usuario} {u.apellido_usuario}</td><td>{u.correo_usuario}</td>
+      <td>{u.rol_nombre}</td><td>
+        {(hasPermission('usuarios.editar') || canAssign) && <button disabled={busy} onClick={() => open(u)}>Editar / asignar rol</button>}
+        {hasPermission('roles.revocar') && u.rol_codigo !== 'cliente' && <button disabled={busy} onClick={() => action(u, true)}>Revocar rol</button>}
+        {hasPermission('usuarios.eliminar') && <button disabled={busy} onClick={() => action(u, false)}>Eliminar</button>}
+      </td>
+    </tr>)}</tbody></table></div>
+    {!usuarios.length && <p>No hay usuarios registrados.</p>}
+    <Modal isOpen={!!form} onClose={() => !busy && setForm(null)}>
+      {form && <form className="gestion-form" onSubmit={save}>
+        <h3>{editing ? 'Editar usuario' : 'Registrar usuario'}</h3>
+        {fields.map(([key,label]) => <label key={key}>{label}
+          <input name={key} type={key === 'correo_usuario' ? 'email' : 'text'}
+            required={['nombre_usuario','apellido_usuario','correo_usuario','codigo_postal','estado_usuario','municipio_usuario','colonia_usuario'].includes(key)}
+            disabled={busy || (editing && !hasPermission('usuarios.editar'))}
+            value={form[key] ?? ''} onChange={e => setForm({ ...form, [key]: e.target.value })} />
+        </label>)}
+        {!editing && <label>Contraseña<input type="password" required value={form.contrasena}
+          onChange={e => setForm({ ...form, contrasena: e.target.value })} /></label>}
+        <label>Rol<select required value={form.id_rol} disabled={busy || !canAssign}
+          onChange={e => setForm({ ...form, id_rol: Number(e.target.value) })}>
+          <option value="">Selecciona un rol</option>
+          {roles.map(r => <option key={r.id_rol} value={r.id_rol}>{r.nombre}</option>)}
+        </select></label>
+        {error && <p role="alert" className="gestion-error">{error}</p>}
+        <button disabled={busy}>{busy ? 'Guardando...' : 'Guardar'}</button>
+        <button type="button" disabled={busy} onClick={() => setForm(null)}>Cancelar</button>
+      </form>}
+    </Modal>
+  </div></div>;
+}

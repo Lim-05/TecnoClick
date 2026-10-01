@@ -1,10 +1,7 @@
-const express = require('express');
-const router = express.Router();
-const adminAuthMiddleware = require('../middleware/adminAuth');
+const router = require('express').Router();
+const auth = require('../middleware/auth');
+const { requirePermission: permit } = require('../middleware/permission');
 const { ingresosEfectivo, ingresosTarjeta } = require('../controllers/ingresosController');
-
-// Rutas de ingresos - SOLO ADMINISTRADORES
-router.get('/efectivo', adminAuthMiddleware, ingresosEfectivo);
-router.get('/tarjeta', adminAuthMiddleware, ingresosTarjeta);
-
+router.get('/efectivo', auth, permit('ingresos.ver'), ingresosEfectivo);
+router.get('/tarjeta', auth, permit('ingresos.ver'), ingresosTarjeta);
 module.exports = router;

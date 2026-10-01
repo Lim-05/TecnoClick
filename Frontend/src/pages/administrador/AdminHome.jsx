@@ -1,57 +1,21 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import "./AdminHome.css";
-
-const AdminHome = () => {
-  const opciones = [
-    {
-      id: 1,
-      titulo: "Gestionar Usuarios",
-      ruta: "/admin/usuarios",
-      color: "#007bff",
-    },
-    {
-      id: 2,
-      titulo: "Gestionar Productos",
-      ruta: "/admin/productos",
-      color: "#28a745",
-    },
-    {
-      id: 3,
-      titulo: "Gestionar Compras",
-      ruta: "/admin/ingresos",
-      color: "#ffc107",
-    },
-    {
-      id: 4,
-      titulo: "Gestionar Pedidos",
-      ruta: "/admin/pedidos",
-      color: "#6e0000ff",
-    },
+import { Link } from 'react-router-dom';
+import { hasPermission, hasRole } from '../../utils/authUtils';
+import './AdminHome.css';
+export default function AdminHome() {
+  const options = [
+    { title:'Gestionar Usuarios',path:'/admin/usuarios',permission:'usuarios.ver',color:'#007bff' },
+    { title:'Gestionar Productos',path:'/admin/productos',permission:'productos.ver',color:'#28a745' },
+    { title:'Gestionar Categorías',path:'/admin/categorias',permission:'categorias.ver',color:'#398678' },
+    { title:'Consultar Ingresos',path:'/admin/ingresos',permission:'ingresos.ver',color:'#ffc107' },
+    { title:'Gestionar Pedidos',path:'/admin/pedidos',permission:'pedidos.gestionar',color:'#6e0000' },
+    { title:'Roles y Permisos',path:'/admin/roles',permission:'roles.ver',color:'#7455ac' },
+    { title:'Registro de Auditoría',path:'/admin/auditoria',permission:'auditoria.ver',color:'#43556e' },
   ];
-
-  return (
-    <div className="admin-home-page">
-      <div className="admin-home-container">
-        <h4>Panel de Administración</h4>
-        <p className="admin-subtitle">Selecciona una sección para gestionar</p>
-
-        <div className="admin-grid">
-          {opciones.map((op) => (
-            <Link
-              key={op.id}
-              to={op.ruta}
-              className="admin-card"
-              style={{ borderTopColor: op.color }}
-            >
-
-              <h5>{op.titulo}</h5>
-            </Link>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export default AdminHome;
+  // Los clientes usan el catalogo publico; el Editor tiene un panel limitado al contenido.
+  return <div className="admin-home-page"><div className="admin-home-container">
+    <h4>{hasRole('editor') ? 'Panel de Editor' : 'Panel de Administración'}</h4>
+    <p className="admin-subtitle">Selecciona una sección para gestionar</p>
+    <div className="admin-grid">{options.filter(op => hasPermission(op.permission)).map(op => <Link
+      key={op.path} to={op.path} className="admin-card" style={{ borderTopColor:op.color }}><h5>{op.title}</h5></Link>)}</div>
+  </div></div>;
+}

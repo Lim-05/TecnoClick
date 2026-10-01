@@ -45,11 +45,13 @@ const Login = () => {
         window.dispatchEvent(new Event('usuarioChange'));
 
         // Detectar rol y redirigir
-        console.log('🔍 Rol detectado:', data.usuario.rol);
+        console.log('🔍 Rol detectado:', data.usuario.rol_codigo);
         console.log('🔍 Usuario completo:', data.usuario);
         
         // Acepta tanto "admin" como "administrador" para mayor flexibilidad
-        if (data.usuario.rol === 'administrador' || data.usuario.rol === 'admin') {
+        if (data.usuario.rol_codigo === 'editor') {
+          navigate('/editor');
+        } else if (data.usuario.rol_codigo === 'admin' || data.usuario.permisos?.some(p => ['usuarios.ver','roles.ver','auditoria.ver','productos.crear','productos.editar','productos.eliminar','categorias.crear','categorias.editar','categorias.eliminar','ingresos.ver','pedidos.gestionar'].includes(p))) {
           console.log('Redirigiendo a /admin');
           navigate('/admin'); // panel de administrador
         } else {

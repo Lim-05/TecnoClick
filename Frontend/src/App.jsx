@@ -14,7 +14,9 @@ import Perfil from './pages/Perfil';
 import Login from './pages/Login';
 import UsuariosAdmin from './pages/administrador/UsuariosAdmin';
 import AdminHome from './pages/administrador/AdminHome';
-import ProductosAdmin from './pages/administrador/ProductosAdmin';
+import ContenidoAdmin from './pages/administrador/ContenidoAdmin';
+import RolesAdmin from './pages/administrador/RolesAdmin';
+import AuditoriaAdmin from './pages/administrador/AuditoriaAdmin';
 import IngresosAdmin from './pages/administrador/IngresosAdmin';
 import PedidoAdmin from './pages/administrador/PedidosAdmin';
 import CompraPage from './pages/CompraPage'; 
@@ -45,30 +47,35 @@ function App() {
               <Route path="/tarjetas" element={<TarjetaForm />}/>
 
               <Route path="/admin" element={
-                <ProtectedRoute requiredRole="admin">
+                <ProtectedRoute anyPermissions={['productos.crear','productos.editar','productos.eliminar','categorias.crear','categorias.editar','categorias.eliminar','usuarios.ver','roles.ver','auditoria.ver','ingresos.ver','pedidos.gestionar']}>
                   <AdminHome />
                 </ProtectedRoute>
               } />
               <Route path="/admin/usuarios" element={
-                <ProtectedRoute requiredRole="admin">
+                <ProtectedRoute requiredPermission="usuarios.ver">
                   <UsuariosAdmin />
                 </ProtectedRoute>
               } />
               <Route path="/admin/productos" element={
-                <ProtectedRoute requiredRole="admin">
-                  <ProductosAdmin />
+                <ProtectedRoute requiredPermission="productos.ver">
+                  <ContenidoAdmin resource="productos" />
                 </ProtectedRoute>
               } />
               <Route path="/admin/ingresos" element={
-                <ProtectedRoute requiredRole="admin">
+                <ProtectedRoute requiredPermission="ingresos.ver">
                   <IngresosAdmin />
                 </ProtectedRoute>
               } />
               <Route path="/admin/pedidos" element={
-                <ProtectedRoute requiredRole="admin">
+                <ProtectedRoute requiredPermission="pedidos.gestionar">
                   <PedidoAdmin />
                 </ProtectedRoute>
               } />
+
+              <Route path="/admin/categorias" element={<ProtectedRoute requiredPermission="categorias.ver"><ContenidoAdmin resource="categorias" /></ProtectedRoute>} />
+              <Route path="/admin/roles" element={<ProtectedRoute requiredPermission="roles.ver"><RolesAdmin /></ProtectedRoute>} />
+              <Route path="/admin/auditoria" element={<ProtectedRoute requiredPermission="auditoria.ver"><AuditoriaAdmin /></ProtectedRoute>} />
+              <Route path="/editor" element={<ProtectedRoute requiredRole="editor"><AdminHome /></ProtectedRoute>} />
 
             </Routes>
           </main>

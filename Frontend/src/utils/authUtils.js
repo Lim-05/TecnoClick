@@ -103,11 +103,11 @@ export const getUserFromToken = () => {
  * Cierra la sesión del usuario eliminando todos los datos
  */
 export const logout = () => {
+  const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
   removeToken();
   localStorage.removeItem('usuario');
   
   // Limpiar carrito y favoritos del usuario actual
-  const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
   if (usuario?.id_usuario) {
     localStorage.removeItem(`cart_${usuario.id_usuario}`);
     localStorage.removeItem(`favoritos_${usuario.id_usuario}`);
@@ -140,8 +140,15 @@ export const getAuthHeaders = () => {
  * @returns {boolean} true si el usuario tiene ese rol
  */
 export const hasRole = (rol) => {
-  const userData = getUserFromToken();
-  return userData?.rol === rol;
+  if (!isAuthenticated()) return false;
+  const userData = JSON.parse(localStorage.getItem('usuario') || 'null');
+  return userData?.rol_codigo === rol;
+};
+
+export const hasPermission = (permission) => {
+  if (!isAuthenticated()) return false;
+  const userData = JSON.parse(localStorage.getItem('usuario') || 'null');
+  return userData?.permisos?.includes(permission) || false;
 };
 
 /**

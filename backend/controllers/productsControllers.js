@@ -1,5 +1,6 @@
-const { getAllProducts, getProductById, deleteProductById } = require('../models/productModel');
+const { getAllProducts, getProductById } = require('../models/productModel');
 const { getAverageRating } = require('../models/resenaModel');
+const { transaction, audit, positiveId, httpError, respondError } = require('../services/access');
 
 // Controlador para obtener todos los productos
 async function getProductos(req, res) {
@@ -78,17 +79,15 @@ async function getProductoPorId(req, res) {
 
 async function deleteProducto(req, res) {
   try {
-    const id = parseInt(req.params.id);
-    const eliminado = await deleteProductById(id);
-
-    if (!eliminado) {
-      return res.status(404).json({ mensaje: 'Producto no encontrado o ya eliminado' });
-    }
-
+    const id = positiveId(req.params.id);
+    await transaction(async client => {
+      const result = await client.query('DELETE FROM productos WHERE id_producto=$1 RETURNING id_producto', [id]);
+      if (!result.rows.length) throw httpError(404, 'Producto no encontrado o ya eliminado');
+      await audit(client, req.usuario, 'productos.eliminar', 'productos', id);
+    });
     res.json({ mensaje: 'Producto eliminado correctamente' });
   } catch (error) {
-    console.error('Error al eliminar producto:', error.message);
-    res.status(500).json({ mensaje: 'Error al eliminar el producto' });
+    respondError(res, error);
   }
 }
 

@@ -1,76 +1,30 @@
-// controllers/authController.js
 const db = require('../config/db');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-
+const { getAccess, safeUser, audit, transaction, respondError } = require('../services/access');
 const SECRET = process.env.JWT_SECRET || 'claveSecreta';
-
-const login = async (req, res) => {
+async function login(req, res) {
   const { correo, contra } = req.body;
-
-  // Validar que existan datos
-  if (!correo || !contra) {
-    return res.status(400).json({ mensaje: 'Correo y contraseña son requeridos' });
+  if (typeof correo !== 'string' || typeof contra !== 'string' || !correo || !contra) {
+    return res.status(400).json({ mensaje: 'Correo y contraseña son requeridos.' });
   }
-
   try {
-    // Buscar el usuario por correo
-    const sql = 'SELECT * FROM usuario WHERE correo_usuario = $1';
-    const result = await db.query(sql, [correo]);
-
-    if (result.rows.length === 0) {
-      return res.status(401).json({ mensaje: 'Usuario no encontrado' });
-    }
-
+    const result = await db.query('SELECT * FROM usuario WHERE correo_usuario = $1', [correo.trim()]);
     const usuario = result.rows[0];
-
-    const esValida = await bcrypt.compare(contra, usuario.contrasena);
-    if (!esValida) {
-      return res.status(401).json({ mensaje: 'Contraseña incorrecta' });
+    if (!usuario || !(await bcrypt.compare(contra, usuario.contrasena))) {
+      return res.status(401).json({ mensaje: 'Correo o contraseña incorrectos.' });
     }
-
-    delete usuario.contrasena;
-
-    // Normalizar rol: si es "administrador", cambiarlo a "admin"
-    let rol = usuario.rol || 'cliente';
-    if (rol === 'administrador') {
-      rol = 'admin';
-    }
-
-    //generar token JWT
-    const token = jwt.sign(
-      { 
-        id_usuario: usuario.id_usuario,
-        correo: usuario.correo_usuario,
-        rol: rol
-      },
-      SECRET,
-      { expiresIn: '2d' } // Token expira en 2 días
-    );
-
-    res.status(200).json({
-      mensaje: 'Inicio de sesión exitoso',
-      token: token,  //devolver el token
-      usuario: {
-        id_usuario: usuario.id_usuario,
-        nombre_usuario: usuario.nombre_usuario,
-        apellido_usuario: usuario.apellido_usuario,
-        telefono_usuario: usuario.telefono_usuario,
-        correo_usuario: usuario.correo_usuario,
-        direccion_usuario: usuario.direccion_usuario,
-        codigo_postal: usuario.codigo_postal,
-        estado_usuario: usuario.estado_usuario,
-        municipio_usuario: usuario.municipio_usuario,
-        colonia_usuario: usuario.colonia_usuario,
-        referencias: usuario.referencias,
-        rol, // devolvemos el rol
-      },
-    });
-
-  } catch (err) {
-    console.error('Error en login:', err.message);
-    res.status(500).json({ mensaje: 'Error del servidor', error: err.message });
-  }
-};
-
-module.exports = { login };
+    const access = await getAccess(usuario.id_usuario);
+    if (!access) return res.status(403).json({ mensaje: 'La cuenta no tiene un rol válido.' });
+    await transaction(client => audit(client, access, 'sesion.iniciar', 'usuario', usuario.id_usuario));
+    const token = jwt.sign({ id_usuario: usuario.id_usuario }, SECRET, { expiresIn: '2d' });
+    res.json({ mensaje: 'Inicio de sesión exitoso', token, usuario: { ...safeUser(usuario), ...access } });
+  } catch (error) { respondError(res, error); }
+}
+async function session(req, res) {
+  try {
+    const result = await db.query('SELECT * FROM usuario WHERE id_usuario = $1', [req.usuario.id_usuario]);
+    res.json({ usuario: { ...safeUser(result.rows[0]), ...req.usuario } });
+  } catch (error) { respondError(res, error); }
+}
+module.exports = { login, session };

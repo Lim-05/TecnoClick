@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Reg_compra.css';
-import { useEffect } from 'react';
+import { setToken } from '../../utils/authUtils';
 
 const Reg_Compra = () => {
   const navigate = useNavigate();
@@ -50,6 +50,8 @@ const Reg_Compra = () => {
     if (!formData.codigoPostal.trim()) newErrors.codigoPostal = 'El código postal es requerido';
     if (!formData.estado.trim()) newErrors.estado = 'El estado es requerido';
     if (!formData.municipio.trim()) newErrors.municipio = 'El municipio es requerido';
+    if (!formData.colonia.trim()) newErrors.colonia = 'La colonia es requerida';
+    if (!formData.email.trim()) newErrors.email = 'El correo es requerido';
     
     // Validar campos requeridos de contacto
     if (!formData.nombre.trim()) newErrors.nombre = 'El nombre es requerido';
@@ -97,7 +99,18 @@ const handleSubmit = async (e) => {
       const data = await response.json();
 
       if (response.ok) {
-        localStorage.setItem('usuario', JSON.stringify(data.usuario)); // Guardar datos del usuario en localStorage
+        const login = await fetch('/api/login', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ correo: formData.email, contra: formData.password }),
+        });
+        const session = await login.json();
+        if (!login.ok) {
+          alert('Tu cuenta fue creada. Inicia sesión para continuar.');
+          navigate('/login');
+          return;
+        }
+        setToken(session.token);
+        localStorage.setItem('usuario', JSON.stringify(session.usuario));
         // Disparar evento personalizado para notificar al contexto
         window.dispatchEvent(new Event('usuarioChange'));
         alert('Usuario guardado correctamente');
@@ -118,6 +131,9 @@ const handleSubmit = async (e) => {
       formData.codigoPostal.trim() &&
       formData.estado.trim() &&
       formData.municipio.trim() &&
+      formData.colonia.trim() &&
+      formData.email.trim() &&
+      formData.password.trim() &&
       formData.nombre.trim() &&
       formData.apellido.trim() &&
       formData.telefono.trim() &&
@@ -183,10 +199,11 @@ const handleSubmit = async (e) => {
             </label>
             
             <label>
-              Colonia
+              Colonia *
               <input 
                 type="text" 
                 name="colonia"
+                required
                 value={formData.colonia}
                 onChange={handleInputChange}
               />
@@ -245,10 +262,11 @@ const handleSubmit = async (e) => {
             </label>
             
             <label>
-              Correo electrónico (opcional)
+              Correo electrónico *
               <input 
                 type="email" 
                 name="email"
+                required
                 value={formData.email}
                 onChange={handleInputChange}
               />

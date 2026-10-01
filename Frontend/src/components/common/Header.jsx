@@ -59,6 +59,8 @@ useEffect(() => {
         
         <nav className="nav">
           <Link to="/products">Productos</Link>
+          {usuario?.rol_codigo === 'editor' ? <Link to="/editor">Panel de Editor</Link> :
+            usuario?.permisos?.some(p => ['usuarios.ver','roles.ver','auditoria.ver','productos.crear','productos.editar','productos.eliminar','categorias.crear','categorias.editar','categorias.eliminar','ingresos.ver','pedidos.gestionar'].includes(p)) && <Link to="/admin">Administración</Link>}
 
           {usuario ? (
             <button 
