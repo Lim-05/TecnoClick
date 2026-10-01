@@ -1,4 +1,4 @@
-
+import React from 'react';
 import Reg_Compra from '../components/cart/Reg_Compra';
 import CheckoutForm from '../components/checkout/CheckoutForm';
 
