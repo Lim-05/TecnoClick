@@ -43,7 +43,7 @@ const ProductDetail = () => {
   const loadResenas = async (productId) => {
     setLoadingResenas(true);
     try {
-      const response = await fetch(`http://localhost:3000/api/resenas/producto/${productId}`);
+      const response = await fetch(`https://localhost:3000/api/resenas/producto/${productId}`);
       
       if (!response.ok) {
         throw new Error('Error al cargar reseñas');
@@ -82,7 +82,7 @@ const ProductDetail = () => {
   // Verificar permisos de reseña
   const verificarPermisosResena = async (productId, token) => {
     try {
-      const response = await fetch(`http://localhost:3000/api/resenas/puede-resenar/${productId}`, {
+      const response = await fetch(`https://localhost:3000/api/resenas/puede-resenar/${productId}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -121,7 +121,7 @@ const ProductDetail = () => {
       setError(null);
       try {
         console.log(` Cargando producto con ID: ${id}`);
-        const response = await fetch(`http://localhost:3000/api/productos/products/${id}`);
+        const response = await fetch(`https://localhost:3000/api/productos/products/${id}`);
         
         if (!response.ok) {
           throw new Error(`Error HTTP: ${response.status}`);

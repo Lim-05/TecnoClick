@@ -34,7 +34,7 @@ const HistorialCompras = () => {
       }
 
       const response = await fetch(
-        `http://localhost:3000/api/pedidos/historial/${usuario.id_usuario}`,
+        `https://localhost:3000/api/pedidos/historial/${usuario.id_usuario}`,
         {
           headers: {
             "Authorization": `Bearer ${token}`,
@@ -75,7 +75,7 @@ const HistorialCompras = () => {
       }
 
       const response = await fetch(
-        `http://localhost:3000/api/pedidos/detalle/${idPedido}/${usuario.id_usuario}`,
+        `https://localhost:3000/api/pedidos/detalle/${idPedido}/${usuario.id_usuario}`,
         {
           headers: {
             "Authorization": `Bearer ${token}`,

@@ -14,14 +14,14 @@ const IngresosAdmin = () => {
       try {
         const token = getToken();
         
-        const resEfectivo = await fetch("http://localhost:3000/api/ingresos/efectivo", {
+        const resEfectivo = await fetch("https://localhost:3000/api/ingresos/efectivo", {
           headers: {
             'Authorization': `Bearer ${token}`
           }
         });
         const dataEfectivo = await resEfectivo.json();
 
-        const resTarjeta = await fetch("http://localhost:3000/api/ingresos/tarjeta", {
+        const resTarjeta = await fetch("https://localhost:3000/api/ingresos/tarjeta", {
           headers: {
             'Authorization': `Bearer ${token}`
           }

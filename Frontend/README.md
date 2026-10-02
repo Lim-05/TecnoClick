@@ -46,3 +46,19 @@ npm install nodemailer
 # AGREGAR EN .ENV
 EMAIL_USER= tecnoclick.sistema@gmail.com
 EMAIL_PASSWORD=ciqzhnpnxguqxdjy
+
+## Comunicación segura (HTTPS/TLS) y Cookies seguras para JWT (Puntos 5 y 7)
+Se implementó el cifrado de extremo a extremo mediante certificados SSL/TLS tanto en el servidor Backend (`https://localhost:3000`) como en el Frontend (`https://localhost:5173`). Además, se migró el almacenamiento del token JWT de `localStorage` a cookies seguras con los atributos `HttpOnly`, `Secure` y `SameSite=Strict` para prevenir ataques
+
+# DESDE TERMINAL WSL EN BACKEND (Instalar dependencia para leer cookies)
+cd backend
+npm install cookie-parser
+
+# GENERAR CERTIFICADOS SSL LOCALES (Estando dentro de la carpeta backend)
+mkdir -p certs
+openssl req -x509 -newkey rsa:2048 -nodes -sha256 -days 365 \
+  -subj "/CN=localhost" \
+  -addext "subjectAltName=DNS:localhost,IP:127.0.0.1" \
+  -keyout certs/key.pem -out certs/cert.pem
+
+  Estos comandos crean los dos archivos criptográficos necesarios para que Node.js y Vite puedan cifrar el tráfico con HTTPS: una llave privada (key.pem) y un certificado público (cert.pem).

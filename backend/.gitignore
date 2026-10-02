@@ -7,3 +7,6 @@ node_modules/
 # Logs y otros archivos temporales
 *.log
 .DS_Store
+
+# Certificados SSL
+certs/

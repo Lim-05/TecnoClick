@@ -9,7 +9,7 @@ const TarjetaForm = () => {
     const token = localStorage.getItem("token");
     if (!usuario || !token) return;
 
-    fetch(`http://localhost:3000/api/datos_tarjeta/${usuario.id_usuario}`, {
+    fetch(`https://localhost:3000/api/datos_tarjeta/${usuario.id_usuario}`, {
       headers: {
         "Authorization": `Bearer ${token}`,
         "Content-Type": "application/json"

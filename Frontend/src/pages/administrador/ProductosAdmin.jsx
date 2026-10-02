@@ -10,7 +10,7 @@ const ProductosAdmin = () => {
   useEffect(() => {
     const fetchProductos = async () => {
       try {
-        const res = await fetch("http://localhost:3000/api/productos/products");
+        const res = await fetch("https://localhost:3000/api/productos/products");
         if (!res.ok) throw new Error("Error al obtener productos");
         const data = await res.json();
         setProductos(data);
@@ -30,7 +30,7 @@ const ProductosAdmin = () => {
 
     try {
       const res = await fetch(
-        `http://localhost:3000/api/productos/products/${id}`,
+        `https://localhost:3000/api/productos/products/${id}`,
         { method: "DELETE" }
       );
 

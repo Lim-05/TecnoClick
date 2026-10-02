@@ -21,7 +21,7 @@ const HomePage = () => {
         setLoading(true);
         console.log(' Cargando productos destacados...');
         
-        const response = await fetch('http://localhost:3000/api/productos/products');
+        const response = await fetch('https://localhost:3000/api/productos/products');
         
         if (!response.ok) {
           throw new Error(`Error HTTP: ${response.status}`);

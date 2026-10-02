@@ -9,7 +9,7 @@ const PedidoAdmin = () => {
 
   useEffect(() => {
     const token = getToken();
-    fetch("http://localhost:3000/api/pedidos/pendientes", {
+    fetch("https://localhost:3000/api/pedidos/pendientes", {
       headers: {
         'Authorization': `Bearer ${token}`
       }
@@ -35,7 +35,7 @@ const PedidoAdmin = () => {
     if (!window.confirm("¿Marcar este pedido como completado?")) return;
 
     const token = getToken();
-    const response = await fetch(`http://localhost:3000/api/pedidos/${id}/completar`, {
+    const response = await fetch(`https://localhost:3000/api/pedidos/${id}/completar`, {
       method: "PUT",
       headers: {
         'Authorization': `Bearer ${token}`

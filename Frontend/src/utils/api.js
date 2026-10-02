@@ -1,7 +1,8 @@
 import { getAuthHeaders } from './authUtils';
 export async function api(path, options = {}) {
-  const response = await fetch('http://localhost:3000/api' + path, {
+  const response = await fetch('https://localhost:3000/api' + path, {
     ...options,
+    credentials: 'include',
     headers: { ...getAuthHeaders(), ...options.headers },
     body: options.body === undefined ? undefined : JSON.stringify(options.body),
   });

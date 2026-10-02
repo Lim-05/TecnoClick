@@ -2,6 +2,7 @@ const express = require('express');
 
 const {
   login,
+  logout,
   session,
   solicitarRecuperacion,
   restablecerContrasena
@@ -12,6 +13,8 @@ const auth = require('../middleware/auth');
 const router = express.Router();
 
 router.post('/login', login);
+
+router.post('/logout', logout);
 
 router.get('/sesion', auth, session);
 

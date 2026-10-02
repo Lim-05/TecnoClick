@@ -1,12 +1,21 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import fs from 'fs'
+import path from 'path'
 
-// https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
   server: {
-    proxy:{
-      '/api': 'http://localhost:3000' // Proxy para redirigir las solicitudes a la API de backend
+    https: {
+      key: fs.readFileSync(path.resolve(__dirname, '../backend/certs/key.pem')),
+      cert: fs.readFileSync(path.resolve(__dirname, '../backend/certs/cert.pem')),
+    },
+    proxy: {
+      '/api': {
+        target: 'https://localhost:3000',
+        changeOrigin: true,
+        secure: false, // Acepta el certificado autofirmado en desarrollo
+      }
     }
   }
 })

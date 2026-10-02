@@ -26,8 +26,21 @@ async function login(req, res) {
     const access = await getAccess(usuario.id_usuario);
     if (!access) return res.status(403).json({ mensaje: 'La cuenta no tiene un rol válido.' });
     await transaction(client => audit(client, access, 'sesion.iniciar', 'usuario', usuario.id_usuario));
-    const token = jwt.sign({ id_usuario: usuario.id_usuario }, SECRET, { expiresIn: '2d' });
-    res.json({ mensaje: 'Inicio de sesión exitoso', token, usuario: { ...safeUser(usuario), ...access } });
+    const token = jwt.sign({ id_usuario: usuario.id_usuario }, SECRET, {
+      expiresIn: '2d'
+    });
+
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'strict',
+      maxAge: 2 * 24 * 60 * 60 * 1000 // 2 días
+    });
+
+    res.json({
+      mensaje: 'Inicio de sesión exitoso',
+      usuario: { ...safeUser(usuario), ...access }
+    });
   } catch (error) { respondError(res, error); }
 }
 
@@ -85,7 +98,7 @@ async function solicitarRecuperacion(req, res) {
     );
 
     const enlace =
-      `http://localhost:5173/restablecer-contrasena/${token}`;
+      `https://localhost:5173/restablecer-contrasena/${token}`;
 
     await enviarCorreoRecuperacion(
       usuario.correo_usuario,
@@ -185,8 +198,19 @@ async function session(req, res) {
     res.json({ usuario: { ...safeUser(result.rows[0]), ...req.usuario } });
   } catch (error) { respondError(res, error); }
 }
+async function logout(req, res) {
+  res.clearCookie('token', {
+    httpOnly: true,
+    secure: true,
+    sameSite: 'strict'
+  });
+  res.json({ mensaje: 'Sesión cerrada correctamente.' });
+}
+
+
 module.exports = { 
   login,
+  logout,
   session,
   solicitarRecuperacion,
   restablecerContrasena

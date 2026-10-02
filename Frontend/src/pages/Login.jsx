@@ -14,8 +14,9 @@ const Login = () => {
     setMensaje(''); // Limpia mensaje previo
 
     try {
-      const response = await fetch('http://localhost:3000/api/auth/login', { 
+      const response = await fetch('https://localhost:3000/api/auth/login', { 
         method: 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           correo,
@@ -28,15 +29,14 @@ const Login = () => {
       if (response.ok) {
         setMensaje(data.mensaje);
 
-        // Guardar TOKEN JWT en localStorage (CRÍTICO para autenticación)
-        if (data.token) {
-          setToken(data.token);
-          console.log('✅Token guardado correctamente');
+        // Registrar el inicio de sesión (el JWT ya viajó en la cookie HttpOnly)
+        setToken(data.token);
+        console.log('✅Token guardado correctamente');
           
           // Mostrar tiempo de expiración
-          const minutosRestantes = getTokenTimeRemaining();
-          console.log(`⏱️ Tu sesión expirará en ${minutosRestantes} minutos (${Math.floor(minutosRestantes / 60 / 24)} días)`);
-        }
+        const minutosRestantes = getTokenTimeRemaining();
+        console.log(`⏱️ Tu sesión expirará en ${minutosRestantes} minutos (${Math.floor(minutosRestantes / 60 / 24)} días)`);
+        
 
         const usuarioCompleto = data.usuario;
 

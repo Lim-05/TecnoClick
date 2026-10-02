@@ -1,144 +1,68 @@
-/**
- * Obtiene el token JWT almacenado en localStorage
- * @returns {string|null} El token o null si no existe
- */
+const SESSION_DURATION_MS = 2 * 24 * 60 * 60 * 1000; // 2 días
+
 export const getToken = () => {
-  return localStorage.getItem('token');
+  // El token viaja automáticamente en la cookie HttpOnly.
+  // Retornamos un marcador si hay sesión activa para mantener compatibilidad con componentes de compañeros.
+  return localStorage.getItem('usuario') ? 'cookie-http-only' : null;
 };
 
-/**
- * Guarda el token JWT en localStorage
- * @param {string} token - El token a guardar
- */
-export const setToken = (token) => {
-  localStorage.setItem('token', token);
+export const setToken = () => {
+  // Ya no se guarda el JWT en localStorage por seguridad (Punto 7).
+  // Solo registramos la marca de tiempo de inicio de sesión.
+  localStorage.setItem('session_start', Date.now().toString());
 };
 
-/**
- * Elimina el token JWT de localStorage
- */
 export const removeToken = () => {
   localStorage.removeItem('token');
+  localStorage.removeItem('session_start');
 };
 
-/**
- * Decodifica un token JWT sin verificar su firma
- * @param {string} token - El token a decodificar
- * @returns {object|null} El payload decodificado o null si es inválido
- */
-export const decodeToken = (token) => {
-  try {
-    if (!token) return null;
-    
-    const base64Url = token.split('.')[1];
-    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    const jsonPayload = decodeURIComponent(
-      atob(base64)
-        .split('')
-        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-        .join('')
-    );
-    
-    return JSON.parse(jsonPayload);
-  } catch (error) {
-    console.error('Error al decodificar token:', error);
-    return null;
-  }
+export const decodeToken = () => null;
+
+export const isTokenExpired = () => {
+  const start = localStorage.getItem('session_start');
+  if (!start) return false;
+  return Date.now() - Number(start) >= SESSION_DURATION_MS;
 };
 
-/**
- * Verifica si el token ha expirado
- * @param {string} token - El token a verificar
- * @returns {boolean} true si el token ha expirado, false en caso contrario
- */
-export const isTokenExpired = (token) => {
-  const decoded = decodeToken(token);
-  
-  if (!decoded || !decoded.exp) {
-    return true;
-  }
-  
-  // exp está en segundos, Date.now() está en milisegundos
-  const expirationTime = decoded.exp * 1000;
-  const currentTime = Date.now();
-  
-  return currentTime >= expirationTime;
-};
-
-/**
- * Verifica si el usuario está autenticado y su token es válido
- * @returns {boolean} true si está autenticado y el token es válido
- */
 export const isAuthenticated = () => {
-  const token = getToken();
-  
-  if (!token) {
-    return false;
-  }
-  
-  if (isTokenExpired(token)) {
-    // Si el token expiró, limpiar todo
+  const usuario = localStorage.getItem('usuario');
+  if (!usuario) return false;
+
+  if (isTokenExpired()) {
     logout();
     return false;
   }
-  
   return true;
 };
 
-/**
- * Obtiene los datos del usuario desde el token
- * @returns {object|null} Los datos del usuario o null si no hay token válido
- */
 export const getUserFromToken = () => {
-  const token = getToken();
-  
-  if (!token || isTokenExpired(token)) {
-    return null;
-  }
-  
-  return decodeToken(token);
+  const data = localStorage.getItem('usuario');
+  return data ? JSON.parse(data) : null;
 };
 
-/**
- * Cierra la sesión del usuario eliminando todos los datos
- */
 export const logout = () => {
   const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
   removeToken();
   localStorage.removeItem('usuario');
-  
-  // Limpiar carrito y favoritos del usuario actual
+
   if (usuario?.id_usuario) {
     localStorage.removeItem(`cart_${usuario.id_usuario}`);
     localStorage.removeItem(`favoritos_${usuario.id_usuario}`);
   }
-  
-  // Disparar evento personalizado para que los componentes reaccionen
+
+  fetch('https://localhost:3000/api/auth/logout', {
+    method: 'POST',
+    credentials: 'include'
+  }).catch(() => {});
+
   window.dispatchEvent(new Event('usuarioChange'));
 };
 
-/**
- * Obtiene los headers de autorización para las peticiones HTTP
- * @returns {object} Headers con el token de autorización
- */
-export const getAuthHeaders = () => {
-  const token = getToken();
-  
-  if (!token) {
-    return {};
-  }
-  
-  return {
-    'Authorization': `Bearer ${token}`,
-    'Content-Type': 'application/json',
-  };
-};
+export const getAuthHeaders = () => ({
+  'Content-Type': 'application/json',
+});
 
-/**
- * Verifica si el usuario tiene un rol específico
- * @param {string} rol - El rol a verificar (ej: 'administrador', 'cliente')
- * @returns {boolean} true si el usuario tiene ese rol
- */
 export const hasRole = (rol) => {
   if (!isAuthenticated()) return false;
   const userData = JSON.parse(localStorage.getItem('usuario') || 'null');
@@ -151,21 +75,9 @@ export const hasPermission = (permission) => {
   return userData?.permisos?.includes(permission) || false;
 };
 
-/**
- * Obtiene el tiempo restante hasta que expire el token (en minutos)
- * @returns {number|null} Minutos restantes o null si no hay token
- */
 export const getTokenTimeRemaining = () => {
-  const token = getToken();
-  const decoded = decodeToken(token);
-  
-  if (!decoded || !decoded.exp) {
-    return null;
-  }
-  
-  const expirationTime = decoded.exp * 1000;
-  const currentTime = Date.now();
-  const timeRemaining = expirationTime - currentTime;
-  
-  return Math.floor(timeRemaining / 1000 / 60); //convertir a minutos
+  const start = localStorage.getItem('session_start');
+  if (!start) return 2880;
+  const remaining = SESSION_DURATION_MS - (Date.now() - Number(start));
+  return Math.max(0, Math.floor(remaining / 1000 / 60));
 };

@@ -28,7 +28,7 @@ const ResenaForm = ({ idProducto, onResenaCreada, puedeResenar, yaReseno, haComp
         return;
       }
 
-      const response = await fetch('http://localhost:3000/api/resenas', {
+      const response = await fetch('https://localhost:3000/api/resenas', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -1,10 +1,26 @@
 const express = require('express');
+const https = require('https');
+const fs = require('fs');
+const path = require('path');
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
 require('dotenv').config();
+
 const app = express();
 const PORT = process.env.PORT || 3000;
-app.use(cors({ origin: ['http://localhost:5173', 'http://127.0.0.1:5173'] }));
+
+app.use(cors({
+  origin: [
+    'https://localhost:5173',
+    'https://127.0.0.1:5173',
+    'http://localhost:5173',
+    'http://127.0.0.1:5173'
+  ],
+  credentials: true
+}));
 app.use(express.json());
+app.use(cookieParser());
+
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api', require('./routes/accessRoutes'));
 app.use('/api/productos', require('./routes/productRoutes'));
@@ -17,8 +33,18 @@ app.use('/api/pedidos', require('./routes/pedidoRoutes'));
 app.use('/api/ingresos', require('./routes/ingresosRoutes'));
 app.use('/api/resenas', require('./routes/resenaRoutes'));
 app.use('/api/pedidos', require('./routes/pedidosAdminRoutes'));
-app.get('/', (req, res) => res.send('Servidor Node.js corriendo'));
-if (require.main === module) app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Servidor corriendo en http://0.0.0.0:${PORT}`);
-});
+
+app.get('/', (req, res) => res.send('Servidor Node.js corriendo con HTTPS'));
+
+if (require.main === module) {
+  const httpsOptions = {
+    key: fs.readFileSync(path.join(__dirname, 'certs', 'key.pem')),
+    cert: fs.readFileSync(path.join(__dirname, 'certs', 'cert.pem'))
+  };
+
+  https.createServer(httpsOptions, app).listen(PORT, '0.0.0.0', () => {
+    console.log(`Servidor seguro corriendo en https://localhost:${PORT}`);
+  });
+}
+
 module.exports = app;

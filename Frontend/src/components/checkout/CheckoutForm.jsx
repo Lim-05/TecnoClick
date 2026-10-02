@@ -46,7 +46,7 @@ const CheckoutForm = () => {
         return;
       }
 
-      const res = await fetch(`http://localhost:3000/api/datos_tarjeta/${usuario.id_usuario}`, {
+      const res = await fetch(`https://localhost:3000/api/datos_tarjeta/${usuario.id_usuario}`, {
         headers: {
           "Authorization": `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -255,7 +255,7 @@ const CheckoutForm = () => {
         const folio = 'TEC' + Date.now().toString().slice(-8);
         const token = getToken();
 
-        const response = await fetch('http://localhost:3000/api/checkout/efectivo', {
+        const response = await fetch('https://localhost:3000/api/checkout/efectivo', {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json',
@@ -301,7 +301,7 @@ const CheckoutForm = () => {
         };
         const token = getToken();
 
-        const response = await fetch('http://localhost:3000/api/checkout/tarjeta', {
+        const response = await fetch('https://localhost:3000/api/checkout/tarjeta', {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json',

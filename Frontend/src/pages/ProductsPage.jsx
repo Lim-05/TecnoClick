@@ -28,7 +28,7 @@ const ProductsPage = () => {
       setLoading(true);
       try {
         console.log(' Iniciando carga de productos desde la API...');
-        const response = await fetch('http://localhost:3000/api/productos/products');
+        const response = await fetch('https://localhost:3000/api/productos/products');
         
         if (!response.ok) {
           throw new Error(`Error HTTP: ${response.status}`);

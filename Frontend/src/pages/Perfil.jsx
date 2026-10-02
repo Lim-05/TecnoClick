@@ -85,7 +85,7 @@ const Perfil = () => {
     const body = contrasena ? { ...resto, contrasena } : resto;
 
     try {
-      const response = await fetch(`http://localhost:3000/api/usuarios/${id}`, {
+      const response = await fetch(`https://localhost:3000/api/usuarios/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
