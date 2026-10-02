@@ -23,3 +23,26 @@ Se agrego un nuevo page, llamado productDetails.js junto con su propio css, en e
 para importar el componente productdetails, también para visualizar  sus detalles se utilizo
  <Route path="/product/:id" element={<ProductDetail />} /> 
 que esto hace que por base de id detecte que producto se esta llamando 
+
+# Cambiar contraseña olvidada
+
+# EN BASE DE DATOS CREAR TABLA
+CREATE TABLE IF NOT EXISTS recuperacion_contrasena (
+    id_recuperacion SERIAL PRIMARY KEY,
+    id_usuario INTEGER NOT NULL,
+    token VARCHAR(255) NOT NULL UNIQUE,
+    expiracion TIMESTAMP NOT NULL,
+    usado BOOLEAN NOT NULL DEFAULT FALSE,
+
+    CONSTRAINT fk_recuperacion_usuario
+        FOREIGN KEY (id_usuario)
+        REFERENCES usuario(id_usuario)
+        ON DELETE CASCADE
+);
+
+# DESDE TERMINAL WSL EN BACKEND
+npm install nodemailer
+
+# AGREGAR EN .ENV
+EMAIL_USER= tecnoclick.sistema@gmail.com
+EMAIL_PASSWORD=ciqzhnpnxguqxdjy
