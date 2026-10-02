@@ -6,6 +6,7 @@ async function getAllProducts() {
     const result = await db.query(`
       SELECT 
         p.id_producto,
+        p.id_categoria,
         p.nombre AS nombre_producto,
         p.marca,
         p.descripcion,
@@ -30,6 +31,7 @@ async function getProductById(id) {
     const result = await db.query(`
       SELECT 
         p.id_producto,
+        p.id_categoria,
         p.nombre AS nombre_producto,
         p.marca,
         p.descripcion,
@@ -61,4 +63,15 @@ async function deleteProductById(id) {
   }
 }
 
-module.exports = { getAllProducts, getProductById, deleteProductById };
+async function getCategoriesWithCounts() {
+  const result = await db.query(`
+    SELECT c.id_categoria, c.nombre_categoria,
+           COUNT(p.id_producto)::int AS count
+    FROM categoria c
+    LEFT JOIN productos p ON p.id_categoria = c.id_categoria
+    GROUP BY c.id_categoria, c.nombre_categoria
+    ORDER BY c.id_categoria`);
+  return result.rows;
+}
+
+module.exports = { getAllProducts, getProductById, deleteProductById, getCategoriesWithCounts };

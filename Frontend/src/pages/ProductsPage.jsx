@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { Link } from 'react-router-dom';
 import './ProductsPage.css';
@@ -28,13 +28,18 @@ const ProductsPage = () => {
       setLoading(true);
       try {
         console.log(' Iniciando carga de productos desde la API...');
-        const response = await fetch('https://localhost:3000/api/productos/products');
+        const [response, categoriesResponse] = await Promise.all([
+          fetch('/api/productos/products', { cache: 'no-store' }),
+          fetch('/api/productos/categorias', { cache: 'no-store' })
+        ]);
         
         if (!response.ok) {
           throw new Error(`Error HTTP: ${response.status}`);
         }
+        if (!categoriesResponse.ok) throw new Error(`Error al cargar categorías: ${categoriesResponse.status}`);
         
         const data = await response.json();
+        const databaseCategories = await categoriesResponse.json();
         console.log(' Productos cargados:', data);
         
         // Validar y limpiar datos
@@ -51,24 +56,21 @@ const ProductsPage = () => {
         setProducts(cleanedProducts);
         setFilteredProducts(cleanedProducts);
         
-        // Actualizar categorías dinámicamente
-        const categoryCounts = cleanedProducts.reduce((acc, product) => {
-          acc[product.category] = (acc[product.category] || 0) + 1;
-          return acc;
-        }, {});
-
+        // Mostrar todas las categorías, incluso las que no tienen productos.
         const categoriesData = [
           { 
             id: 'todos', 
             name: 'Todos los Productos', 
             count: cleanedProducts.length 
           },
-          ...Object.entries(categoryCounts).map(([category, count]) => ({
-            id: category,
-            name: formatCategoryName(category),
-            count: count
+          ...databaseCategories.map(category => ({
+            id: String(category.id_categoria),
+            name: category.nombre_categoria,
+            count: Number(category.count)
           }))
         ];
+        const uncategorized = cleanedProducts.filter(product => product.categoryId == null).length;
+        if (uncategorized) categoriesData.push({ id: 'sin-categoria', name: 'Sin categoría', count: uncategorized });
         
         setCategories(categoriesData);
         console.log(' Categorías disponibles:', categoriesData);
@@ -125,26 +127,15 @@ const ProductsPage = () => {
     return uniqueSentences.join('. ') + (uniqueSentences.length > 0 ? '.' : '');
   };
 
-  // Función para formatear nombres de categoría
-  const formatCategoryName = (category) => {
-    const nameMap = {
-      'mouse': 'Mouse',
-      'monitores': 'Monitores',
-      'almacenamiento-externo': 'Almacenamiento Externo',
-      'audio': 'Audio',
-      'impresoras/escáneres': 'Impresoras/Escáneres'
-    };
-    
-    return nameMap[category] || category.charAt(0).toUpperCase() + category.slice(1);
-  };
-
   // Filtros y búsqueda optimizados
   useEffect(() => {
     let result = [...products];
 
     if (selectedCategory !== 'todos') {
       result = result.filter(product => 
-        product.category === selectedCategory
+        selectedCategory === 'sin-categoria'
+          ? product.categoryId == null
+          : String(product.categoryId) === selectedCategory
       );
     }
 

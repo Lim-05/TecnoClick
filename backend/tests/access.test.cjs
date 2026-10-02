@@ -12,7 +12,7 @@ const roles = [
 ];
 const adminPermissions = ['usuarios.ver','usuarios.crear','usuarios.editar','usuarios.eliminar',
   'roles.ver','roles.crear','roles.editar','roles.eliminar','roles.asignar','roles.revocar','auditoria.ver',
-  'productos.ver','productos.crear','productos.editar','productos.eliminar','categorias.ver'];
+  'productos.ver','productos.crear','productos.editar','productos.eliminar','categorias.ver','categorias.crear'];
 const users = new Map([
   [10, { id_usuario: 10, id_rol: 2, nombre_usuario: 'Admin', correo_usuario: 'admin@test.local', rol: 'admin', contrasena: 'hash' }],
   [20, { id_usuario: 20, id_rol: 3, nombre_usuario: 'Editor', correo_usuario: 'editor@test.local', rol: 'editor', contrasena: 'hash' }],
@@ -20,17 +20,26 @@ const users = new Map([
 ]);
 const statements = [];
 let failAudit = false;
+let blockDeletion = false;
+let laggingSequence = false;
 function access(user) {
   if (!user) return [];
   const role = roles.find(r => r.id_rol === user.id_rol);
   return [{ id_usuario: user.id_usuario, id_rol: role.id_rol, rol_codigo: role.codigo,
     rol_nombre: role.nombre, permisos: role.codigo === 'admin' ? adminPermissions : role.codigo === 'editor'
-      ? ['productos.ver','productos.crear','productos.editar','productos.eliminar','categorias.ver'] : ['productos.ver'] }];
+      ? ['productos.ver','productos.crear','productos.editar','productos.eliminar','categorias.ver','categorias.crear'] : ['productos.ver'] }];
 }
 async function query(sql, values = []) {
   statements.push({ sql, values });
   const normalized = sql.replace(/\s+/g, ' ').trim();
   if (/^(BEGIN|COMMIT|ROLLBACK)$/.test(normalized) || normalized.includes('pg_advisory_xact_lock')) return { rows: [] };
+  if (normalized.startsWith('LOCK TABLE public.')) return { rows: [] };
+  if (normalized.includes('pg_get_serial_sequence')) {
+    return { rows: [{ sequence: values[0] === 'productos' ? 'public.productos_id_producto_seq' : null, identity_generation:null }] };
+  }
+  if (normalized.includes('COALESCE(MAX(')) return { rows: [{ max_id:'98' }] };
+  if (normalized.startsWith('SELECT nextval')) return { rows: [{ id:laggingSequence ? '1' : '99' }] };
+  if (normalized.startsWith('SELECT setval')) return { rows: [] };
   if (normalized.startsWith('INSERT INTO auditoria')) {
     if (failAudit) throw new Error('simulated audit failure');
     return { rows: [] };
@@ -61,7 +70,20 @@ async function query(sql, values = []) {
     users.set(40, user);
     return { rows: [user] };
   }
-  if (normalized.startsWith('INSERT INTO productos')) return { rows: [{ id_producto: 99 }] };
+  if (normalized.startsWith('INSERT INTO public.productos')) return { rows: [{ id_producto:Number(values[0]),imagen:values[5] }] };
+  if (normalized.startsWith('INSERT INTO public.categoria')) return { rows: [{ id_categoria:Number(values[0]) }] };
+  if (normalized.startsWith('DELETE FROM usuario')) {
+    if (blockDeletion) throw Object.assign(new Error('related records'), { code: '23503' });
+    users.delete(values[0]);
+    return { rows: [] };
+  }
+  if (normalized.startsWith('SELECT a.*, u.nombre_usuario')) {
+    return { rows: statements.filter(s => s.sql.includes('INSERT INTO auditoria')).map((s,i) => ({ id_auditoria:i+1, accion:s.values[2] })) };
+  }
+  if (normalized.includes('COUNT(p.id_producto)::int AS count')) {
+    return { rows: [{ id_categoria:1,nombre_categoria:'Libros',count:5 },
+      { id_categoria:99,nombre_categoria:'Portafolio',count:0 }] };
+  }
   if (normalized.startsWith('UPDATE usuario SET id_rol')) {
     users.get(values[1]).id_rol = values[0];
     return { rows: [] };
@@ -89,7 +111,7 @@ async function request(path, id, method = 'GET', body) {
   const headers = { 'Content-Type': 'application/json' };
   if (id) headers.Authorization = 'Bearer ' + token(id);
   const response = await fetch(base + '/api' + path, { method, headers, body: body ? JSON.stringify(body) : undefined });
-  return { status: response.status, body: await response.json() };
+  return { status: response.status, body: await response.json(), cookie: response.headers.get('set-cookie') };
 }
 const registration = { nombre: 'Nuevo', apellido: 'Usuario', correo: 'nuevo@test.local',
   contra: 'test-password', CP: '12345', estado: 'Estado', municipio: 'Municipio', colonia: 'Colonia' };
@@ -185,5 +207,80 @@ test('login entrega id_rol y permisos; el JWT solo lleva la identidad', async ()
   assert.equal(result.body.usuario.id_rol, 2);
   assert.ok(result.body.usuario.permisos.includes('roles.asignar'));
   assert.equal(result.body.usuario.contrasena, undefined);
-  assert.equal(jwt.decode(result.body.token).rol, undefined);
+  assert.equal(result.body.token, undefined);
+  assert.match(result.cookie, /HttpOnly/i);
+  const cookieToken = result.cookie.match(/token=([^;]+)/)[1];
+  assert.equal(jwt.decode(cookieToken).rol, undefined);
+});
+
+test('Administrador y Editor pueden crear categorías', async () => {
+  for (const actor of [10,20]) {
+    const result = await request('/categorias', actor, 'POST', { nombre_categoria:'Prueba', descripcion_categoria:'Categoría de prueba' });
+    assert.equal(result.status, 201);
+    assert.equal(result.body.id_categoria, 99);
+  }
+});
+test('eliminar un usuario sin relaciones lo retira y registra auditoría', async () => {
+  users.set(50, { id_usuario:50,id_rol:1,nombre_usuario:'Prueba',correo_usuario:'eliminar@test.local' });
+  const result = await request('/usuarios/50', 10, 'DELETE');
+  assert.equal(result.status,200);
+  assert.equal(users.has(50),false);
+  assert.equal(statements.at(-1).sql,'COMMIT');
+});
+test('eliminar un usuario con relaciones devuelve una explicación y conserva la cuenta', async () => {
+  blockDeletion = true;
+  try {
+    const result = await request('/usuarios/30', 10, 'DELETE');
+    assert.equal(result.status,409);
+    assert.match(result.body.mensaje,/registros relacionados/);
+    assert.equal(users.has(30),true);
+    assert.equal(statements.at(-1).sql,'ROLLBACK');
+  } finally { blockDeletion=false; }
+});
+test('actualizar auditoría vuelve a consultar los eventos', async () => {
+  const first = await request('/auditoria',10);
+  assert.equal(first.status,200);
+  await request('/contenido/productos',20,'POST',{nombre:'Nuevo',precio:10,stock:1});
+  const next = await request('/auditoria',10);
+  assert.equal(next.status,200);
+  assert.equal(next.body.registros.length,first.body.registros.length+1);
+});
+
+test('crear producto sin imagen es válido y conserva un valor vacío', async () => {
+  for (const imagen of [undefined,'','   ']) {
+    const result = await request('/contenido/productos',20,'POST',{nombre:'Sin imagen',precio:10,stock:1,imagen});
+    assert.equal(result.status,201);
+    assert.equal(result.body.imagen,'');
+  }
+});
+test('un contador atrasado se adelanta a un ID libre antes de insertar producto', async () => {
+  laggingSequence=true;
+  try {
+    const start=statements.length;
+    const result=await request('/contenido/productos',10,'POST',{nombre:'Nuevo producto',precio:10,stock:1});
+    assert.equal(result.status,201);
+    assert.equal(result.body.id_producto,99);
+    const calls=statements.slice(start);
+    assert.ok(calls.some(s=>s.sql.startsWith('LOCK TABLE public.productos')));
+    assert.ok(calls.some(s=>s.sql.startsWith('SELECT setval') && s.values[1]==='99'));
+  } finally {laggingSequence=false;}
+});
+test('una categoría con ID entero sin secuencia recibe un ID nuevo', async () => {
+  const start=statements.length;
+  const result=await request('/categorias',20,'POST',{nombre_categoria:'Portafolio',descripcion_categoria:'Carpetas de presentación'});
+  assert.equal(result.status,201);
+  const calls=statements.slice(start);
+  const insert=calls.find(s=>s.sql.startsWith('INSERT INTO public.categoria'));
+  assert.equal(insert.values[0],'99');
+  assert.ok(insert.sql.includes('id_categoria'));
+  assert.equal(calls.some(s=>s.sql.startsWith('SELECT nextval')),false);
+});
+
+test('el catálogo público muestra categorías sin productos y sus conteos', async () => {
+  const result=await request('/productos/categorias');
+  assert.equal(result.status,200);
+  const empty=result.body.find(c=>c.id_categoria===99);
+  assert.equal(empty.nombre_categoria,'Portafolio');
+  assert.equal(empty.count,0);
+  assert.equal(result.body.find(c=>c.id_categoria===1).count,5);
 });

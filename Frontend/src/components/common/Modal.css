@@ -1,5 +1,5 @@
 /* src/components/common/Modal.css */
-.modal-overlay {
+.tc-modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -9,19 +9,24 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 2000;
+  z-index: 10000;
+  padding: 20px;
 }
 
-.modal-content {
-  background: rgba(255, 255, 255, 0.61);
+.tc-modal-content {
+  background: #fff;
+  color: #202938;
   padding: 2rem;
   border-radius: 12px;
   max-width: 700px;
   width: 90%;
   position: relative;
+  max-height: calc(100dvh - 40px);
+  overflow-y: auto;
+  box-shadow: 0 16px 60px rgba(0,0,0,.3);
 }
 
-.modal-close {
+.tc-modal-close {
   position: absolute;
   top: 10px;
   right: 10px;
@@ -29,4 +34,5 @@
   background: transparent;
   font-size: 1.2rem;
   cursor: pointer;
+  color: #202938;
 }

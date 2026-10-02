@@ -3,6 +3,7 @@ const db = require('../config/db');
 const auth = require('../middleware/auth');
 const { requirePermission: permit } = require('../middleware/permission');
 const { audit, transaction, httpError, positiveId, respondError } = require('../services/access');
+const { insertContent } = require('../services/contentId');
 const resources = [
   { route: 'contenido/productos', table: 'productos', id: 'id_producto', prefix: 'productos',
     fields: ['nombre','descripcion','precio','id_categoria','imagen','stock','marca'] },
@@ -18,7 +19,7 @@ for (const resource of resources) {
   });
   async function save(req, res) {
     try {
-      const data = req.body;
+      const data = req.body || {};
       if (typeof data[fields[0]] !== 'string' || !data[fields[0]].trim()) {
         throw httpError(400, 'El nombre es obligatorio.');
       }
@@ -30,6 +31,8 @@ for (const resource of resources) {
         if (data.id_categoria !== '' && data.id_categoria != null) positiveId(data.id_categoria);
       }
       const values = fields.map(field => {
+        // Una imagen vacía es válida; el catálogo ya usa su imagen de respaldo.
+        if (field === 'imagen') return typeof data.imagen === 'string' ? data.imagen.trim() : '';
         if (field === 'id_categoria') return data[field] === '' || data[field] == null ? null : Number(data[field]);
         if (field === 'precio' || field === 'stock') return Number(data[field]);
         return data[field] ?? null;
@@ -41,8 +44,7 @@ for (const resource of resources) {
             WHERE ${id}=$${fields.length+1} RETURNING *`, [...values, positiveId(req.params.id)]);
           if (!result.rows[0]) throw httpError(404, 'Contenido no encontrado.');
         } else {
-          result = await client.query(`INSERT INTO ${table} (${fields.join(',')})
-            VALUES (${fields.map((_,i)=>'$'+(i+1)).join(',')}) RETURNING *`, values);
+          result = await insertContent(client, table, fields, values);
         }
         const row = result.rows[0];
         await audit(client, req.usuario, prefix + (req.params.id ? '.editar' : '.crear'), table, row[id]);

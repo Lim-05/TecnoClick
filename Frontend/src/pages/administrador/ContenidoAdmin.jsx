@@ -5,7 +5,7 @@ import Modal from '../../components/common/Modal';
 import './Gestion.css';
 const configs = {
   productos: { title: 'Productos', path: '/contenido/productos', id: 'id_producto',
-    fields: [['nombre','Nombre'],['descripcion','Descripción'],['precio','Precio'],['stock','Stock'],['marca','Marca'],['imagen','Archivo de imagen'],['id_categoria','Categoría']],
+    fields: [['nombre','Nombre'],['descripcion','Descripción'],['precio','Precio'],['stock','Stock'],['marca','Marca'],['imagen','Archivo de imagen (opcional)'],['id_categoria','Categoría']],
     empty: { nombre:'',descripcion:'',precio:0,stock:0,marca:'',imagen:'',id_categoria:'' } },
   categorias: { title: 'Categorías', path: '/categorias', id: 'id_categoria',
     fields: [['nombre_categoria','Nombre'],['descripcion_categoria','Descripción']],
@@ -19,6 +19,7 @@ export default function ContenidoAdmin({ resource = 'productos' }) {
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState('');
   const load = useCallback(async () => {
     const data = await api(config.path); setRows(data);
     if (resource === 'productos' && hasPermission('categorias.ver')) setCategories(await api('/categorias'));
@@ -28,12 +29,12 @@ export default function ContenidoAdmin({ resource = 'productos' }) {
     load().catch(e => setError(e.message)).finally(() => setLoading(false));
   }, [load]);
   async function save(e) {
-    e.preventDefault(); setBusy(true); setError('');
+    e.preventDefault(); setBusy(true); setError(''); setMessage('');
     try {
       await api(config.path + (form[config.id] ? '/' + form[config.id] : ''), {
         method: form[config.id] ? 'PUT' : 'POST', body: form,
       });
-      await load(); setForm(null);
+      await load(); setForm(null); setMessage('Contenido guardado correctamente.');
     } catch (err) { setError(err.message); } finally { setBusy(false); }
   }
   async function remove(row) {
@@ -44,8 +45,9 @@ export default function ContenidoAdmin({ resource = 'productos' }) {
   }
   if (loading) return <p>Cargando contenido...</p>;
   return <section className="gestion"><h2>Gestión de {config.title}</h2>
-    {hasPermission(resource + '.crear') && <button disabled={busy} onClick={() => { setError(''); setForm({ ...config.empty }); }}>Crear {resource === 'productos' ? 'producto' : 'categoría'}</button>}
+    {hasPermission(resource + '.crear') && <button type="button" disabled={busy} onClick={() => { setError(''); setForm({ ...config.empty }); }}>Crear {resource === 'productos' ? 'producto' : 'categoría'}</button>}
     {error && <p role="alert" className="gestion-error">{error}</p>}
+    {message && <p role="status" className="gestion-success">{message}</p>}
     <div className="gestion-table"><table><thead><tr><th>ID</th>
       {config.fields.filter(([key]) => !['imagen','descripcion','descripcion_categoria'].includes(key)).map(([key,label]) => <th key={key}>{label}</th>)}<th>Acciones</th>
     </tr></thead><tbody>{rows.map(row => <tr key={row[config.id]}><td>{row[config.id]}</td>
@@ -65,6 +67,7 @@ export default function ContenidoAdmin({ resource = 'productos' }) {
         </select> : <input type={['precio','stock'].includes(key) ? 'number' : 'text'}
           min={['precio','stock'].includes(key) ? 0 : undefined} step={['precio','stock'].includes(key) ? 1 : undefined}
           required={[config.fields[0][0],'precio','stock'].includes(key)}
+          placeholder={key === 'imagen' ? 'Puedes dejar este campo vacío' : undefined}
           value={form[key] ?? ''} onChange={e => setForm({ ...form,[key]:e.target.value })} />}
       </label>)}
       {error && <p role="alert" className="gestion-error">{error}</p>}

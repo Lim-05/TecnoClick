@@ -42,9 +42,25 @@ async function transaction(work) {
 function respondError(res, error) {
   const status = error.status || ({ '23503': 409, '23505': 409, '23514': 400,
     '22P02': 400, '22003': 400, '22001': 400, '23502': 400 }[error.code]) || 500;
-  const message = error.status ? error.message : status === 409
+  let message = error.status ? error.message : status === 409
     ? 'El registro ya existe o tiene datos relacionados que impiden esta operación.'
     : status === 400 ? 'Revisa los datos enviados.' : 'Error al procesar la solicitud.';
+  if (!error.status && error.code === '23505') {
+    message = error.constraint?.endsWith('_pkey')
+      ? 'No se pudo generar un identificador nuevo. Revisa el contador de IDs de la base de datos.'
+      : 'Ya existe un registro con un valor que debe ser único.';
+  }
+  if (!error.status && error.code === '23503') {
+    message = 'Hay un registro relacionado que no existe o impide esta operación. Revisa la categoría seleccionada o los datos asociados.';
+  }
+  if (!error.status && error.code === '23502') {
+    const labels = { id_categoria:'el identificador de categoría', id_producto:'el identificador de producto',
+      nombre:'el nombre del producto', nombre_categoria:'el nombre de categoría', imagen:'la imagen',
+      precio:'el precio', stock:'el stock' };
+    message = 'Falta un valor obligatorio para ' + (labels[error.column] || 'un campo del registro') + '.';
+  }
+  if (!error.status && error.code === '22001') message = 'Uno de los textos supera la longitud permitida.';
+  if (error.code) console.error('Error PostgreSQL:', { codigo:error.code, tabla:error.table, columna:error.column, restriccion:error.constraint });
   if (status === 500) console.error(error.message);
   return res.status(status).json({ mensaje: message });
 }

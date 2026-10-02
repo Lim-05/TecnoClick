@@ -207,7 +207,14 @@ async function eliminarUsuario(req, res) {
       if (!current) throw httpError(404, 'Usuario no encontrado.');
       await keepAdministrator(client, current, null);
       await audit(client, req.usuario, 'usuarios.eliminar', 'usuario', id);
-      await client.query('DELETE FROM usuario WHERE id_usuario = $1', [id]);
+      try {
+        await client.query('DELETE FROM usuario WHERE id_usuario = $1', [id]);
+      } catch (error) {
+        if (error.code === '23503') {
+          throw httpError(409, 'No se puede eliminar este usuario porque tiene pedidos, compras u otros registros relacionados. No se eliminó ningún dato.');
+        }
+        throw error;
+      }
     });
     res.json({ mensaje: 'Usuario eliminado.' });
   } catch (error) { respondError(res, error); }

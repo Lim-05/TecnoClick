@@ -12,3 +12,7 @@
 .gestion-check input { width: auto; }
 .gestion-error { color: #a01829; background: #fff1f2; padding: 12px; border-radius: 6px; }
 .gestion code { overflow-wrap: anywhere; }
+.gestion:not(.usuarios-admin-container) { margin-top: calc(10vh + 24px); }
+.gestion-success { color: #17613e; background: #edf9f1; padding: 12px; border-radius: 6px; margin: 12px 0; }
+.tc-modal-content .gestion-form h3 { margin: 0 24px 12px 0; }
+.tc-modal-content button { color: #172f51; background: #edf3fb; }

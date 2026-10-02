@@ -1,4 +1,4 @@
-const { getAllProducts, getProductById } = require('../models/productModel');
+const { getAllProducts, getProductById, getCategoriesWithCounts } = require('../models/productModel');
 const { getAverageRating } = require('../models/resenaModel');
 const { transaction, audit, positiveId, httpError, respondError } = require('../services/access');
 
@@ -13,6 +13,7 @@ async function getProductos(req, res) {
       
       return {
         id: p.id_producto,
+        categoryId: p.id_categoria,
         name: p.nombre_producto,
         price: precioNumero.toLocaleString('es-MX', { minimumFractionDigits: 2 }),
         originalPrice: (precioNumero * 1.2).toLocaleString('es-MX', { minimumFractionDigits: 2 }), // 20% más como precio original
@@ -55,6 +56,7 @@ async function getProductoPorId(req, res) {
 
     const producto = {
       id: productoDB.id_producto,
+      categoryId: productoDB.id_categoria,
       name: productoDB.nombre_producto,
       price: precioNumero, // ✅ número real
       originalPrice: precioNumero * 1.2, // ✅ número real
@@ -91,4 +93,9 @@ async function deleteProducto(req, res) {
   }
 }
 
-module.exports = { getProductos, getProductoPorId, deleteProducto };
+async function getCategorias(req, res) {
+  try { res.json(await getCategoriesWithCounts()); }
+  catch (error) { respondError(res, error); }
+}
+
+module.exports = { getProductos, getProductoPorId, deleteProducto, getCategorias };

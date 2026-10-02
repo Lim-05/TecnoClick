@@ -19,6 +19,8 @@ export default function UsuariosAdmin() {
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [confirmation, setConfirmation] = useState(null);
+  const [message, setMessage] = useState('');
   const canAssign = hasPermission('roles.asignar');
   async function load() {
     const [users, available] = await Promise.all([api('/usuarios'), api('/roles')]);
@@ -40,25 +42,32 @@ export default function UsuariosAdmin() {
       await load(); setForm(null);
     } catch (e) { setError(e.message); } finally { setBusy(false); }
   }
-  async function action(user, revoke) {
-    if (!window.confirm(revoke ? '¿Revocar el rol y devolver este usuario a Cliente?' : '¿Eliminar este usuario?')) return;
+  async function action() {
+    const { user, revoke } = confirmation;
     setBusy(true); setError('');
-    try { await api('/usuarios/' + user.id_usuario + (revoke ? '/rol' : ''), { method: 'DELETE' }); await load(); }
-    catch (e) { setError(e.message); } finally { setBusy(false); }
+    setMessage('');
+    try {
+      const result = await api('/usuarios/' + user.id_usuario + (revoke ? '/rol' : ''), { method: 'DELETE' });
+      if (!revoke) setUsuarios(users => users.filter(u => u.id_usuario !== user.id_usuario));
+      setMessage(result.mensaje);
+      setConfirmation(null);
+      await load();
+    } catch (e) { setError(e.message); } finally { setBusy(false); }
   }
   if (loading) return <p>Cargando usuarios...</p>;
   return <div className="usuarios-admin-page"><div className="usuarios-admin-container gestion">
     <h4>Gestión de Usuarios</h4>
     {hasPermission('usuarios.crear') && <button disabled={busy} onClick={() => open(null)}>Registrar usuario</button>}
     {error && <p role="alert" className="gestion-error">{error}</p>}
+    {message && <p role="status" className="gestion-success">{message}</p>}
     <div className="gestion-table"><table className="usuarios-table"><thead><tr>
       <th>ID</th><th>Nombre</th><th>Correo</th><th>Rol</th><th>Acciones</th>
     </tr></thead><tbody>{usuarios.map(u => <tr key={u.id_usuario}>
       <td>{u.id_usuario}</td><td>{u.nombre_usuario} {u.apellido_usuario}</td><td>{u.correo_usuario}</td>
       <td>{u.rol_nombre}</td><td>
         {(hasPermission('usuarios.editar') || canAssign) && <button disabled={busy} onClick={() => open(u)}>Editar / asignar rol</button>}
-        {hasPermission('roles.revocar') && u.rol_codigo !== 'cliente' && <button disabled={busy} onClick={() => action(u, true)}>Revocar rol</button>}
-        {hasPermission('usuarios.eliminar') && <button disabled={busy} onClick={() => action(u, false)}>Eliminar</button>}
+        {hasPermission('roles.revocar') && u.rol_codigo !== 'cliente' && <button disabled={busy} onClick={() => { setError(''); setConfirmation({ user: u, revoke: true }); }}>Revocar rol</button>}
+        {hasPermission('usuarios.eliminar') && <button disabled={busy} onClick={() => { setError(''); setConfirmation({ user: u, revoke: false }); }}>Eliminar</button>}
       </td>
     </tr>)}</tbody></table></div>
     {!usuarios.length && <p>No hay usuarios registrados.</p>}
@@ -82,6 +91,16 @@ export default function UsuariosAdmin() {
         <button disabled={busy}>{busy ? 'Guardando...' : 'Guardar'}</button>
         <button type="button" disabled={busy} onClick={() => setForm(null)}>Cancelar</button>
       </form>}
+    </Modal>
+    <Modal isOpen={!!confirmation} title="Confirmar acción sobre usuario" onClose={() => !busy && setConfirmation(null)}>
+      {confirmation && <div className="gestion-form">
+        <h3>{confirmation.revoke ? 'Revocar rol' : 'Eliminar usuario'}</h3>
+        <p>{confirmation.user.nombre_usuario} — {confirmation.user.correo_usuario}</p>
+        <p>{confirmation.revoke ? 'El usuario volverá al rol Cliente.' : 'Esta acción elimina la cuenta. Los usuarios con pedidos o historial relacionado pueden requerir conservarse.'}</p>
+        {error && <p role="alert" className="gestion-error">{error}</p>}
+        <button type="button" disabled={busy} onClick={action}>{busy ? 'Procesando...' : 'Confirmar'}</button>
+        <button type="button" disabled={busy} onClick={() => setConfirmation(null)}>Cancelar</button>
+      </div>}
     </Modal>
   </div></div>;
 }
