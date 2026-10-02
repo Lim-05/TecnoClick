@@ -3,6 +3,7 @@
   max-width: 1200px;
   margin: 0 auto;
   padding-top: 12vh; /* igual que perfil */
+  box-sizing: border-box;
 }
 
 .admin-home-container {
@@ -57,4 +58,26 @@
   color: #333;
   font-size: 1.1rem;
   font-weight: 600;
+}
+
+@media (max-width: 700px) {
+  .admin-home-page {
+    width: 100%;
+    padding: 84px 10px 16px;
+  }
+
+  .admin-home-container {
+    padding: 18px 12px;
+    border-radius: 8px;
+  }
+
+  .admin-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .admin-card {
+    min-height: 72px;
+    padding: 16px 12px;
+  }
 }

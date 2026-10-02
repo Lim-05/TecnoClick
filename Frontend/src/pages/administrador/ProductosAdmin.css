@@ -3,6 +3,7 @@
   max-width: 1200px;
   margin: 0 auto;
   padding-top: 12vh;
+  box-sizing: border-box;
 }
 
 .productos-admin-container {
@@ -10,6 +11,7 @@
   border-radius: 12px;
   padding: 2rem;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  overflow-x: auto;
 }
 
 .productos-admin-container h4 {
@@ -19,6 +21,7 @@
 
 .productos-table {
   width: 100%;
+  min-width: 650px;
   border-collapse: collapse;
 }
 
@@ -52,4 +55,28 @@
 .error {
   text-align: center;
   font-size: 1.1rem;
+}
+
+@media (max-width: 700px) {
+  .productos-admin-page {
+    width: 100%;
+    padding: 84px 10px 16px;
+  }
+
+  .productos-admin-container {
+    padding: 14px 12px;
+    border-radius: 8px;
+  }
+
+  .productos-admin-container h4 {
+    font-size: 1.3rem;
+    line-height: 1.25;
+  }
+
+  .productos-table th,
+  .productos-table td {
+    padding: 8px;
+    font-size: .88rem;
+    white-space: nowrap;
+  }
 }
