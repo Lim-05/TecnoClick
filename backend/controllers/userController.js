@@ -78,35 +78,104 @@ async function actualizarUsuario(req, res) {
     const user = await transaction(async client => {
       // Serializa cambios de roles y eliminaciones para proteger al ultimo administrador.
       await client.query('SELECT pg_advisory_xact_lock(746301)');
+      
       const result = await client.query('SELECT * FROM usuario WHERE id_usuario = $1 FOR UPDATE', [id]);
+      
       const current = result.rows[0];
+      
       if (!current) throw httpError(404, 'Usuario no encontrado.');
       const fields = profileFields.filter(field => req.body[field] !== undefined);
+
       if (fields.length && id !== req.usuario.id_usuario && !req.usuario.permisos.includes('usuarios.editar')) {
         throw httpError(403, 'No puedes editar los datos de otros usuarios.');
       }
+
       let roleId = current.id_rol;
+
       if (req.body.id_rol !== undefined) {
         roleId = positiveId(req.body.id_rol);
+
         if (roleId !== current.id_rol) {
-          if (!req.usuario.permisos.includes('roles.asignar')) throw httpError(403, 'No puedes asignar roles.');
-          const role = await client.query('SELECT id_rol FROM roles WHERE id_rol = $1 FOR SHARE', [roleId]);
-          if (!role.rows[0]) throw httpError(400, 'El rol seleccionado no existe.');
+          if (!req.usuario.permisos.includes('roles.asignar')) {
+            throw httpError(403, 'No puedes asignar roles.');
+          }
+
+          const role = await client.query(
+            'SELECT id_rol FROM roles WHERE id_rol = $1 FOR SHARE',
+            [roleId]
+          );
+
+          if (!role.rows[0]) {
+            throw httpError(400, 'El rol seleccionado no existe.');
+          }
+
           await keepAdministrator(client, current, roleId);
+
           fields.push('id_rol');
         }
       }
-      const values = fields.map(field => field === 'id_rol' ? roleId : req.body[field]);
-      if (fields.length) {
-        await client.query(`UPDATE usuario SET ${fields.map((field,i) => field + ' = $' + (i+1)).join(', ')}
-          WHERE id_usuario = $${fields.length + 1}`, [...values, id]);
-        if (fields.some(field => field !== 'id_rol')) {
-          await audit(client, req.usuario, 'usuarios.editar', 'usuario', id, { campos: fields.filter(f => f !== 'id_rol') });
+
+      // NUEVA CONTRASEÑA
+      const cambiarContrasena =
+        typeof req.body.contrasena === 'string' &&
+        req.body.contrasena.trim() !== '';
+
+      let contrasenaHash = null;
+
+      if (cambiarContrasena) {
+        contrasenaHash = await bcrypt.hash(req.body.contrasena, 10);
+        fields.push('contrasena');
+      }
+
+      // VALORES DEL UPDATE
+      const values = fields.map(field => {
+        if (field === 'id_rol') {
+          return roleId;
         }
+
+        if (field === 'contrasena') {
+          return contrasenaHash;
+        }
+
+        return req.body[field];
+      });
+
+      if (fields.length) {
+        await client.query(
+          `UPDATE usuario
+          SET ${fields.map((field, i) => field + ' = $' + (i + 1)).join(', ')}
+          WHERE id_usuario = $${fields.length + 1}`,
+          [...values, id]
+        );
+
+        if (fields.some(field => field !== 'id_rol')) {
+          await audit(
+            client,
+            req.usuario,
+            'usuarios.editar',
+            'usuario',
+            id,
+            {
+              campos: fields.filter(f => f !== 'id_rol')
+            }
+          );
+        }
+
         if (roleId !== current.id_rol) {
-          await audit(client, req.usuario, 'roles.asignar', 'usuario', id, { anterior: current.id_rol, nuevo: roleId });
+          await audit(
+            client,
+            req.usuario,
+            'roles.asignar',
+            'usuario',
+            id,
+            {
+              anterior: current.id_rol,
+              nuevo: roleId
+            }
+          );
         }
       }
+      
       const updated = await client.query(selectUser + ' WHERE u.id_usuario = $1', [id]);
       return safeUser(updated.rows[0]);
     });

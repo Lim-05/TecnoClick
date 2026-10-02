@@ -12,6 +12,8 @@ import Reg_Compra from './components/cart/Reg_Compra'; // ← Agregar esta impor
 import Favoritos from './components/cart/Favoritos'; 
 import Perfil from './pages/Perfil'; 
 import Login from './pages/Login';
+import RecuperarContrasena from './pages/RecuperarContrasena';
+import RestablecerContrasena from './pages/RestablecerContrasena';
 import UsuariosAdmin from './pages/administrador/UsuariosAdmin';
 import AdminHome from './pages/administrador/AdminHome';
 import ContenidoAdmin from './pages/administrador/ContenidoAdmin';
@@ -43,6 +45,8 @@ function App() {
               <Route path="/checkout" element={<CheckoutForm />} />
               <Route path="/perfil" element={<Perfil />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/recuperar" element={<RecuperarContrasena />} />
+              <Route path="/restablecer-contrasena/:token" element={<RestablecerContrasena />} />
               <Route path="/historial-compras" element={<HistorialCompras />} />
               <Route path="/tarjetas" element={<TarjetaForm />}/>
 

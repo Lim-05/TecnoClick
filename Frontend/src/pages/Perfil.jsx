@@ -50,7 +50,7 @@ const Perfil = () => {
         municipio_usuario: usuarioData.municipio_usuario || '',
         colonia_usuario: usuarioData.colonia_usuario || '',
         referencias: usuarioData.referencias || '',
-        contrasena: usuarioData.contrasena || ''
+        contrasena: '' // No se guarda la contraseña en localStorage por seguridad
       });
     }
   }, []);
@@ -162,8 +162,8 @@ return (
             <label key={field}>
               {field.charAt(0).toUpperCase() + field.slice(1)}
               <input
-                type="text"
-                //type={field === 'contrasena' ? 'password' : 'text'}
+                //type="text"
+                type={field === 'contrasena' ? 'password' : 'text'}
                 name={field}
                 value={formData[field]}
                 onChange={handleInputChange}

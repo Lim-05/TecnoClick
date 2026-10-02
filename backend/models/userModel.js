@@ -1,5 +1,6 @@
 
 const db = require('../config/db');
+const bcrypt = require('bcrypt');
 
 // Obtener todos los usuarios
 async function getAllUsers() {
@@ -71,6 +72,14 @@ const Usuario = {
       referencias
     } = datos;
 
+    // si el usuario escribio una nueva contraseña,
+    // se genera un nuevo hash
+    let contrasenaHash = contrasenaActual;
+
+    if (contrasena && contrasena.trim() !== '') {
+      contrasenaHash = await bcrypt.hash(contrasena, 10);
+    }
+
     const sql = `
       UPDATE usuario
       SET nombre_usuario = $1,
@@ -94,7 +103,7 @@ const Usuario = {
       telefono_usuario,
       correo_usuario,
       direccion_usuario,
-      contrasena || contrasenaActual,
+      contrasenaHash,
       codigo_postal,
       estado_usuario,
       municipio_usuario,
