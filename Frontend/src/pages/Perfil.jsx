@@ -1,90 +1,97 @@
-import React, { useEffect, useState } from 'react'; //
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { getToken, logout } from '../utils/authUtils';
 import './Perfil.css';
 
+const CAMPOS_CONTACTO = [
+  { name: 'nombre_usuario', label: 'Nombre', autoComplete: 'given-name' },
+  { name: 'apellido_usuario', label: 'Apellido', autoComplete: 'family-name' },
+  { name: 'telefono_usuario', label: 'Teléfono', type: 'tel', autoComplete: 'tel' },
+  { name: 'correo_usuario', label: 'Correo electrónico', type: 'email', autoComplete: 'email' },
+  { name: 'contrasena', label: 'Nueva contraseña', type: 'password', autoComplete: 'new-password', placeholder: 'Déjala vacía para conservar la actual' },
+];
+
+const CAMPOS_DOMICILIO = [
+  { name: 'direccion_usuario', label: 'Calle y número', full: true },
+  { name: 'codigo_postal', label: 'Código postal', autoComplete: 'postal-code' },
+  { name: 'colonia_usuario', label: 'Colonia' },
+  { name: 'municipio_usuario', label: 'Municipio' },
+  { name: 'estado_usuario', label: 'Estado' },
+  { name: 'referencias', label: 'Referencias (opcional)', full: true },
+];
+
+const ATAJOS = [
+  { to: '/cart', label: 'Carrito', icon: 'M3 4h2l2.4 11h10.2L20 7H6.2M9 20a1 1 0 100-2 1 1 0 000 2zm8 0a1 1 0 100-2 1 1 0 000 2z' },
+  { to: '/favoritos', label: 'Favoritos', icon: 'M12 20s-7-4.4-7-10a4 4 0 017-2.6A4 4 0 0119 10c0 5.600-7 10-7 10z' },
+  { to: '/historial-compras', label: 'Historial de compras', icon: 'M12 7v5l3 2M4 12a8 8 0 108-8 8 8 0 00-6 2.700M4 4v4h4' },
+  { to: '/Tarjetas', label: 'Tarjetas', icon: 'M3 7h18v10H3zM3 10.500h18M6.500 14.500H10' },
+];
+
+const Icono = ({ d }) => (
+  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor"
+       strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d={d} />
+  </svg>
+);
+
+const armarFormulario = (u = {}) => ({
+  id_usuario: u.id_usuario || '',
+  nombre_usuario: u.nombre_usuario || '',
+  apellido_usuario: u.apellido_usuario || '',
+  telefono_usuario: u.telefono_usuario || '',
+  correo_usuario: u.correo_usuario || '',
+  direccion_usuario: u.direccion_usuario || '',
+  codigo_postal: u.codigo_postal || '',
+  estado_usuario: u.estado_usuario || '',
+  municipio_usuario: u.municipio_usuario || '',
+  colonia_usuario: u.colonia_usuario || '',
+  referencias: u.referencias || '',
+  contrasena: '', // nunca se guarda en localStorage
+});
+
 const Perfil = () => {
   const navigate = useNavigate();
-  const [usuario, setUsuario] = useState(null); // aqui se guarda el usuario desde el localStorage
+  const [usuario, setUsuario] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [showNotification, setShowNotification] = useState(false);
+  const [formData, setFormData] = useState(armarFormulario());
 
-  
-  const [formData, setFormData] = useState({
-    id_usuario: '',
-    nombre_usuario: '',
-    apellido_usuario: '',
-    telefono_usuario: '',
-    correo_usuario: '',
-    direccion_usuario: '',
-    codigo_postal: '',
-    estado_usuario: '',
-    municipio_usuario: '',
-    colonia_usuario: '',
-    contrasena: '',
-    referencias: ''
-    });
-
-  //manejo de inputs
-  const handleInputChange = (e) => { //funcion que se ejecuta cada vez que se cambia un input
+  const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Cargar datos del usuario desde localStorage al montar el componente
   useEffect(() => {
-    //localStorage.removeItem('usuario')
-    const data = localStorage.getItem('usuario'); //recupera los datos del usuario guardados
+    const data = localStorage.getItem('usuario');
     if (data) {
-      const usuarioData = JSON.parse(data); //convierte la cadena JSON a un objeto
-      setUsuario(usuarioData); //actualiza el estado del usuario
-      setFormData({
-        id_usuario: usuarioData.id_usuario, 
-        nombre_usuario: usuarioData.nombre_usuario || '',
-        apellido_usuario: usuarioData.apellido_usuario || '',
-        telefono_usuario: usuarioData.telefono_usuario || '',
-        correo_usuario: usuarioData.correo_usuario || '',
-        direccion_usuario: usuarioData.direccion_usuario || '',
-        codigo_postal: usuarioData.codigo_postal || '',
-        estado_usuario: usuarioData.estado_usuario || '',
-        municipio_usuario: usuarioData.municipio_usuario || '',
-        colonia_usuario: usuarioData.colonia_usuario || '',
-        referencias: usuarioData.referencias || '',
-        contrasena: '' // No se guarda la contraseña en localStorage por seguridad
-      });
+      const usuarioData = JSON.parse(data);
+      setUsuario(usuarioData);
+      setFormData(armarFormulario(usuarioData));
     }
   }, []);
 
-  //activar edicion
-  const handleEditClick = () => setIsEditing(true);
+  const handleCancelClick = () => {
+    setFormData(armarFormulario(usuario));
+    setIsEditing(false);
+  };
 
-  //guardar cambios loclamente
   const handleSaveClick = async (e) => {
     e.preventDefault();
+    const id = formData.id_usuario || usuario?.id_usuario;
+    if (!id) return console.error('ID de usuario no disponible');
 
-    const id = formData.id_usuario || usuario?.id_usuario; //respaldo
-    if(!id) return console.error('ID de usuario no disponible');
-      try {
-        const token = getToken();
-        const response = await fetch(`http://localhost:3000/api/usuarios/${formData.id_usuario}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({
-          nombre_usuario: formData.nombre_usuario,
-          apellido_usuario: formData.apellido_usuario,
-          telefono_usuario: formData.telefono_usuario,
-          correo_usuario: formData.correo_usuario,
-          direccion_usuario: formData.direccion_usuario,
-          contrasena: formData.contrasena,
-          codigo_postal: formData.codigo_postal,
-          estado_usuario: formData.estado_usuario,
-          municipio_usuario: formData.municipio_usuario,
-          colonia_usuario: formData.colonia_usuario,
-          referencias: formData.referencias,
-        })
+    // No enviamos la contraseña si el campo está vacío
+    const { id_usuario, contrasena, ...resto } = formData;
+    const body = contrasena ? { ...resto, contrasena } : resto;
+
+    try {
+      const response = await fetch(`http://localhost:3000/api/usuarios/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${getToken()}`,
+        },
+        body: JSON.stringify(body),
       });
 
       if (response.ok) {
@@ -93,15 +100,10 @@ const Perfil = () => {
         localStorage.setItem('usuario', JSON.stringify(updateUser));
         window.dispatchEvent(new Event('usuarioChange'));
         setUsuario(updateUser);
+        setFormData(armarFormulario(updateUser));
         setIsEditing(false);
-        
-        //mostrar notificación de éxito al editar los datos
         setShowNotification(true);
-        
-        //ocultar notificación después de 4 segundos
-        setTimeout(() => {
-          setShowNotification(false);
-        }, 4000);
+        setTimeout(() => setShowNotification(false), 4000);
       } else {
         alert('Error al actualizar los datos del usuario');
       }
@@ -109,86 +111,99 @@ const Perfil = () => {
       console.error('Error al actualizar el usuario:', error);
     }
   };
-  //cerrar sesion
+
   const handleLogout = () => {
-    console.log('Cerrar sesión');
     logout();
-  // Disparar evento personalizado para notificar al contexto
     window.dispatchEvent(new Event('usuarioChange'));
-    navigate('/'); // redirige a la página principal
+    navigate('/');
   };
 
+  const iniciales =
+    `${formData.nombre_usuario[0] || ''}${formData.apellido_usuario[0] || ''}`.toUpperCase() || '?';
 
-return (
-  <div className="perfil-page">
-    {/* Notificación de datos actualizados */}
-    {showNotification && (
-      <div className="update-notification">
-        <div className="update-notification-content">
-          <span className="update-notification-icon">✓</span>
-          <div className="update-notification-text">
-            <strong>¡Datos actualizados!</strong>
-            <p>Tu información ha sido guardada correctamente</p>
+  const renderCampo = ({ name, label, type = 'text', full, ...resto }) => (
+    <div key={name} className={`campo${full ? ' campo-full' : ''}`}>
+      <label htmlFor={name}>{label}</label>
+      <input
+        id={name}
+        name={name}
+        type={type}
+        value={formData[name]}
+        onChange={handleInputChange}
+        disabled={!isEditing}
+        {...resto}
+      />
+    </div>
+  );
+
+  return (
+    <div className="perfil-page">
+      {showNotification && (
+        <div className="perfil-toast" role="status">
+          <span className="perfil-toast-icono">✓</span>
+          <div>
+            <strong>Datos actualizados</strong>
+            <p>Guardamos tu información correctamente.</p>
           </div>
         </div>
-      </div>
-    )}
-    
-    <div className="perfil-container">
-      <h4>Mi Perfil</h4>
-
-      <fieldset>
-        <legend>Domicilio</legend>
-        <div className="form-grid">
-          {['direccion_usuario','codigo_postal','estado_usuario','municipio_usuario','colonia_usuario','referencias'].map(field => (
-            <label key={field}>
-              {field === 'referencias' ? 'Referencias (opcional)' : field.charAt(0).toUpperCase() + field.slice(1)}
-              <input
-                type="text"
-                name={field}
-                value={formData[field]}
-                onChange={handleInputChange}
-                disabled={!isEditing}
-              />
-            </label>
-          ))}
-        </div>
-      </fieldset>
-
-      <fieldset>
-        <legend>Contacto</legend>
-        <div className="form-grid">
-          {['nombre_usuario','apellido_usuario','telefono_usuario','correo_usuario','contrasena'].map(field => (
-            <label key={field}>
-              {field.charAt(0).toUpperCase() + field.slice(1)}
-              <input
-                //type="text"
-                type={field === 'contrasena' ? 'password' : 'text'}
-                name={field}
-                value={formData[field]}
-                onChange={handleInputChange}
-                disabled={!isEditing}
-              />
-            </label>
-          ))}
-        </div>
-      </fieldset>
-      {!isEditing ? (
-        <button className="continue-btn active" onClick={handleEditClick}>Editar</button>
-      ) : (
-        <button className="continue-btn active" onClick={handleSaveClick}>Guardar Cambios</button>
       )}
 
-      <div className="sidebar-right">
-        <Link to="/cart" title="Carrito">Carr</Link>
-        <Link to="/favoritos" title="Favoritos">Fav</Link>
-        <Link to="/historial-compras" title="Historial de Compras">His</Link>
-        <Link to="/Tarjetas" title="Tarjetas">Tarj</Link>
-        <button onClick={handleLogout} title="Cerrar sesión" style={{border:'none', fontSize:'1.5rem', cursor:'pointer'}}>CS</button>
+      <div className="perfil-layout">
+        <aside className="perfil-lateral">
+          <div className="perfil-identidad">
+            <div className="perfil-avatar" aria-hidden="true">{iniciales}</div>
+            <div className="perfil-identidad-texto">
+              <h1>{`${formData.nombre_usuario} ${formData.apellido_usuario}`.trim() || 'Mi perfil'}</h1>
+              <span>{formData.correo_usuario}</span>
+            </div>
+          </div>
+
+          <nav className="perfil-nav" aria-label="Mi cuenta">
+            {ATAJOS.map(({ to, label, icon }) => (
+              <Link key={to} to={to}><Icono d={icon} />{label}</Link>
+            ))}
+            <button type="button" className="perfil-salir" onClick={handleLogout}>
+              <Icono d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10" />
+              Cerrar sesión
+            </button>
+          </nav>
+        </aside>
+
+        <form className="perfil-contenido" onSubmit={handleSaveClick}>
+          <header className="perfil-encabezado">
+            <div>
+              <h2>Mis datos</h2>
+              <p>{isEditing ? 'Edita lo que necesites y guarda los cambios.' : 'Revisa y actualiza tu información de contacto y envío.'}</p>
+            </div>
+            {!isEditing && (
+              <button type="button" className="btn btn-primario" onClick={() => setIsEditing(true)}>
+                Editar datos
+              </button>
+            )}
+          </header>
+
+          <section className="perfil-seccion">
+            <h3>Contacto</h3>
+            <div className="form-grid">{CAMPOS_CONTACTO.map(renderCampo)}</div>
+          </section>
+
+          <section className="perfil-seccion">
+            <h3>Domicilio de envío</h3>
+            <div className="form-grid">{CAMPOS_DOMICILIO.map(renderCampo)}</div>
+          </section>
+
+          {isEditing && (
+            <div className="perfil-acciones">
+              <button type="button" className="btn btn-secundario" onClick={handleCancelClick}>
+                Cancelar
+              </button>
+              <button type="submit" className="btn btn-primario">Guardar cambios</button>
+            </div>
+          )}
+        </form>
       </div>
     </div>
-  </div>
-);
+  );
 };
 
 export default Perfil;

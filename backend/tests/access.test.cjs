@@ -180,7 +180,7 @@ test('si falla la auditoría se solicita ROLLBACK de la modificación', async ()
   } finally { failAudit = false; }
 });
 test('login entrega id_rol y permisos; el JWT solo lleva la identidad', async () => {
-  const result = await request('/login', null, 'POST', { correo: 'admin@test.local', contra: 'test-password' });
+  const result = await request('/auth/login', null, 'POST', { correo: 'admin@test.local', contra: 'test-password' });
   assert.equal(result.status, 200);
   assert.equal(result.body.usuario.id_rol, 2);
   assert.ok(result.body.usuario.permisos.includes('roles.asignar'));

@@ -9,7 +9,7 @@ const ProtectedRoute = ({ children, requiredPermission, anyPermissions, required
   useEffect(() => {
     let active = true;
     if (!isAuthenticated()) return;
-    api('/sesion').then(({ usuario }) => {
+    api('/auth/sesion').then(({ usuario }) => {
       if (!active) return;
       localStorage.setItem('usuario', JSON.stringify(usuario));
       window.dispatchEvent(new Event('usuarioChange'));

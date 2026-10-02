@@ -1,4 +1,4 @@
--- Migracion: roles, permisos y auditoria.
+in the database something had to be modified?
 BEGIN;
 
 -- Evita cambios concurrentes en usuarios durante la migracion.

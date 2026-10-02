@@ -3,9 +3,10 @@ const { insertarDatosTarjeta, obtenerPorUsuario } = require('../models/tarjetaMo
 
 async function procesarPagoTarjeta(req, res) {
   try {
-    const { idUsuario, productos, total, tarjeta } = req.body;
+    const { productos, total, tarjeta } = req.body;
+    const idUsuario = req.usuario.id_usuario;
 
-    if (!idUsuario || !productos || productos.length === 0) {
+    if (!productos || productos.length === 0) {
       return res.status(400).json({ mensaje: 'Datos incompletos para procesar el pago' });
     }
 

@@ -3,7 +3,7 @@ const { getPedidosByUsuario, getPedidoById } = require('../models/pedidoModel');
 // Obtener historial de compras del usuario
 async function obtenerHistorialCompras(req, res) {
   try {
-    const { idUsuario } = req.params;
+    const idUsuario = req.usuario.id_usuario;
 
     console.log('Buscando historial para usuario:', idUsuario);
 
@@ -41,7 +41,8 @@ async function obtenerHistorialCompras(req, res) {
 // Obtener detalle de una compra específica
 async function obtenerDetalleCompra(req, res) {
   try {
-    const { idPedido, idUsuario } = req.params;
+    const { idPedido } = req.params;
+    const idUsuario = req.usuario.id_usuario;
 
     console.log('Buscando detalle del pedido:', idPedido, 'para usuario:', idUsuario);
 
