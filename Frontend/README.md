@@ -62,3 +62,9 @@ openssl req -x509 -newkey rsa:2048 -nodes -sha256 -days 365 \
   -keyout certs/key.pem -out certs/cert.pem
 
   Estos comandos crean los dos archivos criptográficos necesarios para que Node.js y Vite puedan cifrar el tráfico con HTTPS: una llave privada (key.pem) y un certificado público (cert.pem).
+
+# Protección contra intentos automatizados - Implementación de rate limiting
+    En backend ejecutar lo siguiente: 
+    npm install express-rate-limit
+
+    
