@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Reg_compra.css';
-import { setToken } from '../../utils/authUtils';
 
 const Reg_Compra = () => {
   const navigate = useNavigate();
@@ -76,52 +75,88 @@ const Reg_Compra = () => {
 const handleSubmit = async (e) => {
   e.preventDefault();
 
-  if (validateForm()) {
-    try {
-      const response = await fetch('/api/usuarios', { // ruta relativa, proxy de Vite la redirige
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          nombre: formData.nombre,
-          apellido: formData.apellido,
-          telefono: formData.telefono,
-          correo: formData.email,
-          direccion: formData.direccion,
-          contra: formData.password,
-          CP: formData.codigoPostal,
-          estado: formData.estado,
-          municipio: formData.municipio,
-          colonia: formData.colonia,
-          referencias: formData.referencias,
-        }),
-      });
+  console.log('1. Se presionó Continuar al Pago');
 
-      const data = await response.json();
+  if (!validateForm()) {
+    console.log('2. El formulario no pasó la validación');
+    return;
+  }
 
-      if (response.ok) {
-        const login = await fetch('/api/login', {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ correo: formData.email, contra: formData.password }),
-        });
-        const session = await login.json();
-        if (!login.ok) {
-          alert('Tu cuenta fue creada. Inicia sesión para continuar.');
-          navigate('/login');
-          return;
-        }
-        setToken(session.token);
-        localStorage.setItem('usuario', JSON.stringify(session.usuario));
-        // Disparar evento personalizado para notificar al contexto
-        window.dispatchEvent(new Event('usuarioChange'));
-        alert('Usuario guardado correctamente');
-        navigate('/checkout', { state: { customerData: formData } });
-      } else {
-        alert(`Error al guardar: ${data.mensaje || 'Error desconocido'}`);
-      }
-    } catch (error) {
-      console.error('Error al enviar datos:', error);
-      alert('Error de conexión con el servidor');
+  try {
+    console.log('3. Enviando registro...');
+
+    const response = await fetch('https://localhost:3000/api/usuarios', {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        nombre: formData.nombre,
+        apellido: formData.apellido,
+        telefono: formData.telefono,
+        correo: formData.email,
+        direccion: formData.direccion,
+        contra: formData.password,
+        CP: formData.codigoPostal,
+        estado: formData.estado,
+        municipio: formData.municipio,
+        colonia: formData.colonia,
+        referencias: formData.referencias
+      })
+    });
+
+    const data = await response.json();
+
+    console.log('4. Respuesta registro:', response.status, data);
+
+    if (!response.ok) {
+      alert(`Error al guardar: ${data.mensaje || data.error || 'Error desconocido'}`);
+      return;
     }
+
+    console.log('5. Usuario creado correctamente. Iniciando sesión...');
+
+    const login = await fetch('https://localhost:3000/api/auth/login', {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        correo: formData.email,
+        contra: formData.password
+      })
+    });
+
+    const session = await login.json();
+
+    console.log('6. Respuesta login:', login.status, session);
+
+    if (!login.ok) {
+      alert('Tu cuenta fue creada. Inicia sesión para continuar.');
+      navigate('/login');
+      return;
+    }
+
+    localStorage.setItem(
+      'usuario',
+      JSON.stringify(session.usuario)
+    );
+
+    window.dispatchEvent(new Event('usuarioChange'));
+
+    console.log('7. Sesión iniciada correctamente');
+
+    navigate('/checkout', {
+      state: {
+        customerData: formData
+      }
+    });
+
+  } catch (error) {
+    console.error('ERROR EN REGISTRO/LOGIN:', error);
+    alert('Error de conexión con el servidor');
   }
 };
 

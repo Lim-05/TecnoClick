@@ -27,39 +27,42 @@ const Login = () => {
       const data = await response.json();
 
       if (response.ok) {
-        setMensaje(data.mensaje);
+          setMensaje(data.mensaje);
 
-        // Registrar el inicio de sesión (el JWT ya viajó en la cookie HttpOnly)
-        setToken(data.token);
-        console.log('✅Token guardado correctamente');
-          
-          // Mostrar tiempo de expiración
-        const minutosRestantes = getTokenTimeRemaining();
-        console.log(`⏱️ Tu sesión expirará en ${minutosRestantes} minutos (${Math.floor(minutosRestantes / 60 / 24)} días)`);
-        
+          const usuarioCompleto = data.usuario;
 
-        const usuarioCompleto = data.usuario;
+          localStorage.setItem(
+              'usuario',
+              JSON.stringify(usuarioCompleto)
+          );
 
-        // Guardar usuario en localStorage
-        localStorage.setItem('usuario', JSON.stringify(usuarioCompleto));
-        window.dispatchEvent(new Event('usuarioChange'));
+          window.dispatchEvent(new Event('usuarioChange'));
 
-        // Detectar rol y redirigir
-        console.log('🔍 Rol detectado:', data.usuario.rol_codigo);
-        console.log('🔍 Usuario completo:', data.usuario);
-        
-        // Acepta tanto "admin" como "administrador" para mayor flexibilidad
-        if (data.usuario.rol_codigo === 'editor') {
-          navigate('/editor');
-        } else if (data.usuario.rol_codigo === 'admin' || data.usuario.permisos?.some(p => ['usuarios.ver','roles.ver','auditoria.ver','productos.crear','productos.editar','productos.eliminar','categorias.crear','categorias.editar','categorias.eliminar','ingresos.ver','pedidos.gestionar'].includes(p))) {
-          console.log('Redirigiendo a /admin');
-          navigate('/admin'); // panel de administrador
-        } else {
-          console.log('Redirigiendo a / (home)');
-          navigate('/');
-        }
-      } else {
-        setMensaje(data.mensaje);
+          console.log('🔍 Rol detectado:', data.usuario.rol_codigo);
+          console.log('🔍 Usuario completo:', data.usuario);
+
+          if (data.usuario.rol_codigo === 'editor') {
+              navigate('/editor');
+          } else if (
+              data.usuario.rol_codigo === 'admin' ||
+              data.usuario.permisos?.some(p => [
+                  'usuarios.ver',
+                  'roles.ver',
+                  'auditoria.ver',
+                  'productos.crear',
+                  'productos.editar',
+                  'productos.eliminar',
+                  'categorias.crear',
+                  'categorias.editar',
+                  'categorias.eliminar',
+                  'ingresos.ver',
+                  'pedidos.gestionar'
+              ].includes(p))
+          ) {
+              navigate('/admin');
+          } else {
+              navigate('/');
+          }
       }
     } catch (error) {
       console.error('Error al iniciar sesión:', error);

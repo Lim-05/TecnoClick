@@ -10,6 +10,7 @@ const TarjetaForm = () => {
     if (!usuario || !token) return;
 
     fetch(`https://localhost:3000/api/datos_tarjeta/${usuario.id_usuario}`, {
+      credentials: 'include',
       headers: {
         "Authorization": `Bearer ${token}`,
         "Content-Type": "application/json"

@@ -20,19 +20,12 @@ const ResenaForm = ({ idProducto, onResenaCreada, puedeResenar, yaReseno, haComp
     setEnviando(true);
 
     try {
-      const token = localStorage.getItem('token');
-      
-      if (!token) {
-        setError('Debes iniciar sesión para escribir una reseña');
-        setEnviando(false);
-        return;
-      }
 
       const response = await fetch('https://localhost:3000/api/resenas', {
         method: 'POST',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
           resena: resenaTexto,

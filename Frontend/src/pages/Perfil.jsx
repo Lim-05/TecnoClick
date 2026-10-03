@@ -87,6 +87,7 @@ const Perfil = () => {
     try {
       const response = await fetch(`https://localhost:3000/api/usuarios/${id}`, {
         method: 'PUT',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${getToken()}`,

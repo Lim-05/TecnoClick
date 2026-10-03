@@ -15,6 +15,7 @@ const IngresosAdmin = () => {
         const token = getToken();
         
         const resEfectivo = await fetch("https://localhost:3000/api/ingresos/efectivo", {
+          credentials: 'include',
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -22,6 +23,7 @@ const IngresosAdmin = () => {
         const dataEfectivo = await resEfectivo.json();
 
         const resTarjeta = await fetch("https://localhost:3000/api/ingresos/tarjeta", {
+          credentials: 'include',
           headers: {
             'Authorization': `Bearer ${token}`
           }

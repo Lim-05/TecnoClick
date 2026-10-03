@@ -33,6 +33,7 @@ const RestablecerContrasena = () => {
       const response = await fetch(
         'https://localhost:3000/api/auth/restablecer',
         {
+          credentials: 'include',
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'

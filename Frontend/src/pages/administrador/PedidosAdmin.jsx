@@ -10,6 +10,7 @@ const PedidoAdmin = () => {
   useEffect(() => {
     const token = getToken();
     fetch("https://localhost:3000/api/pedidos/pendientes", {
+      credentials: 'include',
       headers: {
         'Authorization': `Bearer ${token}`
       }
@@ -36,6 +37,7 @@ const PedidoAdmin = () => {
 
     const token = getToken();
     const response = await fetch(`https://localhost:3000/api/pedidos/${id}/completar`, {
+      credentials: 'include',
       method: "PUT",
       headers: {
         'Authorization': `Bearer ${token}`

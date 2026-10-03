@@ -1,4 +1,4 @@
-const { createOrder, registerCashPayment, registerIncome } = require('../models/checkoutModel');
+const { crearPedido, registrarPagoEfectivo } = require('../models/checkoutModel');
 
 async function procesarPagoEfectivo(req, res) {
   try {

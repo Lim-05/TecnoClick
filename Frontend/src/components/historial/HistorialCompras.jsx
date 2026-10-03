@@ -25,9 +25,8 @@ const HistorialCompras = () => {
       setError(null);
 
       const usuario = JSON.parse(localStorage.getItem('usuario'));
-      const token = localStorage.getItem('token');
 
-      if (!usuario || !usuario.id_usuario || !token) {
+      if (!usuario || !usuario.id_usuario) {
         setError('Usuario no autenticado. Por favor, inicia sesión nuevamente.');
         setLoading(false);
         return;
@@ -36,9 +35,9 @@ const HistorialCompras = () => {
       const response = await fetch(
         `https://localhost:3000/api/pedidos/historial/${usuario.id_usuario}`,
         {
+          credentials: 'include',
           headers: {
-            "Authorization": `Bearer ${token}`,
-            "Content-Type": "application/json"
+            'Content-Type': 'application/json'
           }
         }
       );
@@ -67,9 +66,8 @@ const HistorialCompras = () => {
 
     try {
       const usuario = JSON.parse(localStorage.getItem('usuario'));
-      const token = localStorage.getItem('token');
 
-      if (!usuario || !token) {
+      if (!usuario || !usuario.id_usuario) {
         alert('Usuario no autenticado. Por favor, inicia sesión nuevamente.');
         return;
       }
@@ -77,8 +75,8 @@ const HistorialCompras = () => {
       const response = await fetch(
         `https://localhost:3000/api/pedidos/detalle/${idPedido}/${usuario.id_usuario}`,
         {
+          credentials: 'include',
           headers: {
-            "Authorization": `Bearer ${token}`,
             "Content-Type": "application/json"
           }
         }

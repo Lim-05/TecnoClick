@@ -39,16 +39,15 @@ const CheckoutForm = () => {
   const fetchUserCards = async () => {
     try {
       const usuario = JSON.parse(localStorage.getItem("usuario"));
-      const token = localStorage.getItem("token");
 
-      if (!usuario || !token) {
-        console.warn("No hay usuario o token en localStorage");
+      if (!usuario || !usuario.id_usuario) {
+        console.warn("No hay usuario logueado");
         return;
       }
 
       const res = await fetch(`https://localhost:3000/api/datos_tarjeta/${usuario.id_usuario}`, {
+        credentials: 'include',
         headers: {
-          "Authorization": `Bearer ${token}`,
           "Content-Type": "application/json",
         },
       });
@@ -253,13 +252,12 @@ const CheckoutForm = () => {
 
       if (paymentMethod === 'efectivo') {
         const folio = 'TEC' + Date.now().toString().slice(-8);
-        const token = getToken();
 
         const response = await fetch('https://localhost:3000/api/checkout/efectivo', {
           method: 'POST',
+          credentials: 'include',
           headers: { 
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
           },
           body: JSON.stringify({
             idUsuario,
@@ -299,13 +297,12 @@ const CheckoutForm = () => {
           fecha_vencimiento: formData.fechaExpiracion,
           cvv: formData.cvv
         };
-        const token = getToken();
 
         const response = await fetch('https://localhost:3000/api/checkout/tarjeta', {
           method: 'POST',
+          credentials: 'include',
           headers: { 
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
           },
           body: JSON.stringify({
             idUsuario,

@@ -80,38 +80,41 @@ const ProductDetail = () => {
   };
 
   // Verificar permisos de reseña
-  const verificarPermisosResena = async (productId, token) => {
+  const verificarPermisosResena = async (productId) => {
     try {
-      const response = await fetch(`https://localhost:3000/api/resenas/puede-resenar/${productId}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
+      const response = await fetch(
+        `https://localhost:3000/api/resenas/puede-resenar/${productId}`,
+        {
+          method: 'GET',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json'
+          }
         }
-      });
-      
+      );
+
       if (!response.ok) {
-        throw new Error('Error al verificar permisos');
+        console.log('No se pudieron verificar los permisos de reseña:', response.status);
+        return;
       }
-      
+
       const data = await response.json();
+
       console.log('Permisos de reseña:', data);
-      
+
       setPuedeResenar(data.puedeResenar);
       setYaReseno(data.yaReseno);
       setHaComprado(data.haComprado);
+
     } catch (error) {
-      console.error('Error al verificar permisos:', error);
+      console.error('Error al verificar permisos de reseña:', error);
     }
   };
 
   // Callback cuando se crea una nueva reseña
   const handleResenaCreada = () => {
-    // Recargar reseñas
     loadResenas(id);
-    // Actualizar permisos
-    const token = localStorage.getItem('token');
-    if (token) {
-      verificarPermisosResena(id, token);
-    }
+    verificarPermisosResena(id);
   };
 
   // Cargar producto desde la API
@@ -163,9 +166,10 @@ const ProductDetail = () => {
         loadResenas(id);
         
         // Verificar permisos de reseña si el usuario está autenticado
-        const token = localStorage.getItem('token');
-        if (token) {
-          verificarPermisosResena(id, token);
+        const usuario = JSON.parse(localStorage.getItem('usuario'));
+
+        if (usuario?.id_usuario) {
+          verificarPermisosResena(id);
         }
       } catch (error) {
         console.error(' Error al cargar producto:', error);
@@ -484,7 +488,7 @@ const ProductDetail = () => {
               </div>
 
               {/* Formulario para agregar reseña */}
-              {localStorage.getItem('token') ? (
+              {JSON.parse(localStorage.getItem('usuario'))?.id_usuario ? (
                 <ResenaForm 
                   idProducto={product.id}
                   onResenaCreada={handleResenaCreada}

@@ -20,6 +20,7 @@ const RecuperarContrasena = () => {
       const response = await fetch(
         'https://localhost:3000/api/auth/recuperar',
         {
+          credentials: 'include',
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'

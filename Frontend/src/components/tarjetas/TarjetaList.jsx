@@ -6,7 +6,7 @@ const TarjetaList = ({ userId, onSelectTarjeta }) => {
   const [editingTarjeta, setEditingTarjeta] = useState(null);
 
   const fetchTarjetas = async () => {
-    const res = await fetch(`https://localhost:3000/api/datos_tarjeta/${userId}`);
+    const res = await fetch(`https://localhost:3000/api/datos_tarjeta/${userId}`, { credentials: 'include' });
     const data = await res.json();
     setTarjetas(data);
   };
@@ -15,7 +15,7 @@ const TarjetaList = ({ userId, onSelectTarjeta }) => {
 
   const handleEdit = t => setEditingTarjeta(t);
   const handleDelete = async id_tarjeta => {
-    await fetch(`https://localhost:3000/api/datos_tarjeta/${userId}/${id_tarjeta}`, { method: 'DELETE' });
+    await fetch(`https://localhost:3000/api/datos_tarjeta/${userId}/${id_tarjeta}`, { method: 'DELETE', credentials: 'include' });
     fetchTarjetas();
   };
 

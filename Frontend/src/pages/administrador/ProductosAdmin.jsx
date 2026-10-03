@@ -31,7 +31,10 @@ const ProductosAdmin = () => {
     try {
       const res = await fetch(
         `https://localhost:3000/api/productos/products/${id}`,
-        { method: "DELETE" }
+        { 
+          method: "DELETE",
+          credentials: 'include'
+        }
       );
 
       if (!res.ok) throw new Error("Error al eliminar producto");
