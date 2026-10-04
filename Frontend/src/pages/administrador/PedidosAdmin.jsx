@@ -1,3 +1,4 @@
+import { authFetch } from '../../utils/authFetch.js';
 import React, { useEffect, useState } from "react";
 import { getToken } from "../../utils/authUtils";
 import "./PedidosAdmin.css";
@@ -9,7 +10,7 @@ const PedidoAdmin = () => {
 
   useEffect(() => {
     const token = getToken();
-    fetch("https://localhost:3000/api/pedidos/pendientes", {
+    authFetch("https://localhost:3000/api/pedidos/pendientes", {
       credentials: 'include',
       headers: {
         'Authorization': `Bearer ${token}`
@@ -36,7 +37,7 @@ const PedidoAdmin = () => {
     if (!window.confirm("¿Marcar este pedido como completado?")) return;
 
     const token = getToken();
-    const response = await fetch(`https://localhost:3000/api/pedidos/${id}/completar`, {
+    const response = await authFetch(`https://localhost:3000/api/pedidos/${id}/completar`, {
       credentials: 'include',
       method: "PUT",
       headers: {

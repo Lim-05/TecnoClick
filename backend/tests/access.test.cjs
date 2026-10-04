@@ -2,6 +2,7 @@ const { test, before, after } = require('node:test');
 const assert = require('node:assert/strict');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
+process.env.JWT_SECRET = 'test-only-secret-at-least-32-bytes-long';
 
 // Pruebas HTTP del backend real con la frontera de PostgreSQL simulada.
 // No acceden a la base de datos ni modifican cuentas existentes.
@@ -32,6 +33,8 @@ function access(user) {
 async function query(sql, values = []) {
   statements.push({ sql, values });
   const normalized = sql.replace(/\s+/g, ' ').trim();
+  if (normalized.startsWith('SELECT id FROM auth_sessions')) return { rows: [{ id: values[0] }] };
+  if (normalized.startsWith('INSERT INTO auth_sessions') || normalized.startsWith('INSERT INTO auth_refresh_tokens')) return { rows: [] };
   if (/^(BEGIN|COMMIT|ROLLBACK)$/.test(normalized) || normalized.includes('pg_advisory_xact_lock')) return { rows: [] };
   if (normalized.startsWith('LOCK TABLE public.')) return { rows: [] };
   if (normalized.includes('pg_get_serial_sequence')) {
@@ -105,7 +108,8 @@ before(async () => {
 after(() => new Promise(resolve => server.close(resolve)));
 function token(id) {
   // Un rol obsoleto dentro del JWT no debe conceder acceso.
-  return jwt.sign({ id_usuario: id, rol: 'admin' }, process.env.JWT_SECRET || 'claveSecreta', { expiresIn: '1h' });
+  return jwt.sign({ id_usuario: id, rol: 'admin', type: 'access', sid: '11111111-1111-4111-8111-111111111111' }, process.env.JWT_SECRET,
+    { expiresIn: '15m', issuer: 'tecnoclick', audience: 'tecnoclick-api' });
 }
 async function request(path, id, method = 'GET', body) {
   const headers = { 'Content-Type': 'application/json' };

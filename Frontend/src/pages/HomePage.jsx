@@ -1,3 +1,4 @@
+import { authFetch } from '../utils/authFetch.js';
 // src/pages/HomePage.jsx
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
@@ -21,7 +22,7 @@ const HomePage = () => {
         setLoading(true);
         console.log(' Cargando productos destacados...');
         
-        const response = await fetch('https://localhost:3000/api/productos/products');
+        const response = await authFetch('https://localhost:3000/api/productos/products');
         
         if (!response.ok) {
           throw new Error(`Error HTTP: ${response.status}`);

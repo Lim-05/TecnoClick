@@ -1,6 +1,7 @@
+import { authFetch } from './authFetch.js';
 import { getAuthHeaders } from './authUtils';
 export async function api(path, options = {}) {
-  const response = await fetch('/api' + path, {
+  const response = await authFetch('/api' + path, {
     ...options,
     credentials: 'include',
     cache: 'no-store',

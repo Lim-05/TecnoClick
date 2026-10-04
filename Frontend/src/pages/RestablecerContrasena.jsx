@@ -1,3 +1,4 @@
+import { authFetch } from '../utils/authFetch.js';
 import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
@@ -30,7 +31,7 @@ const RestablecerContrasena = () => {
     setGuardando(true);
 
     try {
-      const response = await fetch(
+      const response = await authFetch(
         'https://localhost:3000/api/auth/restablecer',
         {
           credentials: 'include',

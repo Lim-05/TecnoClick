@@ -1,3 +1,4 @@
+import { authFetch } from '../../utils/authFetch.js';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Reg_compra.css';
@@ -85,7 +86,7 @@ const handleSubmit = async (e) => {
   try {
     console.log('3. Enviando registro...');
 
-    const response = await fetch('https://localhost:3000/api/usuarios', {
+    const response = await authFetch('https://localhost:3000/api/usuarios', {
       method: 'POST',
       credentials: 'include',
       headers: {
@@ -117,7 +118,7 @@ const handleSubmit = async (e) => {
 
     console.log('5. Usuario creado correctamente. Iniciando sesión...');
 
-    const login = await fetch('https://localhost:3000/api/auth/login', {
+    const login = await authFetch('https://localhost:3000/api/auth/login', {
       method: 'POST',
       credentials: 'include',
       headers: {

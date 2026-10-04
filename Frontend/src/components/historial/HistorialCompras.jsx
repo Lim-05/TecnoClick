@@ -1,3 +1,4 @@
+import { authFetch } from '../../utils/authFetch.js';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './HistorialCompras.css';
@@ -32,7 +33,7 @@ const HistorialCompras = () => {
         return;
       }
 
-      const response = await fetch(
+      const response = await authFetch(
         `https://localhost:3000/api/pedidos/historial/${usuario.id_usuario}`,
         {
           credentials: 'include',
@@ -72,7 +73,7 @@ const HistorialCompras = () => {
         return;
       }
 
-      const response = await fetch(
+      const response = await authFetch(
         `https://localhost:3000/api/pedidos/detalle/${idPedido}/${usuario.id_usuario}`,
         {
           credentials: 'include',

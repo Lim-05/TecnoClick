@@ -1,6 +1,6 @@
 const db = require('../config/db');
 const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
+const tokens = require('../services/tokens');
 const crypto = require('crypto');
 
 const { 
@@ -11,7 +11,6 @@ const {
   enviarCorreoRecuperacion 
 } = require('../services/email');
 
-const SECRET = process.env.JWT_SECRET || 'claveSecreta';
 async function login(req, res) {
   const { correo, contra } = req.body;
   if (typeof correo !== 'string' || typeof contra !== 'string' || !correo || !contra) {
@@ -25,17 +24,14 @@ async function login(req, res) {
     }
     const access = await getAccess(usuario.id_usuario);
     if (!access) return res.status(403).json({ mensaje: 'La cuenta no tiene un rol válido.' });
-    await transaction(client => audit(client, access, 'sesion.iniciar', 'usuario', usuario.id_usuario));
-    const token = jwt.sign({ id_usuario: usuario.id_usuario }, SECRET, {
-      expiresIn: '2d'
+    const credentials = await transaction(async client => {
+      const current = (await client.query('SELECT * FROM usuario WHERE id_usuario = $1 FOR UPDATE', [usuario.id_usuario])).rows[0];
+      if (!current || current.contrasena !== usuario.contrasena) return null;
+      await audit(client, access, 'sesion.iniciar', 'usuario', usuario.id_usuario);
+      return tokens.createSession(client, usuario.id_usuario);
     });
-
-    res.cookie('token', token, {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'strict',
-      maxAge: 2 * 24 * 60 * 60 * 1000 // 2 días
-    });
+    if (!credentials) return res.status(401).json({ mensaje: 'Vuelve a iniciar sesión.' });
+    tokens.setCookies(res, credentials);
 
     res.json({
       mensaje: 'Inicio de sesión exitoso',
@@ -172,6 +168,7 @@ async function restablecerContrasena(req, res) {
          WHERE id_recuperacion = $1`,
         [recuperacion.id_recuperacion]
       );
+      await tokens.revokeUserSessions(client, recuperacion.id_usuario);
 
       await audit(
         client,
@@ -199,17 +196,28 @@ async function session(req, res) {
   } catch (error) { respondError(res, error); }
 }
 async function logout(req, res) {
-  res.clearCookie('token', {
-    httpOnly: true,
-    secure: true,
-    sameSite: 'strict'
-  });
-  res.json({ mensaje: 'Sesión cerrada correctamente.' });
+  try {
+    await tokens.revokeRefresh(req.cookies?.refresh_token);
+    tokens.clearCookies(res);
+    res.json({ mensaje: 'Sesión cerrada correctamente.' });
+  } catch (error) { respondError(res, error); }
 }
 
+async function refresh(req, res) {
+  try {
+    const credentials = await tokens.rotateRefresh(req.cookies?.refresh_token);
+    if (!credentials) {
+      tokens.clearCookies(res);
+      return res.status(401).json({ mensaje: 'La sesión expiró o fue revocada. Inicia sesión nuevamente.' });
+    }
+    tokens.setCookies(res, credentials);
+    res.json({ mensaje: 'Sesión renovada.' });
+  } catch (error) { respondError(res, error); }
+}
 
 module.exports = { 
   login,
+  refresh,
   logout,
   session,
   solicitarRecuperacion,

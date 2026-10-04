@@ -1,3 +1,4 @@
+import { authFetch } from '../../utils/authFetch.js';
 import React, { useEffect, useState } from "react";
 import "./ProductosAdmin.css";
 
@@ -10,7 +11,7 @@ const ProductosAdmin = () => {
   useEffect(() => {
     const fetchProductos = async () => {
       try {
-        const res = await fetch("https://localhost:3000/api/productos/products");
+        const res = await authFetch("https://localhost:3000/api/productos/products");
         if (!res.ok) throw new Error("Error al obtener productos");
         const data = await res.json();
         setProductos(data);
@@ -29,7 +30,7 @@ const ProductosAdmin = () => {
     if (!window.confirm("¿Seguro que deseas eliminar este producto?")) return;
 
     try {
-      const res = await fetch(
+      const res = await authFetch(
         `https://localhost:3000/api/productos/products/${id}`,
         { 
           method: "DELETE",

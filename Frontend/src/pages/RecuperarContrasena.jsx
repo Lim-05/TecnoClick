@@ -1,3 +1,4 @@
+import { authFetch } from '../utils/authFetch.js';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -17,7 +18,7 @@ const RecuperarContrasena = () => {
     setEnviando(true);
 
     try {
-      const response = await fetch(
+      const response = await authFetch(
         'https://localhost:3000/api/auth/recuperar',
         {
           credentials: 'include',

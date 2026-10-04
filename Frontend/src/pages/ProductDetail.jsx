@@ -1,3 +1,4 @@
+import { authFetch } from '../utils/authFetch.js';
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
@@ -43,7 +44,7 @@ const ProductDetail = () => {
   const loadResenas = async (productId) => {
     setLoadingResenas(true);
     try {
-      const response = await fetch(`https://localhost:3000/api/resenas/producto/${productId}`);
+      const response = await authFetch(`https://localhost:3000/api/resenas/producto/${productId}`);
       
       if (!response.ok) {
         throw new Error('Error al cargar reseñas');
@@ -82,7 +83,7 @@ const ProductDetail = () => {
   // Verificar permisos de reseña
   const verificarPermisosResena = async (productId) => {
     try {
-      const response = await fetch(
+      const response = await authFetch(
         `https://localhost:3000/api/resenas/puede-resenar/${productId}`,
         {
           method: 'GET',
@@ -124,7 +125,7 @@ const ProductDetail = () => {
       setError(null);
       try {
         console.log(` Cargando producto con ID: ${id}`);
-        const response = await fetch(`https://localhost:3000/api/productos/products/${id}`);
+        const response = await authFetch(`https://localhost:3000/api/productos/products/${id}`);
         
         if (!response.ok) {
           throw new Error(`Error HTTP: ${response.status}`);

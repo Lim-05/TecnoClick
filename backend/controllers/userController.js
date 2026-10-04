@@ -1,5 +1,6 @@
 const db = require('../config/db');
 const bcrypt = require('bcrypt');
+const { revokeUserSessions } = require('../services/tokens');
 const { getAccess, safeUser, audit, transaction, respondError, httpError, positiveId } = require('../services/access');
 const profileFields = ['nombre_usuario', 'apellido_usuario', 'telefono_usuario', 'correo_usuario',
   'direccion_usuario', 'codigo_postal', 'estado_usuario', 'municipio_usuario', 'colonia_usuario', 'referencias'];
@@ -123,6 +124,10 @@ async function actualizarUsuario(req, res) {
       let contrasenaHash = null;
 
       if (cambiarContrasena) {
+        if (id !== req.usuario.id_usuario && !req.usuario.permisos.includes('usuarios.editar')) {
+          throw httpError(403, 'No puedes cambiar la contraseña de otros usuarios.');
+        }
+        if (Buffer.byteLength(req.body.contrasena, 'utf8') > 72) throw httpError(400, 'La contraseña no puede superar 72 bytes.');
         contrasenaHash = await bcrypt.hash(req.body.contrasena, 10);
         fields.push('contrasena');
       }
@@ -147,6 +152,7 @@ async function actualizarUsuario(req, res) {
           WHERE id_usuario = $${fields.length + 1}`,
           [...values, id]
         );
+        if (cambiarContrasena) await revokeUserSessions(client, id);
 
         if (fields.some(field => field !== 'id_rol')) {
           await audit(

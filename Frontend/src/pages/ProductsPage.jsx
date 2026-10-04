@@ -1,3 +1,4 @@
+import { authFetch } from '../utils/authFetch.js';
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { Link } from 'react-router-dom';
@@ -29,8 +30,8 @@ const ProductsPage = () => {
       try {
         console.log(' Iniciando carga de productos desde la API...');
         const [response, categoriesResponse] = await Promise.all([
-          fetch('/api/productos/products', { cache: 'no-store' }),
-          fetch('/api/productos/categorias', { cache: 'no-store' })
+          authFetch('/api/productos/products', { cache: 'no-store' }),
+          authFetch('/api/productos/categorias', { cache: 'no-store' })
         ]);
         
         if (!response.ok) {

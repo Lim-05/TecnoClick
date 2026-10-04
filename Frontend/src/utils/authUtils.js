@@ -1,4 +1,5 @@
-const SESSION_DURATION_MS = 2 * 24 * 60 * 60 * 1000; // 2 días
+import { authFetch } from './authFetch.js';
+// Cookie expiry is checked by the server; localStorage is only a UI cache.
 
 export const getToken = () => {
   // El token viaja automáticamente en la cookie HttpOnly.
@@ -20,9 +21,7 @@ export const removeToken = () => {
 export const decodeToken = () => null;
 
 export const isTokenExpired = () => {
-  const start = localStorage.getItem('session_start');
-  if (!start) return false;
-  return Date.now() - Number(start) >= SESSION_DURATION_MS;
+  return false;
 };
 
 export const isAuthenticated = () => {
@@ -51,7 +50,7 @@ export const logout = () => {
     localStorage.removeItem(`favoritos_${usuario.id_usuario}`);
   }
 
-  fetch('https://localhost:3000/api/auth/logout', {
+  authFetch('https://localhost:3000/api/auth/logout', {
     method: 'POST',
     credentials: 'include'
   }).catch(() => {});
@@ -76,8 +75,5 @@ export const hasPermission = (permission) => {
 };
 
 export const getTokenTimeRemaining = () => {
-  const start = localStorage.getItem('session_start');
-  if (!start) return 2880;
-  const remaining = SESSION_DURATION_MS - (Date.now() - Number(start));
-  return Math.max(0, Math.floor(remaining / 1000 / 60));
+  return null;
 };

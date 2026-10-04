@@ -1,3 +1,4 @@
+import { authFetch } from '../../utils/authFetch.js';
 import React, { useState } from 'react';
 import './ResenaForm.css';
 
@@ -21,7 +22,7 @@ const ResenaForm = ({ idProducto, onResenaCreada, puedeResenar, yaReseno, haComp
 
     try {
 
-      const response = await fetch('https://localhost:3000/api/resenas', {
+      const response = await authFetch('https://localhost:3000/api/resenas', {
         method: 'POST',
         credentials: 'include',
         headers: {

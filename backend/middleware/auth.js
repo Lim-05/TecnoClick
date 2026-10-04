@@ -1,7 +1,6 @@
-const jwt = require('jsonwebtoken');
+const { verifyAccess, activeSession } = require('../services/tokens');
 const { getAccess } = require('../services/access');
 
-const SECRET = process.env.JWT_SECRET || 'claveSecreta';
 
 async function authMiddleware(req, res, next) {
   const cookieToken = req.cookies?.token;
@@ -12,7 +11,7 @@ async function authMiddleware(req, res, next) {
 
   let decoded;
   try {
-    decoded = jwt.verify(token, SECRET);
+    decoded = verifyAccess(token);
   } catch (error) {
     return res.status(401).json({
       mensaje: error.name === 'TokenExpiredError'
@@ -22,6 +21,7 @@ async function authMiddleware(req, res, next) {
   }
 
   try {
+    if (!await activeSession(decoded)) return res.status(401).json({ mensaje: 'La sesión fue revocada o expiró.' });
     const usuario = await getAccess(decoded.id_usuario);
     if (!usuario) return res.status(401).json({ mensaje: 'La cuenta ya no está disponible.' });
     req.usuario = usuario;

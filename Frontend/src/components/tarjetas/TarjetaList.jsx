@@ -1,3 +1,4 @@
+import { authFetch } from '../../utils/authFetch.js';
 import React, { useEffect, useState } from 'react';
 import TarjetaForm from './TarjetaForm';
 
@@ -6,7 +7,7 @@ const TarjetaList = ({ userId, onSelectTarjeta }) => {
   const [editingTarjeta, setEditingTarjeta] = useState(null);
 
   const fetchTarjetas = async () => {
-    const res = await fetch(`https://localhost:3000/api/datos_tarjeta/${userId}`, { credentials: 'include' });
+    const res = await authFetch(`https://localhost:3000/api/datos_tarjeta/${userId}`, { credentials: 'include' });
     const data = await res.json();
     setTarjetas(data);
   };
@@ -15,7 +16,7 @@ const TarjetaList = ({ userId, onSelectTarjeta }) => {
 
   const handleEdit = t => setEditingTarjeta(t);
   const handleDelete = async id_tarjeta => {
-    await fetch(`https://localhost:3000/api/datos_tarjeta/${userId}/${id_tarjeta}`, { method: 'DELETE', credentials: 'include' });
+    await authFetch(`https://localhost:3000/api/datos_tarjeta/${userId}/${id_tarjeta}`, { method: 'DELETE', credentials: 'include' });
     fetchTarjetas();
   };
 

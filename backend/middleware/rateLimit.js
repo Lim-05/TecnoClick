@@ -41,6 +41,8 @@ const registerLimiter = rateLimit({
 });
 
 module.exports = {
+  refreshLimiter: rateLimit({ windowMs: 60 * 1000, max: 30, standardHeaders: true, legacyHeaders: false,
+    message: { mensaje: 'Demasiadas renovaciones. Intenta nuevamente en un minuto.' } }),
   loginLimiter,
   recoveryLimiter,
   resetLimiter,

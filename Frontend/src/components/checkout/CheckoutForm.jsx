@@ -1,3 +1,4 @@
+import { authFetch } from '../../utils/authFetch.js';
 import React, { useState, useEffect } from 'react'; 
 import { useApp } from '../../context/AppContext';
 import { useNavigate } from 'react-router-dom';
@@ -45,7 +46,7 @@ const CheckoutForm = () => {
         return;
       }
 
-      const res = await fetch(`https://localhost:3000/api/datos_tarjeta/${usuario.id_usuario}`, {
+      const res = await authFetch(`https://localhost:3000/api/datos_tarjeta/${usuario.id_usuario}`, {
         credentials: 'include',
         headers: {
           "Content-Type": "application/json",
@@ -253,7 +254,7 @@ const CheckoutForm = () => {
       if (paymentMethod === 'efectivo') {
         const folio = 'TEC' + Date.now().toString().slice(-8);
 
-        const response = await fetch('https://localhost:3000/api/checkout/efectivo', {
+        const response = await authFetch('https://localhost:3000/api/checkout/efectivo', {
           method: 'POST',
           credentials: 'include',
           headers: { 
@@ -298,7 +299,7 @@ const CheckoutForm = () => {
           cvv: formData.cvv
         };
 
-        const response = await fetch('https://localhost:3000/api/checkout/tarjeta', {
+        const response = await authFetch('https://localhost:3000/api/checkout/tarjeta', {
           method: 'POST',
           credentials: 'include',
           headers: { 

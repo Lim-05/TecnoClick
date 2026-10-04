@@ -1,3 +1,4 @@
+import { authFetch } from '../../utils/authFetch.js';
 import React, { useEffect, useState } from "react";
 import "./TarjetaForm.css";
 
@@ -9,7 +10,7 @@ const TarjetaForm = () => {
     const token = localStorage.getItem("token");
     if (!usuario || !token) return;
 
-    fetch(`https://localhost:3000/api/datos_tarjeta/${usuario.id_usuario}`, {
+    authFetch(`https://localhost:3000/api/datos_tarjeta/${usuario.id_usuario}`, {
       credentials: 'include',
       headers: {
         "Authorization": `Bearer ${token}`,

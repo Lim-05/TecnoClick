@@ -1,3 +1,4 @@
+import { authFetch } from '../utils/authFetch.js';
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { getToken, logout } from '../utils/authUtils';
@@ -85,7 +86,7 @@ const Perfil = () => {
     const body = contrasena ? { ...resto, contrasena } : resto;
 
     try {
-      const response = await fetch(`https://localhost:3000/api/usuarios/${id}`, {
+      const response = await authFetch(`https://localhost:3000/api/usuarios/${id}`, {
         method: 'PUT',
         credentials: 'include',
         headers: {
