@@ -40,7 +40,7 @@ async function getProductos(req, res) {
 // Controlador para obtener un producto por ID
 async function getProductoPorId(req, res) {
   try {
-    const id = parseInt(req.params.id);
+    const id = positiveId(req.params.id);
     const productoDB = await getProductById(id);
 
     if (!productoDB) {

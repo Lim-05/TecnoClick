@@ -2,7 +2,9 @@
   "dependencies": {
     "bcrypt": "^6.0.0",
     "bootstrap": "^5.3.8",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
+    "express-rate-limit": "^8.7.0",
     "jsonwebtoken": "^9.0.2",
     "jspdf": "^3.0.3",
     "jspdf-autotable": "^5.0.2",

@@ -1,32 +1,29 @@
 const { crearPedido, registrarPagoTarjeta, registrarIngreso } = require('../models/checkoutModel');
-const { insertarDatosTarjeta, obtenerPorUsuario } = require('../models/tarjetaModel');
+const { insertarDatosTarjeta } = require('../models/tarjetaModel');
+const { products, card } = require('../services/inputValidation');
+const { respondError } = require('../services/access');
 
 async function procesarPagoTarjeta(req, res) {
   try {
     const { productos, total, tarjeta } = req.body;
     const idUsuario = req.usuario.id_usuario;
 
-    if (!productos || productos.length === 0) {
-      return res.status(400).json({ mensaje: 'Datos incompletos para procesar el pago' });
-    }
+    const productosValidados = products(productos);
+    const tarjetaValidada = card(tarjeta);
 
     // Crear pedido + detalle + actualizar stock
-    const idPedido = await crearPedido(idUsuario, productos, total);
+    const idPedido = await crearPedido(idUsuario, productosValidados, null);
 
     // Insertar nueva tarjeta sin bloquear por usuario
 
-  console.log('Datos de la tarjeta a insertar:', tarjeta);
-
   const tarjetaGuardada = await insertarDatosTarjeta(
-    tarjeta.nombre_titular,
-    tarjeta.numero_tarjeta,
-    tarjeta.fecha_vencimiento,
-    tarjeta.cvv,
+    tarjetaValidada.nombre_titular,
+    tarjetaValidada.numero_tarjeta,
+    tarjetaValidada.fecha_vencimiento,
+    tarjetaValidada.cvv,
     idUsuario
   );
 
-  console.log('Resultado: ', tarjetaGuardada);
-  
   const idTarjeta = tarjetaGuardada.id_tarjeta;
 
 
@@ -42,8 +39,8 @@ async function procesarPagoTarjeta(req, res) {
     });
 
   } catch (error) {
-    console.error('Error al procesar pago con tarjeta:', error);
-    res.status(500).json({ mensaje: 'Error al registrar el pago', error: error.message });
+    console.error('Error al procesar pago con tarjeta:', error.message);
+    respondError(res, error);
   }
 }
 

@@ -2,13 +2,19 @@ const db = require('../config/db');
 
 async function crearPedido(idUsuario, productos, total, estado = 'pendiente') {
   const fecha = new Date();
+  let totalCalculado = 0;
+
+  for (const producto of productos) {
+    const precioProducto = await obtenerPrecioProducto(producto.id);
+    totalCalculado += precioProducto * producto.quantity;
+  }
 
   // Inserta pedido principal
   const pedidoResult = await db.query(
     `INSERT INTO pedido (monto_pedido, fecha_pedido, estado_pedido, id_usuario)
      VALUES ($1, $2, $3, $4)
      RETURNING id_pedido;`,
-    [total, fecha, estado, idUsuario]
+    [totalCalculado, fecha, estado, idUsuario]
   );
 
   const idPedido = pedidoResult.rows[0].id_pedido;

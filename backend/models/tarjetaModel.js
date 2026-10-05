@@ -11,8 +11,6 @@ const insertarDatosTarjeta = async (nombre_titular, numero_tarjeta, fecha_vencim
   const values = [nombre_titular, numero_tarjeta, fecha_vencimiento, cvv, id_usuario];
   const result = await pool.query(query, values);
   
-  console.log('Resulatdo insertarDatosTarjeta', result.rows[0]);
-  
   return result.rows[0];
 };
 
@@ -34,20 +32,18 @@ const Tarjeta = {
       [nombre_titular, numero_tarjeta, fecha_vencimiento, cvv, id_usuario]
     );
   },
-  actualizar: async (id_tarjeta, datos) => {
-  console.log('Actualizando tarjeta', id_tarjeta, datos); // <- VERIFICAR DATOS
+  actualizar: async (id_tarjeta, datos, id_usuario) => {
   const { nombre_titular, numero_tarjeta, fecha_vencimiento, cvv } = datos;
 
   const query = `
     UPDATE datos_tarjeta
     SET nombre_titular = $1, numero_tarjeta = $2, fecha_vencimiento = $3, cvv = $4
-    WHERE id_tarjeta = $5
+    WHERE id_tarjeta = $5 AND id_usuario = $6
     RETURNING *;
   `;
 
-  const values = [nombre_titular, numero_tarjeta, fecha_vencimiento, cvv, id_tarjeta];
+  const values = [nombre_titular, numero_tarjeta, fecha_vencimiento, cvv, id_tarjeta, id_usuario];
   const result = await pool.query(query, values);
-  console.log('Resultado actualización:', result.rows);
   return result.rows[0];
 }
 

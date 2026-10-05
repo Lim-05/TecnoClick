@@ -1,23 +1,18 @@
-const { insertarDatosTarjeta, buscarTarjetaPorUsuario } = require('../models/tarjetaModel');
+const { insertarDatosTarjeta } = require('../models/tarjetaModel');
 const {Tarjeta} = require('../models/tarjetaModel');
-const db = require('../config/db');
+const { card, positiveId } = require('../services/inputValidation');
 
 const guardarDatosTarjeta = async (req, res) => {
   try {
-    console.log('Datos recibidos en el backend:', req.body); 
-    const { id_usuario, tarjeta } = req.body;
-    const {nombre_titular, numero_tarjeta, fecha_vencimiento, cvv} = tarjeta;
-
-    if (!id_usuario) {
-      return res.status(400).json({ error: 'Falta el id_usuario' });
-    }
+    const tarjeta = card(req.body.tarjeta);
+    const id_usuario = req.usuario.id_usuario;
     
     // Guardar en la base de datos
     const tarjetaInsertada = await insertarDatosTarjeta(
-      nombre_titular, 
-      numero_tarjeta, 
-      fecha_vencimiento, 
-      cvv, 
+      tarjeta.nombre_titular,
+      tarjeta.numero_tarjeta,
+      tarjeta.fecha_vencimiento,
+      tarjeta.cvv,
       id_usuario);
 
     res.status(201).json({
@@ -33,10 +28,8 @@ const guardarDatosTarjeta = async (req, res) => {
 
 const obtenerTarjetaUsuario = async (req, res) => {
   try {
-    const { id_usuario } = req.params;
-    console.log('ID de user', id_usuario);
+    const id_usuario = positiveId(req.params.id_usuario);
     const tarjetas = await Tarjeta.obtenerPorUsuario(id_usuario);
-    console.log('Tarjetas encontradas: ', tarjetas);
 
     if (tarjetas.length === 0) {
       return res.status(404).json({ error: 'No se encontró tarjeta para este usuario' });
@@ -51,10 +44,9 @@ const obtenerTarjetaUsuario = async (req, res) => {
 };
 
 const agregarTarjeta = async (req, res) => {
-  const { id_usuario } = req.params;
-  const datos = req.body;
   try {
-    await Tarjeta.agregar(id_usuario, datos);
+    const datos = card(req.body);
+    await Tarjeta.agregar(req.usuario.id_usuario, datos);
     res.status(201).json({ message: 'Tarjeta agregada' });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -62,11 +54,13 @@ const agregarTarjeta = async (req, res) => {
 };
 
 const actualizarTarjeta = async (req, res) => {
-  const { id_tarjeta } = req.params;
-  const { nombre_titular, numero_tarjeta, fecha_vencimiento, cvv } = req.body;
-
   try {
-    const tarjetaActualizada = await Tarjeta.actualizar(id_tarjeta, { nombre_titular, numero_tarjeta, fecha_vencimiento, cvv });
+    const id_tarjeta = positiveId(req.params.id_tarjeta);
+    const tarjetaActualizada = await Tarjeta.actualizar(
+      id_tarjeta,
+      card(req.body),
+      req.usuario.id_usuario
+    );
 
     if (!tarjetaActualizada) {
       return res.status(404).json({ error: 'Tarjeta no encontrada' });
@@ -81,8 +75,9 @@ const actualizarTarjeta = async (req, res) => {
 
 
 const eliminarTarjeta = async (req, res) => {
-  const { id_usuario, id_tarjeta } = req.params;
   try {
+    const id_usuario = positiveId(req.params.id_usuario);
+    const id_tarjeta = positiveId(req.params.id_tarjeta);
     await Tarjeta.eliminar(id_usuario, id_tarjeta);
     res.json({ message: 'Tarjeta eliminada' });
   } catch (error) {

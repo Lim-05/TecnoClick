@@ -1,31 +1,31 @@
 const { crearPedido, registrarPagoEfectivo } = require('../models/checkoutModel');
+const { products, text } = require('../services/inputValidation');
+const { respondError } = require('../services/access');
 
 async function procesarPagoEfectivo(req, res) {
   try {
     const { productos, total, folio } = req.body;
     const idUsuario = req.usuario.id_usuario;
 
-    if (!productos || productos.length === 0) {
-      return res.status(400).json({ mensaje: 'Datos incompletos para procesar el pago' });
-    }
+    const productosValidados = products(productos);
+    const folioValidado = text(folio, 'El folio', 40);
 
-    // Crear pedido como pendiente
-    const idPedido = await crearPedido(idUsuario, productos, total, 'pendiente');
+    const idPedido = await crearPedido(idUsuario, productosValidados, null, 'pendiente');
 
     // Registrar pago en efectivo
-    await registrarPagoEfectivo(idPedido, idUsuario, folio);
+    await registrarPagoEfectivo(idPedido, idUsuario, folioValidado);
 
     // No registrar ingreso aún, eso lo hará el admin
 
     res.status(201).json({
       mensaje: 'Compra en efectivo registrada exitosamente',
-      folio,
+      folio: folioValidado,
       idPedido
     });
 
   } catch (error) {
     console.error('Error al procesar pago en efectivo:', error.message);
-    res.status(500).json({ mensaje: 'Error al registrar el pago', error: error.message });
+    respondError(res, error);
   }
 }
 
