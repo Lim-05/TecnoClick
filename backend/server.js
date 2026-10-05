@@ -1,15 +1,15 @@
 const express = require('express');
-const https = require('https');
-const fs = require('fs');
-const path = require('path');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 require('dotenv').config();
+const https = require('https');
+const fs = require('fs');
+const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(cors({
+/*app.use(cors({
   origin: [
     'https://localhost:5173',
     'https://127.0.0.1:5173',
@@ -17,7 +17,33 @@ app.use(cors({
     'http://127.0.0.1:5173'
   ],
   credentials: true
+}));*/
+
+const allowedOrigins = [
+  'https://localhost:5173',
+  'https://127.0.0.1:5173',
+  'http://localhost:5173',
+  'http://127.0.0.1:5173'
+];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin) {
+      return callback(null, true);
+    }
+
+    if (allowedOrigins.includes(origin)){
+      return callback(null, true);
+    }
+
+    return callback(new Error('Origen no permitido por CORS'));
+
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
 }));
+
 app.use(express.json());
 app.use(cookieParser());
 
