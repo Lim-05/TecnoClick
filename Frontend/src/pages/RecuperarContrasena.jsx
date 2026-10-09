@@ -17,6 +17,7 @@ const RecuperarContrasena = () => {
     setError('');
     setEnviando(true);
 
+    //RECUPERAR CONTRASEÑA
     try {
       const response = await authFetch(
         'https://localhost:3000/api/auth/recuperar',

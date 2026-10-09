@@ -9,23 +9,12 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-/*app.use(cors({
-  origin: [
-    'https://localhost:5173',
-    'https://127.0.0.1:5173',
-    'http://localhost:5173',
-    'http://127.0.0.1:5173'
-  ],
-  credentials: true
-}));*/
-
+//CORS
 const allowedOrigins = [
   'https://localhost:5173',
   'https://127.0.0.1:5173',
-  'http://localhost:5173',
-  'http://127.0.0.1:5173'
 ];
-
+// VALIDACION DE CORS
 app.use(cors({
   origin: function (origin, callback) {
     if (!origin) {

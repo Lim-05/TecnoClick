@@ -28,6 +28,7 @@ router.use((req, res, next) => {
   next();
 });
 
+// ENDPOINTS QUE CONECTAN CON EL CONTROLADOR 
 router.post('/login', loginLimiter, login);
 
 router.post('/logout', logout);

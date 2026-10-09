@@ -39,7 +39,7 @@ async function login(req, res) {
     });
   } catch (error) { respondError(res, error); }
 }
-
+// ...
 async function solicitarRecuperacion(req, res) {
   try {
     const { correo } = req.body;

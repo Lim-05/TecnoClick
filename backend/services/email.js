@@ -10,7 +10,7 @@ const transporter = nodemailer.createTransport({
 
 async function enviarCorreoRecuperacion(correo, enlace) {
   await transporter.sendMail({
-    from: process.env.EMAIL_USER,
+    from: process.env.EMAIL_USER, // suenta que envía el correo
     to: correo,
     subject: 'Recuperación de contraseña',
     html: `
