@@ -251,5 +251,41 @@ npm install
 node scripts/setup-jwt.cjs
 
 
+# Cifrado simétrico de datos
+Abre una terminal dentro de la carpeta backend
+cd backend
+Después ejecuta:
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+
+Esto generara una cadena aleatoria, copiala y pegala en el archivo .env
+lo cual seria de la siguiente manera:
+
+DATA_ENCRYPTION_KEY=PEGA AQUI LA LLAVE GENERADA
+
+
+SELECT
+    table_schema,
+    table_name,
+    column_name,
+    data_type,
+    character_maximum_length
+FROM information_schema.columns
+WHERE table_name = 'datos_tarjeta'
+  AND column_name = 'numero_tarjeta';
+
+# Cambia el tipo de dato de la columna numero_tarjeta a TEXT
+ALTER TABLE public.datos_tarjeta
+ALTER COLUMN numero_tarjeta TYPE TEXT;
+
+# Comprueba que se haya realizado el cambio
+SELECT data_type
+FROM information_schema.columns
+WHERE table_schema = 'public'
+  AND table_name = 'datos_tarjeta'
+  AND column_name = 'numero_tarjeta';
+
+# Debe aparecer TEXT
+SELECT COUNT(*) AS tarjetas_existentes
+FROM public.datos_tarjeta;
 
     
