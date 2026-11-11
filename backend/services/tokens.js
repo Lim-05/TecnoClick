@@ -2,10 +2,11 @@ const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const db = require('../config/db');
 const { transaction, getAccess } = require('./access');
+const { privateKey, publicKey } = require('./asymmetric');
 
 const SECRET = process.env.JWT_SECRET;
-if (!SECRET || Buffer.byteLength(SECRET) < 32) {
-  throw new Error('Configura JWT_SECRET con un secreto aleatorio de al menos 32 bytes.');
+if (!SECRET && (!privateKey || !publicKey)) {
+  throw new Error('Configura las claves asimétricas o JWT_SECRET para la autenticación.');
 }
 const ACCESS_SECONDS = 15 * 60;
 const REFRESH_MS = 7 * 24 * 60 * 60 * 1000;
@@ -55,8 +56,12 @@ async function revokeUserSessions(client, userId) {
   await client.query('UPDATE auth_sessions SET revoked_at = NOW() WHERE id_usuario = $1', [userId]);
 }
 function setCookies(res, { session, refreshToken }) {
-  const token = jwt.sign({ id_usuario: session.id_usuario, sid: session.id, type: 'access' }, SECRET,
-    { algorithm: 'HS256', expiresIn: ACCESS_SECONDS, issuer: 'tecnoclick', audience: 'tecnoclick-api' });
+  // Firma asimétrica con clave privada RSA (RS256)
+  const token = jwt.sign(
+    { id_usuario: session.id_usuario, sid: session.id, type: 'access' },
+    privateKey,
+    { algorithm: 'RS256', expiresIn: ACCESS_SECONDS, issuer: 'tecnoclick', audience: 'tecnoclick-api' }
+  );
   res.set('Cache-Control', 'no-store');
   res.cookie('token', token, { ...cookieOptions, maxAge: ACCESS_SECONDS * 1000 });
   res.cookie('refresh_token', refreshToken, { ...refreshOptions, maxAge: Math.max(0, new Date(session.expires_at) - Date.now()) });
@@ -67,7 +72,23 @@ function clearCookies(res) {
   res.clearCookie('refresh_token', refreshOptions);
 }
 function verifyAccess(token) {
-  const decoded = jwt.verify(token, SECRET, { algorithms: ['HS256'], issuer: 'tecnoclick', audience: 'tecnoclick-api' });
+  let decoded;
+  try {
+    // Verificación asimétrica con clave pública RSA
+    decoded = jwt.verify(token, publicKey, { algorithms: ['RS256'], issuer: 'tecnoclick', audience: 'tecnoclick-api' });
+  } catch (error) {
+    // Soporte retrocompatible con tokens antiguos si existe SECRET
+    if (SECRET && (error.name === 'JsonWebTokenError' || error.message?.includes('algorithm'))) {
+      try {
+        decoded = jwt.verify(token, SECRET, { algorithms: ['HS256'], issuer: 'tecnoclick', audience: 'tecnoclick-api' });
+      } catch {
+        throw error;
+      }
+    } else {
+      throw error;
+    }
+  }
+
   if (decoded.type !== 'access' || typeof decoded.sid !== 'string' ||
       !/^[a-f0-9-]{36}$/.test(decoded.sid) || !Number.isInteger(decoded.id_usuario) ||
       !Number.isInteger(decoded.exp) || !Number.isInteger(decoded.iat) || decoded.exp - decoded.iat > ACCESS_SECONDS) {
@@ -79,4 +100,4 @@ async function activeSession(decoded) {
   return (await db.query(`SELECT id FROM auth_sessions WHERE id = $1 AND id_usuario = $2
     AND revoked_at IS NULL AND expires_at > NOW()`, [decoded.sid, decoded.id_usuario])).rows.length > 0;
 }
-module.exports = { createSession, rotateRefresh, revokeRefresh, revokeUserSessions, setCookies, clearCookies, verifyAccess, activeSession };
+module.exports = { createSession, rotateRefresh, revokeRefresh, revokeUserSessions, setCookies, clearCookies, verifyAccess, activeSession, publicKey, privateKey };

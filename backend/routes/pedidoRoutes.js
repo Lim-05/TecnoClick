@@ -5,7 +5,8 @@ const auth = require('../middleware/auth');
 
 const {
   obtenerHistorialCompras,
-  obtenerDetalleCompra
+  obtenerDetalleCompra,
+  verificarComprobante
 } = require('../controllers/pedidoController');
 
 function propioOConPermiso(req, res, next) {
@@ -42,6 +43,12 @@ router.get(
   auth,
   propioOConPermiso,
   obtenerDetalleCompra
+);
+
+// Verificación de integridad y autenticidad del comprobante firmado asimétricamente
+router.post(
+  '/verificar-firma',
+  verificarComprobante
 );
 
 module.exports = router;

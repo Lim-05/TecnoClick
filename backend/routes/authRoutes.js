@@ -10,6 +10,7 @@ const {
 } = require('../controllers/authController');
 
 const auth = require('../middleware/auth');
+const { publicKey } = require('../services/asymmetric');
 
 const {
   loginLimiter,
@@ -37,5 +38,14 @@ router.get('/sesion', auth, session);
 router.post('/recuperar', recoveryLimiter, solicitarRecuperacion);
 
 router.post('/restablecer', resetLimiter, restablecerContrasena);
+
+// Endpoint público para obtener la clave pública RSA (Punto 2: criptografía asimétrica)
+router.get('/public-key', (req, res) => {
+  res.json({
+    algoritmo: 'RS256',
+    formato: 'SPKI PEM',
+    clave_publica: publicKey
+  });
+});
 
 module.exports = router;

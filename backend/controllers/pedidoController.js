@@ -1,4 +1,5 @@
 const { getPedidosByUsuario, getPedidoById } = require('../models/pedidoModel');
+const { firmarDatos, verificarFirma } = require('../services/asymmetric');
 
 // Obtener historial de compras del usuario
 async function obtenerHistorialCompras(req, res) {
@@ -74,9 +75,24 @@ async function obtenerDetalleCompra(req, res) {
       }))
     };
 
+    // Firma asimétrica del comprobante de compra (Punto 2)
+    const datosCertificados = {
+      idPedido: detalle.id,
+      folio: detalle.folio,
+      total: detalle.total,
+      fecha: detalle.fecha,
+      metodoPago: detalle.metodoPago
+    };
+    const firmaDigital = firmarDatos(datosCertificados);
+
     res.status(200).json({
       mensaje: 'Detalle de compra obtenido exitosamente',
-      compra: detalle
+      compra: detalle,
+      comprobanteDigital: {
+        datosCertificados,
+        firmaDigital,
+        algoritmo: 'RSA-SHA256'
+      }
     });
 
   } catch (error) {
@@ -88,7 +104,29 @@ async function obtenerDetalleCompra(req, res) {
   }
 }
 
+// Endpoint para verificar la autenticidad e integridad de un comprobante digital
+async function verificarComprobante(req, res) {
+  try {
+    const { datos, firma } = req.body;
+    if (!datos || !firma) {
+      return res.status(400).json({ mensaje: 'Datos y firma son requeridos.' });
+    }
+
+    const esValido = verificarFirma(datos, firma);
+    res.json({
+      autentico: esValido,
+      mensaje: esValido
+        ? 'El comprobante es auténtico y su integridad fue verificada con la clave pública RSA.'
+        : 'La firma es inválida o el comprobante ha sido alterado.'
+    });
+  } catch (error) {
+    console.error('Error en verificarComprobante:', error.message);
+    res.status(500).json({ error: error.message });
+  }
+}
+
 module.exports = {
   obtenerHistorialCompras,
-  obtenerDetalleCompra
+  obtenerDetalleCompra,
+  verificarComprobante
 };
